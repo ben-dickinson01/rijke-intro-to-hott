@@ -53,4 +53,4 @@ mul-injℕ m n k = (to m n k , from m n k) where
 
   from : (m n k : ℕ) → (m ·ℕ (succℕ k)) ≡ (n ·ℕ (succℕ k)) → m ≡ n
   from m n 0ℕ refl = refl
-  from m n (succℕ k) p = from m n k {!!}
+  from m n (succℕ k) p = ?
