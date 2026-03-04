@@ -254,9 +254,8 @@ succ-≤-to-<ℕ (succℕ m) (succℕ n) p = succ-≤-to-<ℕ m n p
 
 -- Ex 6.5
 distℕ : ℕ → ℕ → ℕ
-distℕ 0ℕ 0ℕ = 0ℕ
+distℕ m 0ℕ = m
 distℕ 0ℕ (succℕ n) = succℕ n
-distℕ (succℕ m) 0ℕ = succℕ m
 distℕ (succℕ m) (succℕ n) = distℕ m n
 
 ≡→dist0ℕ : (m n : ℕ) → m ≡ n → distℕ m n ≡ 0ℕ
