@@ -195,3 +195,16 @@ add-≤ℕ m n k p = ≤-transℕ {m +ℕ n} {n +ℕ m} {m +ℕ k} (≡→≤ℕ
   from (succℕ m) (succℕ n) 0ℕ x = x
   from (succℕ m) (succℕ n) (succℕ k) x = from m n (succℕ k) (proj₂ (≤-addℕ (m ·ℕ (succℕ k +ℕ 1ℕ)) (n ·ℕ (succℕ k +ℕ 1ℕ)) (succℕ k +ℕ 1ℕ)) (≤-transℕ {m ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} {n ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} (≡→≤ℕ {m ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} (inv (succ-mulℕ m (succℕ k +ℕ 1ℕ)))) (≤-transℕ {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} {succℕ n ·ℕ (succℕ k +ℕ 1ℕ)} {n ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} x (≡→≤ℕ {succℕ n ·ℕ (succℕ k +ℕ 1ℕ)} {n ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} (succ-mulℕ n (succℕ k +ℕ 1ℕ))))))
 
+le-minℕ : (m n k : ℕ) → (m ≤ℕ minℕ n k) → (m ≤ℕ n) × (m ≤ℕ k)
+le-minℕ 0ℕ 0ℕ 0ℕ * = (* , *)
+le-minℕ 0ℕ (succℕ n) 0ℕ * = (* , *)
+le-minℕ 0ℕ 0ℕ (succℕ k) * = (* , *)
+le-minℕ 0ℕ (succℕ n) (succℕ k) p = (* , *)
+le-minℕ (succℕ m) (succℕ n) (succℕ k) p = le-minℕ m n k p
+
+max-leℕ : (m n k : ℕ) → (maxℕ m n ≤ℕ k) → (m ≤ℕ k) × (n ≤ℕ k)
+max-leℕ 0ℕ 0ℕ 0ℕ * = (* , *)
+max-leℕ 0ℕ 0ℕ (succℕ k) * = (* , *)
+max-leℕ 0ℕ (succℕ n) (succℕ k) p = (* , p)
+max-leℕ (succℕ m) 0ℕ (succℕ k) p = (p , *)
+max-leℕ (succℕ m) (succℕ n) (succℕ k) p = max-leℕ m n k p
