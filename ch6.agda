@@ -122,11 +122,11 @@ succℕ x ≤ℕ succℕ y = x ≤ℕ y
 ≤-antisymmℕ 0ℕ 0ℕ * * = refl
 ≤-antisymmℕ (succℕ x) (succℕ y) x≤y y≤x = ap succℕ (≤-antisymmℕ x y x≤y y≤x)
 
-≤-transℕ : (x y z : ℕ) → (x ≤ℕ y) → (y ≤ℕ z) → (x ≤ℕ z)
-≤-transℕ 0ℕ 0ℕ 0ℕ * * = *
-≤-transℕ 0ℕ 0ℕ (succℕ z) * * = *
-≤-transℕ 0ℕ (succℕ y) (succℕ z) * yz = *
-≤-transℕ (succℕ x) (succℕ y) (succℕ z) xy yz = ≤-transℕ x y z xy yz
+≤-transℕ : {x y z : ℕ} → (x ≤ℕ y) → (y ≤ℕ z) → (x ≤ℕ z)
+≤-transℕ {0ℕ} {0ℕ} {0ℕ} * * = *
+≤-transℕ {0ℕ} {0ℕ} {succℕ z} * * = *
+≤-transℕ {0ℕ} {succℕ y} {succℕ z} * yz = *
+≤-transℕ {succℕ x} {succℕ y} {succℕ z} xy yz = ≤-transℕ {x} {y} {z} xy yz
 
 ≤-dichotomyℕ : (x y : ℕ) → (x ≤ℕ y) ⊎ (y ≤ℕ x)
 ≤-dichotomyℕ 0ℕ 0ℕ = inl *
@@ -138,7 +138,11 @@ succ-nle-zeroℕ : (x : ℕ) → ¬ (succℕ x ≤ℕ 0ℕ)
 succ-nle-zeroℕ 0ℕ ()
 succ-nle-zeroℕ (succℕ x) ()
 
-succ-≰-zeroℕ = succ-nle-zeroℕ 
+succ-≰-zeroℕ = succ-nle-zeroℕ
+
+0ℕ-leℕ : (x : ℕ) → 0ℕ ≤ℕ x
+0ℕ-leℕ 0ℕ = *
+0ℕ-leℕ (succℕ x) = *
 
 ≤-addℕ : (m n k : ℕ) → (m ≤ℕ n) ↔ ((m +ℕ k) ≤ℕ (n +ℕ k))
 ≤-addℕ m n k = (to m n k , from m n k)
@@ -160,6 +164,17 @@ succ-≰-zeroℕ = succ-nle-zeroℕ
   from (succℕ m) (succℕ n) 0ℕ p = p
   from (succℕ m) (succℕ n) (succℕ k) p = from (succℕ m) (succℕ n) k p
 
+≡→≤ℕ : {m n : ℕ} → m ≡ n → m ≤ℕ n
+≡→≤ℕ {0ℕ} {n} refl = *
+≡→≤ℕ {succℕ m} {n} refl = ≤-rflℕ m
+
+add-≤ℕ : (m n k : ℕ) → (n ≤ℕ k) → (m +ℕ n) ≤ℕ (m +ℕ k)
+add-≤ℕ m n k p = ≤-transℕ {m +ℕ n} {n +ℕ m} {m +ℕ k} (≡→≤ℕ (add-commℕ m n)) (≤-transℕ {n +ℕ m} {k +ℕ m} {m +ℕ k} (proj₁ (≤-addℕ n k m) p) (≡→≤ℕ (add-commℕ k m)))
+
+≤-succℕ : (x : ℕ) → x ≤ℕ succℕ x
+≤-succℕ 0ℕ = *
+≤-succℕ (succℕ x) = ≤-succℕ x
+
 ≤-mulℕ : (m n k : ℕ) → (m ≤ℕ n) ↔ ((m ·ℕ (k +ℕ 1ℕ)) ≤ℕ (n ·ℕ (k +ℕ 1ℕ)))
 ≤-mulℕ m n k = (to m n k , from m n k)
   where
@@ -168,14 +183,15 @@ succ-≰-zeroℕ = succ-nle-zeroℕ
   to 0ℕ (succℕ n) 0ℕ * = *
   to (succℕ m) (succℕ n) 0ℕ p = p
   to 0ℕ 0ℕ (succℕ k) * = ≤-rflℕ (0ℕ ·ℕ (succℕ k +ℕ 1ℕ))
-  to 0ℕ (succℕ n) (succℕ k) * = {!!}
-  to (succℕ m) (succℕ n) (succℕ k) p = {!!}
+  to 0ℕ (succℕ n) (succℕ k) * = ≤-transℕ {0ℕ ·ℕ (succℕ k +ℕ 1ℕ)} {0ℕ} (≡→≤ℕ (zero-mulℕ (succℕ k +ℕ 1ℕ))) (0ℕ-leℕ (succℕ n ·ℕ (succℕ k +ℕ 1ℕ)))
+  to (succℕ m) (succℕ n) (succℕ k) p = ≤-transℕ {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} {(succℕ k +ℕ 1ℕ) +ℕ  m ·ℕ (succℕ k +ℕ 1ℕ)} {succℕ n ·ℕ (succℕ k +ℕ 1ℕ)} (≡→≤ℕ {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} {(succℕ k +ℕ 1ℕ) +ℕ (m ·ℕ (succℕ k +ℕ 1ℕ))} (concat (succ-mulℕ m (succℕ k +ℕ 1ℕ)) (add-commℕ (m ·ℕ (succℕ k +ℕ 1ℕ)) (succℕ k +ℕ 1ℕ)))) (≤-transℕ {succℕ k +ℕ 1ℕ +ℕ m ·ℕ (succℕ k +ℕ 1ℕ)} {succℕ k +ℕ 1ℕ +ℕ n ·ℕ (succℕ k +ℕ 1ℕ)} {succℕ n ·ℕ (succℕ k +ℕ 1ℕ)} (add-≤ℕ (succℕ k +ℕ 1ℕ) (m ·ℕ (succℕ k +ℕ 1ℕ)) (n ·ℕ (succℕ k +ℕ 1ℕ)) (to m n (succℕ k) p)) (≡→≤ℕ {succℕ k +ℕ 1ℕ +ℕ n ·ℕ (succℕ k +ℕ 1ℕ)} {succℕ n ·ℕ (succℕ k +ℕ 1ℕ)} (inv (concat (succ-mulℕ n (succℕ k +ℕ 1ℕ)) (add-commℕ (n ·ℕ (succℕ k +ℕ 1ℕ)) (succℕ k +ℕ 1ℕ))))))
 
   from : (m n k : ℕ) → ((m ·ℕ (k +ℕ 1ℕ)) ≤ℕ (n ·ℕ (k +ℕ 1ℕ))) →  (m ≤ℕ n)
   from 0ℕ 0ℕ 0ℕ * = *
   from 0ℕ 0ℕ (succℕ k) x = *
   from 0ℕ (succℕ n) 0ℕ * = *
   from 0ℕ (succℕ n) (succℕ k) x = *
-  from (succℕ m) 0ℕ (succℕ k) x = ex-falso (succ-nle-zeroℕ (m +ℕ (succℕ m +ℕ succℕ m ·ℕ k)) (from (succℕ m) 0ℕ k {!!}))
+  from (succℕ m) 0ℕ (succℕ k) x = ex-falso (succ-nle-zeroℕ (m +ℕ (succℕ m +ℕ succℕ m ·ℕ k)) (≤-transℕ {succℕ (m +ℕ (succℕ m +ℕ succℕ m ·ℕ k))} {0ℕ +ℕ (0ℕ +ℕ (0ℕ ·ℕ k))} {0ℕ} (≤-transℕ {succℕ (m +ℕ (succℕ m +ℕ succℕ m ·ℕ k))} {succℕ m +ℕ (succℕ m +ℕ succℕ m ·ℕ k)} {0ℕ +ℕ (0ℕ +ℕ (0ℕ ·ℕ k))} (≡→≤ℕ (inv (succ-addℕ m (succℕ m +ℕ succℕ m ·ℕ k)))) x) (≡→≤ℕ (concat (zero-addℕ (0ℕ +ℕ 0ℕ ·ℕ k)) (concat (zero-addℕ (0ℕ ·ℕ k)) (zero-mulℕ k))))))
   from (succℕ m) (succℕ n) 0ℕ x = x
-  from (succℕ m) (succℕ n) (succℕ k) x = from m n (succℕ k) {!!}
+  from (succℕ m) (succℕ n) (succℕ k) x = from m n (succℕ k) (proj₂ (≤-addℕ (m ·ℕ (succℕ k +ℕ 1ℕ)) (n ·ℕ (succℕ k +ℕ 1ℕ)) (succℕ k +ℕ 1ℕ)) (≤-transℕ {m ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} {n ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} (≡→≤ℕ {m ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} (inv (succ-mulℕ m (succℕ k +ℕ 1ℕ)))) (≤-transℕ {succℕ m ·ℕ (succℕ k +ℕ 1ℕ)} {succℕ n ·ℕ (succℕ k +ℕ 1ℕ)} {n ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} x (≡→≤ℕ {succℕ n ·ℕ (succℕ k +ℕ 1ℕ)} {n ·ℕ (succℕ k +ℕ 1ℕ) +ℕ (succℕ k +ℕ 1ℕ)} (succ-mulℕ n (succℕ k +ℕ 1ℕ))))))
+
