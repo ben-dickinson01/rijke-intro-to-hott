@@ -42,7 +42,4 @@ mod-is-symmℕ k (succℕ x) 0ℕ (n , p) = (n , concat p (dist-symmℕ 0ℕ (su
 mod-is-symmℕ k (succℕ x) (succℕ y) (n , p) = (n , concat p (dist-symmℕ x y))
 
 mod-is-trans : (k : ℕ) → is-transitive (λ x y → x ≡ℕ y mod k)
-mod-is-trans k 0ℕ y 0ℕ (nx , px) (ny , py) = (0ℕ , zero-mulℕ k)
-mod-is-trans k (succℕ x) 0ℕ 0ℕ (nxy , pxy) (nyz , pyz) = {!!}
-mod-is-trans k (succℕ x) (succℕ y) 0ℕ (nxy , pxy) (nyz , pyz) = {!!}
-mod-is-trans k x y (succℕ z) (nx , px) (ny , py) = {!!}
+mod-is-trans k x y z p q = {!!}
