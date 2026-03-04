@@ -208,3 +208,202 @@ max-leℕ 0ℕ 0ℕ (succℕ k) * = (* , *)
 max-leℕ 0ℕ (succℕ n) (succℕ k) p = (* , p)
 max-leℕ (succℕ m) 0ℕ (succℕ k) p = (p , *)
 max-leℕ (succℕ m) (succℕ n) (succℕ k) p = max-leℕ m n k p
+
+-- Ex 6.4
+infix 4 _<ℕ_
+_<ℕ_ : ℕ → ℕ → Set
+0ℕ <ℕ 0ℕ = 𝟘
+0ℕ <ℕ succℕ y = 𝟙
+succℕ x <ℕ 0ℕ = 𝟘
+succℕ x <ℕ succℕ y = x <ℕ y
+
+<-antirflℕ : (m : ℕ) → ¬ (m <ℕ m)
+<-antirflℕ 0ℕ ()
+<-antirflℕ (succℕ m) x = <-antirflℕ m x
+
+<-antisymℕ : (m n : ℕ) → m <ℕ n → ¬ (n <ℕ m)
+<-antisymℕ 0ℕ (succℕ n) * ()
+<-antisymℕ (succℕ m) (succℕ n) p = <-antisymℕ m n p
+
+<-transℕ : (m n k : ℕ) → m <ℕ n → n <ℕ k → m <ℕ k
+<-transℕ 0ℕ 0ℕ 0ℕ () nk
+<-transℕ 0ℕ (succℕ n) 0ℕ * ()
+<-transℕ (succℕ m) 0ℕ 0ℕ () nk
+<-transℕ (succℕ m) (succℕ n) 0ℕ mn ()
+<-transℕ 0ℕ 0ℕ (succℕ k) () *
+<-transℕ (succℕ m) 0ℕ (succℕ k) () *
+<-transℕ 0ℕ (succℕ n) (succℕ k) * nk = *
+<-transℕ (succℕ m) (succℕ n) (succℕ k) mn nk = <-transℕ m n k mn nk
+
+<-succℕ : (m : ℕ) → m <ℕ succℕ m
+<-succℕ 0ℕ = *
+<-succℕ (succℕ m) = <-succℕ m
+
+<-to-succ-≤ℕ : (m n : ℕ) → m <ℕ n → succℕ m ≤ℕ n
+<-to-succ-≤ℕ 0ℕ (succℕ 0ℕ) * = *
+<-to-succ-≤ℕ 0ℕ (succℕ (succℕ n)) * = *
+<-to-succ-≤ℕ (succℕ m) (succℕ n) p = <-to-succ-≤ℕ m n p
+
+succ-≤-to-<ℕ : (m n : ℕ) → succℕ m ≤ℕ n → m <ℕ n
+succ-≤-to-<ℕ 0ℕ (succℕ n) p = *
+succ-≤-to-<ℕ (succℕ m) (succℕ n) p = succ-≤-to-<ℕ m n p
+
+<-to-≱ : (m n : ℕ) → m <ℕ n → ¬ (n ≤ℕ m)
+<-to-≱ 0ℕ (succℕ n) * ()
+<-to-≱ (succℕ m) (succℕ n) p q = <-to-≱ m n p q
+
+-- Ex 6.5
+distℕ : ℕ → ℕ → ℕ
+distℕ 0ℕ 0ℕ = 0ℕ
+distℕ 0ℕ (succℕ n) = succℕ n
+distℕ (succℕ m) 0ℕ = succℕ m
+distℕ (succℕ m) (succℕ n) = distℕ m n
+
+≡→dist0ℕ : (m n : ℕ) → m ≡ n → distℕ m n ≡ 0ℕ
+≡→dist0ℕ 0ℕ 0ℕ refl = refl
+≡→dist0ℕ 0ℕ (succℕ n) ()
+≡→dist0ℕ (succℕ m) 0ℕ ()
+≡→dist0ℕ (succℕ m) (succℕ n) refl = ≡→dist0ℕ m n refl
+
+dist0→≡ℕ : (m n : ℕ) → distℕ m n ≡ 0ℕ → m ≡ n
+dist0→≡ℕ 0ℕ 0ℕ refl = refl
+dist0→≡ℕ (succℕ m) (succℕ n) d = ap succℕ (dist0→≡ℕ m n d)
+
+dist-symmℕ : (m n : ℕ) → distℕ m n ≡ distℕ n m
+dist-symmℕ 0ℕ 0ℕ = refl
+dist-symmℕ 0ℕ (succℕ n) = refl
+dist-symmℕ (succℕ m) 0ℕ = refl
+dist-symmℕ (succℕ m) (succℕ n) = dist-symmℕ m n
+
+≤-add-distℕ : (m n : ℕ) → m ≤ℕ n +ℕ distℕ m n
+≤-add-distℕ 0ℕ 0ℕ = *
+≤-add-distℕ 0ℕ (succℕ n) = *
+≤-add-distℕ (succℕ m) 0ℕ = ≡→≤ℕ {succℕ m} {0ℕ +ℕ succℕ m} (inv (zero-addℕ (succℕ m)))
+≤-add-distℕ (succℕ m) (succℕ n) = ≤-transℕ {succℕ m} {distℕ (succℕ m) (succℕ n) +ℕ succℕ n} {succℕ n +ℕ distℕ (succℕ m) (succℕ n)} (≤-transℕ {m} {n +ℕ distℕ (m) (n)} {distℕ (m) (n) +ℕ n} (≤-add-distℕ m n) (≡→≤ℕ {n +ℕ distℕ m n} {distℕ m n +ℕ n} (add-commℕ n (distℕ m n)))) (≡→≤ℕ {distℕ (succℕ m) (succℕ n) +ℕ succℕ n} {succℕ n +ℕ distℕ (succℕ m) (succℕ n)} (add-commℕ (distℕ (succℕ m) (succℕ n)) (succℕ n)))
+
+dist-zero-rightℕ : (m : ℕ) → distℕ m 0ℕ ≡ m
+dist-zero-rightℕ 0ℕ = refl
+dist-zero-rightℕ (succℕ m) = refl
+
+add-distℕ : (x y : ℕ) → (x ≤ℕ y) → x +ℕ distℕ x y ≡ y
+add-distℕ 0ℕ 0ℕ * = refl
+add-distℕ 0ℕ (succℕ y) * = zero-addℕ (succℕ y)
+add-distℕ (succℕ x) (succℕ y) p = concat (succ-addℕ x (distℕ x y)) (ap succℕ (add-distℕ x y p))
+
+dist-triangleℕ : (m n k : ℕ) → distℕ m n ≤ℕ distℕ m k +ℕ distℕ n k
+dist-triangleℕ 0ℕ 0ℕ 0ℕ = *
+dist-triangleℕ 0ℕ 0ℕ (succℕ k) = *
+dist-triangleℕ 0ℕ (succℕ n) 0ℕ = ≡→≤ℕ {succℕ n} {0ℕ +ℕ succℕ n} (inv (zero-addℕ (succℕ n)))
+dist-triangleℕ 0ℕ (succℕ n) (succℕ k) = ≤-add-distℕ (succℕ n) (succℕ k)
+dist-triangleℕ (succℕ m) 0ℕ 0ℕ = ≤-rflℕ (succℕ m)
+dist-triangleℕ (succℕ m) 0ℕ (succℕ k) = ≤-transℕ {distℕ (succℕ m) 0ℕ} {distℕ 0ℕ (succℕ k) +ℕ distℕ (succℕ m) (succℕ k)} {distℕ (succℕ m) (succℕ k) +ℕ distℕ 0ℕ (succℕ k)} (≤-add-distℕ (succℕ m) (succℕ k)) (≡→≤ℕ {distℕ 0ℕ (succℕ k) +ℕ distℕ (succℕ m) (succℕ k)} {distℕ (succℕ m) (succℕ k) +ℕ distℕ 0ℕ (succℕ k)} (add-commℕ (distℕ 0ℕ (succℕ k)) (distℕ (succℕ m) (succℕ k))))
+dist-triangleℕ (succℕ m) (succℕ n) 0ℕ = ≤-transℕ {distℕ m n} {distℕ m 0ℕ +ℕ distℕ n 0ℕ} {distℕ (succℕ m) 0ℕ +ℕ distℕ (succℕ n) 0ℕ} (dist-triangleℕ m n 0ℕ) (≤-transℕ {distℕ m 0ℕ +ℕ distℕ n 0ℕ} {m +ℕ n} {succℕ m +ℕ succℕ n} (≡→≤ℕ (concat (ap (λ x → x +ℕ distℕ n 0ℕ) (dist-zero-rightℕ m)) (ap (λ x → m +ℕ x) (dist-zero-rightℕ n)))) (≤-transℕ {m +ℕ n} {m +ℕ succℕ n} {succℕ m +ℕ succℕ n} (≤-succℕ (m +ℕ n)) (proj₁ (≤-addℕ m (succℕ m) (succℕ n)) (≤-succℕ m))))
+dist-triangleℕ (succℕ m) (succℕ n) (succℕ k) = dist-triangleℕ m n k
+
+≡-add→≤ℕ : (m n k : ℕ) → m ≡ n +ℕ k → n ≤ℕ m
+≡-add→≤ℕ 0ℕ 0ℕ 0ℕ refl = *
+≡-add→≤ℕ (succℕ m) 0ℕ (succℕ k) p = *
+≡-add→≤ℕ (succℕ m) (succℕ n) 0ℕ refl = ≤-rflℕ m
+≡-add→≤ℕ (succℕ m) (succℕ n) (succℕ k) refl = ≤-transℕ {n} {succℕ n} {succℕ n +ℕ k} (≤-succℕ n) (≤-transℕ {succℕ n} {succℕ n +ℕ 0ℕ} {succℕ n +ℕ k} (≡→≤ℕ {succℕ n} {succℕ n +ℕ 0ℕ} refl) (add-≤ℕ (succℕ n) 0ℕ k (0ℕ-leℕ k)))
+
+double-succ-not-leℕ : (m : ℕ) → ¬ (succℕ (succℕ m) ≤ℕ m)
+double-succ-not-leℕ 0ℕ ()
+double-succ-not-leℕ (succℕ m) p = double-succ-not-leℕ m p
+
+dist-tri-eqℕ : (m n k : ℕ) → (distℕ m n ≡ distℕ m k +ℕ distℕ n k) ↔ (((m ≤ℕ k) × (k ≤ℕ n)) ⊎ ((n ≤ℕ k) × (k ≤ℕ m)))
+dist-tri-eqℕ m n k = (to m n k , from m n k)
+  where
+  to : (m n k : ℕ) → (distℕ m n ≡ distℕ m k +ℕ distℕ n k) → ((m ≤ℕ k) × (k ≤ℕ n)) ⊎ ((n ≤ℕ k) × (k ≤ℕ m))
+  to 0ℕ 0ℕ 0ℕ refl = inl (* , *)
+  to 0ℕ (succℕ n) 0ℕ p = inl (* , *)
+  to 0ℕ (succℕ n) (succℕ k) p = inl (* , ≡-add→≤ℕ (succℕ n) (succℕ k) (distℕ n k) p)
+  to (succℕ m) 0ℕ 0ℕ p = inr (* , *)
+  to (succℕ m) 0ℕ (succℕ k) p = inr (* , ≡-add→≤ℕ (succℕ m) (succℕ k) (distℕ m k) (concat p (add-commℕ (distℕ m k) (succℕ k))))
+  to (succℕ m) (succℕ n) 0ℕ p = ex-falso (double-succ-not-leℕ (m +ℕ n)
+    (tr (λ x → x ≤ℕ m +ℕ n) (ap succℕ (succ-addℕ m n))
+    (tr (λ x → x ≤ℕ m +ℕ n) p
+    (tr (λ x → distℕ m n ≤ℕ x)
+      (concat (ap (λ y → y +ℕ distℕ n 0ℕ) (dist-zero-rightℕ m))
+              (ap (λ y → m +ℕ y) (dist-zero-rightℕ n)))
+      (dist-triangleℕ m n 0ℕ)))))
+  to (succℕ m) (succℕ n) (succℕ k) p = to m n k p
+
+  from : (m n k : ℕ) → ((m ≤ℕ k) × (k ≤ℕ n)) ⊎ ((n ≤ℕ k) × (k ≤ℕ m)) → (distℕ m n ≡ distℕ m k +ℕ distℕ n k)
+  from 0ℕ 0ℕ 0ℕ (inl (* , *)) = refl
+  from 0ℕ 0ℕ 0ℕ (inr (* , *)) = refl
+  from 0ℕ 0ℕ (succℕ k) (inl (* , ()))
+  from 0ℕ 0ℕ (succℕ k) (inr (* , ()))
+  from 0ℕ (succℕ n) 0ℕ (inl (* , *)) = inv (zero-addℕ (succℕ n))
+  from 0ℕ (succℕ n) 0ℕ (inr (() , y))
+  from 0ℕ (succℕ n) (succℕ k) (inl (* , y)) = concat (inv (add-distℕ (succℕ k) (succℕ n) y)) (ap (λ x → succℕ k +ℕ x) (dist-symmℕ k n))
+  from 0ℕ (succℕ n) (succℕ k) (inr (x , ()))
+  from (succℕ m) 0ℕ 0ℕ (inl (() , y))
+  from (succℕ m) 0ℕ 0ℕ (inr (* , *)) = refl
+  from (succℕ m) 0ℕ (succℕ k) (inl (x , ()))
+  from (succℕ m) 0ℕ (succℕ k) (inr (* , y)) = concat (inv (add-distℕ (succℕ k) (succℕ m) y)) (concat (ap (λ x → succℕ k +ℕ x) (dist-symmℕ k m)) (add-commℕ (succℕ k) (distℕ m k)))
+  from (succℕ m) (succℕ n) 0ℕ (inl (() , y))
+  from (succℕ m) (succℕ n) 0ℕ (inr (() , y))
+  from (succℕ m) (succℕ n) (succℕ k) (inl (x , y)) = from m n k (inl (x , y))
+  from (succℕ m) (succℕ n) (succℕ k) (inr (x , y)) = from m n k (inr (x , y))
+
+dist-trans-invarℕ : (m n a : ℕ) → distℕ (m +ℕ a) (n +ℕ a) ≡ distℕ m n
+dist-trans-invarℕ m n 0ℕ = refl
+dist-trans-invarℕ m n (succℕ a) = dist-trans-invarℕ m n a
+
+≤-mul-leftℕ : (m n k : ℕ) → m ≤ℕ n → k ·ℕ m ≤ℕ k ·ℕ n
+≤-mul-leftℕ m n 0ℕ _ = ≡→≤ℕ (concat (zero-mulℕ m) (inv (zero-mulℕ n)))
+≤-mul-leftℕ m n (succℕ k) m≤n =
+  tr (λ x → x ≤ℕ succℕ k ·ℕ n) (mul-commℕ m (succℕ k))
+  (tr (λ x → m ·ℕ succℕ k ≤ℕ x) (mul-commℕ n (succℕ k))
+  (proj₁ (≤-mulℕ m n k) m≤n))
+
+dist-linearℕ : (m n k : ℕ) → distℕ (k ·ℕ m) (k ·ℕ n) ≡ k ·ℕ distℕ m n
+dist-linearℕ m n 0ℕ = concat (ap (λ x → distℕ x (0ℕ ·ℕ n)) (zero-mulℕ m)) (concat (ap (λ x → distℕ 0ℕ x) (zero-mulℕ n)) (inv (zero-mulℕ (distℕ m n))))
+dist-linearℕ m n (succℕ k) with ≤-dichotomyℕ m n
+... | inl m≤n = proj₂ (add-injℕ (distℕ (succℕ k ·ℕ m) (succℕ k ·ℕ n)) (succℕ k ·ℕ distℕ m n) (succℕ k ·ℕ m))
+  (concat (add-commℕ (distℕ (succℕ k ·ℕ m) (succℕ k ·ℕ n)) (succℕ k ·ℕ m))
+  (concat (add-distℕ (succℕ k ·ℕ m) (succℕ k ·ℕ n) (≤-mul-leftℕ m n (succℕ k) m≤n))
+  (concat (ap (succℕ k ·ℕ_) (inv (add-distℕ m n m≤n)))
+  (concat (left-distribℕ (succℕ k) m (distℕ m n))
+  (add-commℕ (succℕ k ·ℕ m) (succℕ k ·ℕ distℕ m n))))))
+... | inr n≤m = concat (dist-symmℕ (succℕ k ·ℕ m) (succℕ k ·ℕ n))
+  (concat (proj₂ (add-injℕ (distℕ (succℕ k ·ℕ n) (succℕ k ·ℕ m)) (succℕ k ·ℕ distℕ n m) (succℕ k ·ℕ n))
+    (concat (add-commℕ (distℕ (succℕ k ·ℕ n) (succℕ k ·ℕ m)) (succℕ k ·ℕ n))
+    (concat (add-distℕ (succℕ k ·ℕ n) (succℕ k ·ℕ m) (≤-mul-leftℕ n m (succℕ k) n≤m))
+    (concat (ap (succℕ k ·ℕ_) (inv (add-distℕ n m n≤m)))
+    (concat (left-distribℕ (succℕ k) n (distℕ n m))
+    (add-commℕ (succℕ k ·ℕ n) (succℕ k ·ℕ distℕ n m)))))))
+  (ap (succℕ k ·ℕ_) (dist-symmℕ n m)))
+
+absℤ : ℤ → ℕ
+absℤ 0ℤ = 0ℕ
+absℤ (in-neg x) = succℕ x
+absℤ (in-pos x) = succℕ x
+
+
+abs-zeroℤ : absℤ 0ℤ ≡ 0ℕ
+abs-zeroℤ = refl
+
+abs-eq-zeroℤ : (x : ℤ) → absℤ x ≡ 0ℕ → x ≡ 0ℤ
+abs-eq-zeroℤ 0ℤ refl = refl
+abs-eq-zeroℤ (in-neg x) ()
+abs-eq-zeroℤ (in-pos x) ()
+
+abs-predℤ : (x : ℤ) → absℤ (predℤ x) ≤ℕ succℕ (absℤ x)
+abs-predℤ 0ℤ = *
+abs-predℤ (in-neg x) = ≤-rflℕ x
+abs-predℤ (in-pos 0ℕ) = *
+abs-predℤ (in-pos (succℕ x)) = ≤-transℕ {x} {succℕ x} {succℕ (succℕ x)} (≤-succℕ x) (≤-succℕ (succℕ x))
+
+abs-succℤ : (x : ℤ) → absℤ (succℤ x) ≤ℕ succℕ (absℤ x)
+abs-succℤ 0ℤ = *
+abs-succℤ (in-neg 0ℕ) = *
+abs-succℤ (in-neg (succℕ x)) = ≤-transℕ {x} {succℕ x} {succℕ (succℕ x)} (≤-succℕ x) (≤-succℕ (succℕ x))
+abs-succℤ (in-pos x) = ≤-rflℕ x
+
+abs-tri-ineqℤ : (x y : ℤ) → absℤ (x +ℤ y) ≤ℕ absℤ x +ℕ absℤ y
+abs-tri-ineqℤ x 0ℤ = ≡→≤ℕ {absℤ (x +ℤ 0ℤ)} {absℤ x +ℕ absℤ 0ℤ} refl
+abs-tri-ineqℤ x (in-neg 0ℕ) = abs-predℤ x
+abs-tri-ineqℤ x (in-neg (succℕ y)) = ≤-transℕ {absℤ (predℤ (x +ℤ in-neg y))} {succℕ (absℤ (x +ℤ in-neg y))} {absℤ x +ℕ succℕ (succℕ y)} (abs-predℤ (x +ℤ in-neg y)) (abs-tri-ineqℤ x (in-neg y))
+abs-tri-ineqℤ x (in-pos 0ℕ) = abs-succℤ x
+abs-tri-ineqℤ x (in-pos (succℕ y)) = ≤-transℕ {absℤ (succℤ (x +ℤ in-pos y))} {succℕ (absℤ (x +ℤ in-pos y))} {absℤ x +ℕ succℕ (succℕ y)} (abs-succℤ (x +ℤ in-pos y)) (abs-tri-ineqℤ x (in-pos y))
