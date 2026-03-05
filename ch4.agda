@@ -7,15 +7,15 @@ data Unit : Set where
 
 𝟙 = Unit
 
-ind-Unit : {P : Unit → Set} → (P *) → (x : Unit) → P x
-ind-Unit Pstar * = Pstar
+indUnit : {P : Unit → Set} → (P *) → (x : Unit) → P x
+indUnit Pstar * = Pstar
 
 data Empty : Set where
 
 𝟘 = Empty
 
-ind-Empty : {P : Empty → Set} → (x : Empty) → P x
-ind-Empty ()
+indEmpty : {P : Empty → Set} → (x : Empty) → P x
+indEmpty ()
 
 ex-falso : {A : Set} → Empty → A
 ex-falso ()
@@ -34,11 +34,13 @@ data _⊎_ (A B : Set) : Set where
  inl : A → A ⊎ B
  inr : B → A ⊎ B
 
-ind⊎ : {A B : Set} → {P : A ⊎ B → Set} → ((x : A) → P (inl x)) → ((y : B) → P (inr y)) → (z : A ⊎ B) → P z 
+ind⊎ : {A B : Set} → {P : A ⊎ B → Set} →
+  ((x : A) → P (inl x)) → ((y : B) → P (inr y)) → (z : A ⊎ B) → P z
 ind⊎ {A} {B} {P} fA fB (inl x) = fA x
 ind⊎ {A} {B} {P} fA fB (inr y) = fB y
 
-⊎functor : {A B A' B' : Set} → (f : A → A') → (g : B → B') → (A ⊎ B → A' ⊎ B') 
+⊎functor : {A B A' B' : Set} → (f : A → A') → (g : B → B') →
+  (A ⊎ B → A' ⊎ B')
 ⊎functor f g (inl x) = inl (f x)
 ⊎functor f g (inr y) = inr (g y)
 
@@ -74,10 +76,12 @@ indℤ :
   P 1ℤ → ((n : ℕ) → (P (in-pos n)) → P (in-pos (succℕ n))) →
   (k : ℤ) → P k
 indℤ P-1 fneg P0 P1 fpos (in-neg 0ℕ) = P-1
-indℤ {P} P-1 fneg P0 P1 fpos (in-neg (succℕ x)) = fneg x (indℤ {P} P-1 fneg P0 P1 fpos (in-neg x))
+indℤ {P} P-1 fneg P0 P1 fpos (in-neg (succℕ x)) =
+  fneg x (indℤ {P} P-1 fneg P0 P1 fpos (in-neg x))
 indℤ {P} P-1 fneg P0 P1 fpos (0ℤ) = P0
 indℤ {P} P-1 fneg P0 P1 fpos (in-pos 0ℕ) = P1
-indℤ {P} P-1 fneg P0 P1 fpos (in-pos (succℕ x)) = fpos x (indℤ {P} P-1 fneg P0 P1 fpos (in-pos x))
+indℤ {P} P-1 fneg P0 P1 fpos (in-pos (succℕ x)) =
+  fpos x (indℤ {P} P-1 fneg P0 P1 fpos (in-pos x))
 
 succℤ : ℤ → ℤ
 succℤ 0ℤ = 1ℤ
@@ -104,7 +108,8 @@ infixr 2 _×_
 _×_ : (A B : Set) → Set
 A × B = Σ A (λ _ → B)
 
-ind× : {A B : Set} → {P : A × B → Set} → ((x : A) → (y : B) → P (x , y)) → ((z : A × B) → P z)
+ind× : {A B : Set} → {P : A × B → Set} →
+  ((x : A) → (y : B) → P (x , y)) → ((z : A × B) → P z)
 ind× f (a , b) = f a b
 
 
@@ -162,7 +167,7 @@ _∨𝟚_ : 𝟚 → 𝟚 → 𝟚
 b ∨𝟚 true = true
 b ∨𝟚 false = b
 
-infix 3 _↔_ 
+infix 3 _↔_
 _↔_ : Set → Set → Set
 P ↔ Q = (P → Q) × (Q → P)
 
@@ -195,7 +200,7 @@ ex-4-3-b-ii f = contrapositive (contrapositive f)
 dn-functor = ex-4-3-b-ii
 
 ex-4-3-b-iii : {P Q : Set} → (P → ¬¬ Q) → (¬¬ P → ¬¬ Q)
-ex-4-3-b-iii f nnp nq = nnp λ p → f p nq 
+ex-4-3-b-iii f nnp nq = nnp λ p → f p nq
 
 ex-4-3-c-i : {P : Set} → ¬¬ (¬¬ P → P)
 ex-4-3-c-i {P} f = f (λ nnp → ex-falso (nnp (λ p → f (λ _ → p))))
@@ -254,7 +259,7 @@ ex-4-3-f-ii = (to , from) where
 ex-4-3-f-iii : {P Q : Set} → ¬¬ (P → Q) ↔ (¬¬ P → ¬¬ Q)
 ex-4-3-f-iii = (to , from) where
   to : {P Q : Set} → ¬¬ (P → Q) → (¬¬ P → ¬¬ Q)
-  to nnpq nnp nq = nnp λ p → nnpq λ f → nq (f p) 
+  to nnpq nnp nq = nnp λ p → nnpq λ f → nq (f p)
 
   from : {P Q : Set} → (¬¬ P → ¬¬ Q) → ¬¬ (P → Q)
   from f npq = npq (λ p → ex-falso (f (λ np → np p) λ q → npq λ _ → q))
@@ -265,9 +270,11 @@ data List (A : Set) : Set where
   [] : List A
   _∷_ : A → List A → List A
 
-ind-List : {A : Set} → {P : List A → Set} → P [] → ((lst : List A) → (a : A) → P lst → P (a ∷ lst)) → (lst : List A) → P lst
-ind-List P0 f [] = P0
-ind-List P0 f (a ∷ lst) = f lst a (ind-List P0 f lst)
+indList : {A : Set} → {P : List A → Set} →
+  P [] → ((lst : List A) → (a : A) → P lst → P (a ∷ lst)) →
+  (lst : List A) → P lst
+indList P0 f [] = P0
+indList P0 f (a ∷ lst) = f lst a (indList P0 f lst)
 
 fold-List : {A B : Set} → {b : B} → (μ : A → B → B) → List A → B
 fold-List {b = b} μ [] = b
@@ -282,7 +289,7 @@ length-List [] = 0ℕ
 length-List (x ∷ lst) = succℕ (length-List lst)
 
 sum-List : List ℕ → ℕ
-sum-List [] = 0ℕ 
+sum-List [] = 0ℕ
 sum-List (x ∷ lst) = x +ℕ sum-List lst
 
 prod-List : List ℕ → ℕ
@@ -299,4 +306,4 @@ flatten-List (lst ∷ lst₁) = concat-List lst (flatten-List lst₁)
 
 reverse-List : {A : Set} → List A → List A
 reverse-List [] = []
-reverse-List (x ∷ lst) = concat-List (reverse-List lst) (x ∷ []) 
+reverse-List (x ∷ lst) = concat-List (reverse-List lst) (x ∷ [])

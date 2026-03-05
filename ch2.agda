@@ -9,7 +9,7 @@ id a = a
 
 infixr 9 _∘_
 _∘_ : {A B C : Set} → (g : B → C) → (f : A → B) → (A → C)
-(g ∘ f) a = g (f a)  
+(g ∘ f) a = g (f a)
 
 
 -- Exercises

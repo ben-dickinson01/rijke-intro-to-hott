@@ -71,10 +71,10 @@ factorialℕ 0ℕ = 1ℕ
 factorialℕ (succℕ n) = succℕ n ·ℕ factorialℕ n
 
 -- 3.4
-choose : ℕ → ℕ → ℕ
-choose n 0ℕ = 1ℕ
-choose 0ℕ (succℕ k) = 0ℕ
-choose (succℕ n) (succℕ k) = (choose n k) +ℕ (choose n (succℕ k))
+chooseℕ : ℕ → ℕ → ℕ
+chooseℕ n 0ℕ = 1ℕ
+chooseℕ 0ℕ (succℕ k) = 0ℕ
+chooseℕ (succℕ n) (succℕ k) = (chooseℕ n k) +ℕ (chooseℕ n (succℕ k))
 
 -- 3.5
 fibℕ : ℕ → ℕ
