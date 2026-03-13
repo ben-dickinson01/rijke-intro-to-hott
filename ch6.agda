@@ -48,7 +48,7 @@ add-injℕ m n k = (to m n k , from m n k) where
 
 eq-add-eqℕ : (m n k l : ℕ) → (m ≡ n) → (k ≡ l) → (m +ℕ k ≡ n +ℕ l)
 eq-add-eqℕ m n k l refl refl = refl
-  
+
 mul-injℕ : (m n k : ℕ) → (m ≡ n) ↔ (m ·ℕ (succℕ k)) ≡ (n ·ℕ (succℕ k))
 mul-injℕ m n k = (to m n k , from m n k) where
   to : (m n k : ℕ) → (m ≡ n) → (m ·ℕ (succℕ k)) ≡ (n ·ℕ (succℕ k))
@@ -79,7 +79,7 @@ mul-to-oneℕ (succℕ m) (succℕ n) p = (ap succℕ (proj₁ (add-to-zeroℕ m
 add-ne-selfℕ : (m n : ℕ) → ¬ (m ≡ (m +ℕ (n +ℕ 1ℕ)))
 add-ne-selfℕ (succℕ m) (succℕ n) p = add-ne-selfℕ m (succℕ n) (proj₂ (succ-injℕ m (m +ℕ (succℕ n +ℕ 1ℕ))) (concat p (succ-addℕ m (succℕ n +ℕ 1ℕ))))
 
-mul-ne-selfℕ : (m n : ℕ) → ¬ ((m +ℕ 1ℕ) ≡ (m +ℕ 1ℕ) ·ℕ (n +ℕ 2ℕ)) 
+mul-ne-selfℕ : (m n : ℕ) → ¬ ((m +ℕ 1ℕ) ≡ (m +ℕ 1ℕ) ·ℕ (n +ℕ 2ℕ))
 mul-ne-selfℕ 0ℕ (succℕ n) p = zero-ne-succℕ (n +ℕ 1ℕ) (proj₂ (succ-injℕ 0ℕ (n +ℕ 2ℕ)) (concat p (concat (ap (λ x → x ·ℕ (succℕ n +ℕ 2ℕ)) (zero-addℕ 1ℕ)) (concat (one-mulℕ (succℕ n +ℕ 2ℕ)) (succ-addℕ n 2ℕ)))) )
 mul-ne-selfℕ (succℕ m) 0ℕ p = ex-falso (zero-ne-succℕ (succℕ m) (proj₂ (add-injℕ 0ℕ (succℕ (succℕ m)) m) (concat (zero-addℕ m) (proj₂ (succ-injℕ m (succℕ (succℕ m) +ℕ m)) (proj₂ (succ-injℕ (succℕ m) (succℕ (succℕ (succℕ m) +ℕ m))) (concat p (concat (ap (λ x → (succℕ m +ℕ 1ℕ) ·ℕ x) (zero-addℕ 2ℕ)) (inv (concat (inv (ap succℕ (add-succℕ (succℕ (succℕ m)) m))) (add-succℕ (succℕ (succℕ m)) (succℕ m))))))) ))))
 mul-ne-selfℕ (succℕ m) (succℕ n) p = ex-falso (zero-ne-succℕ (succℕ m +ℕ (succℕ (succℕ m) +ℕ succℕ (succℕ m) ·ℕ n)) (proj₂ (add-injℕ 0ℕ (succℕ (succℕ m +ℕ (succℕ (succℕ m) +ℕ succℕ (succℕ m) ·ℕ n))) (succℕ (succℕ m))) (concat (zero-addℕ (succℕ (succℕ m))) (concat p (concat (ap (λ x → (succℕ m +ℕ 1ℕ) ·ℕ x) (succ-addℕ n 2ℕ)) (concat (add-commℕ (succℕ m +ℕ 1ℕ) ((succℕ m +ℕ 1ℕ) ·ℕ (n +ℕ 2ℕ))) (proj₁ (add-injℕ ((succℕ m +ℕ 1ℕ) ·ℕ (n +ℕ 2ℕ)) (succℕ (succℕ m +ℕ (succℕ (succℕ m) +ℕ succℕ (succℕ m) ·ℕ n))) (succℕ (succℕ m))) (inv (concat (inv (succ-addℕ (succℕ m) (succℕ (succℕ m) +ℕ succℕ (succℕ m) ·ℕ n))) (concat (add-commℕ (succℕ (succℕ m)) (succℕ (succℕ m) +ℕ succℕ (succℕ m) ·ℕ n)) (inv (concat (add-commℕ (succℕ m +ℕ 1ℕ) ((succℕ m +ℕ 1ℕ) ·ℕ (n +ℕ 1ℕ))) (proj₁ (add-injℕ ((succℕ m +ℕ 1ℕ) ·ℕ (n +ℕ 1ℕ)) (succℕ (succℕ m) +ℕ succℕ (succℕ m) ·ℕ n) (succℕ (succℕ m))) refl)))))))))))))

@@ -4,9 +4,9 @@ open import ch4 public
 
 infix 4 _≡_
 data _≡_ {A : Set} (a : A) : A → Set where
-  refl : a ≡ a 
+  refl : a ≡ a
 
-ind≡ : {A : Set} → {a : A} → {P : (x : A) →  a ≡ x → Set} → P a refl → (x : A) → (p : a ≡ x) → P x p 
+ind≡ : {A : Set} → {a : A} → {P : (x : A) →  a ≡ x → Set} → P a refl → (x : A) → (p : a ≡ x) → P x p
 ind≡ pa x refl = pa
 
 concat : {A : Set} → {x y z : A} → x ≡ y → y ≡ z → x ≡ z
@@ -56,7 +56,7 @@ apd f refl = refl
 
 refl-unique : {A : Set} → (a x : A) → (p : a ≡ x) → _≡_ {Σ A (λ z → a ≡ z)} (a , refl) (x , p)
 refl-unique a .a refl = refl
-  
+
 -- Laws of +ℕ
 zero-addℕ : (n : ℕ) → (0ℕ +ℕ n) ≡ n
 zero-addℕ 0ℕ = refl
@@ -206,7 +206,7 @@ neg-addℤ (in-pos (succℕ x)) = concat (ap succℤ (pred-addℤ (in-neg x) (in
 add-negℤ : (x : ℤ) → x +ℤ (-ℤ x) ≡ 0ℤ
 add-negℤ x = concat (add-commℤ x (-ℤ x)) (neg-addℤ x)
 
-zero-mulℤ : (x : ℤ) → 0ℤ ·ℤ x ≡ 0ℤ 
+zero-mulℤ : (x : ℤ) → 0ℤ ·ℤ x ≡ 0ℤ
 zero-mulℤ 0ℤ = refl
 zero-mulℤ (in-neg 0ℕ) = refl
 zero-mulℤ (in-neg (succℕ x)) = concat (zero-addℤ (0ℤ ·ℤ in-neg x)) (zero-mulℤ (in-neg x))
@@ -228,7 +228,7 @@ mul-oneℤ x = refl
 
 infixl 6 _-ℤ_
 _-ℤ_ : ℤ → ℤ → ℤ
-x -ℤ y = x +ℤ (-ℤ y) 
+x -ℤ y = x +ℤ (-ℤ y)
 
 neg-predℤ : (x : ℤ) → -ℤ (predℤ x) ≡ succℤ (-ℤ x)
 neg-predℤ 0ℤ = refl
@@ -257,7 +257,7 @@ pred-mulℤ x (in-pos 0ℕ) = refl
 pred-mulℤ x (in-pos (succℕ y)) = concat (ap (λ n → predℤ x +ℤ n) (pred-mulℤ x (in-pos y))) (concat (ap (λ n → predℤ x +ℤ n) (add-commℤ (x ·ℤ in-pos y) (-ℤ in-pos y))) (concat (inv (add-assocℤ (predℤ x) (-ℤ in-pos y) (x ·ℤ in-pos y))) (concat (ap (λ n → n +ℤ x ·ℤ in-pos y) (concat (pred-addℤ x (-ℤ in-pos y)) (inv (add-predℤ x (-ℤ in-pos y))))) (concat (add-assocℤ x (predℤ (-ℤ in-pos y)) (x ·ℤ in-pos y)) (concat (ap (λ n → x +ℤ n) (add-commℤ (predℤ (-ℤ in-pos y)) (x ·ℤ in-pos y))) (concat (inv (add-assocℤ x (x ·ℤ in-pos y) (predℤ (-ℤ in-pos y)))) (ap (λ n → x +ℤ x ·ℤ in-pos y +ℤ n) (pred-negℤ (in-pos y)) )))))))
 
 
-mul-predℤ : (x y : ℤ) → x ·ℤ predℤ y ≡ x ·ℤ y -ℤ x 
+mul-predℤ : (x y : ℤ) → x ·ℤ predℤ y ≡ x ·ℤ y -ℤ x
 mul-predℤ x 0ℤ = inv (zero-addℤ (-ℤ x))
 mul-predℤ x (in-neg 0ℕ) = refl
 mul-predℤ x (in-neg (succℕ y)) = concat (ap (λ n → (-ℤ x +ℤ n)) (mul-predℤ x (in-neg y))) (inv (add-assocℤ (-ℤ x) (x ·ℤ in-neg y) (-ℤ x)))
@@ -287,7 +287,7 @@ left-distribℤ x y (in-pos (succℕ z)) = concat (mul-succℤ x (y +ℤ in-pos 
 
 neg-distribℤ : (x y : ℤ) → -ℤ (x +ℤ y) ≡ -ℤ x +ℤ -ℤ y
 neg-distribℤ x 0ℤ = refl
-neg-distribℤ x (in-neg 0ℕ) = neg-predℤ x 
+neg-distribℤ x (in-neg 0ℕ) = neg-predℤ x
 neg-distribℤ x (in-neg (succℕ y)) = concat (neg-predℤ (x +ℤ in-neg y)) (concat (ap succℤ (neg-distribℤ x (in-neg y))) (add-succℤ (-ℤ x) (-ℤ in-neg y)))
 neg-distribℤ x (in-pos 0ℕ) = neg-succℤ x
 neg-distribℤ x (in-pos (succℕ y)) = concat (neg-succℤ (x +ℤ in-pos y)) (concat (ap predℤ (neg-distribℤ x (in-pos y))) (add-predℤ (-ℤ x) (-ℤ in-pos y)))
