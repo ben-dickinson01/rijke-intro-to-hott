@@ -1,4 +1,0 @@
-module ch7 where
-
-open import ch6 public
-
