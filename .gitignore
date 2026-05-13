@@ -1,2 +1,5 @@
-*.agdai
-MAlonzo/**
+# Ignore everything except .agda files
+*
+!*/
+!*.agda
+!.gitignore
