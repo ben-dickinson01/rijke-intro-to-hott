@@ -77,8 +77,8 @@ tot-fam-equiv-to-g-equiv {A} {B} {C} {D} f g fe te =
     (3-for-2-f-g-to-h (tot-fam f g) (base-change f D) (tot g)
        (λ _ → refl) te (f-equiv-to-base-change-equiv f D fe))
 
-is-id-sys : (A : Set) → (B : A → Set) → (a : A) → (b : B a) → Set₁
-is-id-sys A B a b = (P : (x : A) → B x → Set) → sec (λ (h : (x : A) → (y : B x) → P x y) → h a b)
+is-id-sys : {A : Set} → (B : A → Set) → (a : A) → (b : B a) → Set₁
+is-id-sys {A} B a b = (P : (x : A) → B x → Set) → sec (λ (h : (x : A) → (y : B x) → P x y) → h a b)
 
 -- FUNDAMENTAL THEOREM OF IDENTITY TYPES
 -- i → ii
@@ -87,14 +87,14 @@ fam-equiv-to-total-contr {A} {a} {B} b f p f-equiv =
   contr-equiv-to-contr (tot f) (Σ-≡-contractible a) (fam-equiv-to-tot-equiv f f-equiv)
 
 -- ii → iii
-total-contr-to-id-sys : {A : Set} → {a : A} → {B : A → Set} → (b : B a) → (f : (x : A) → (a ≡ x) → B x) → (p : f a refl ≡ b) → is-contractible (Σ A B) → is-id-sys A B a b
+total-contr-to-id-sys : {A : Set} → {a : A} → {B : A → Set} → (b : B a) → (f : (x : A) → (a ≡ x) → B x) → (p : f a refl ≡ b) → is-contractible (Σ A B) → is-id-sys B a b
 total-contr-to-id-sys {A} {a} {B} b f p Σ-contr P =
   (λ pab x y → s (x , y) pab) , sh
   where
     P' : Σ A B → Set
     P' z = P (proj₁ z) (proj₂ z)
     si : sec (λ (g : (z : Σ A B) → P' z) → g (a , b))
-    si = contr-to-sing-ind (Σ A B) (a , b) Σ-contr P'
+    si = contr-to-sing-ind (a , b) Σ-contr P'
     s : (z : Σ A B) → P' (a , b) → P' z
     s z pab = proj₁ si pab z
     sh : (λ (h : (x : A) → (y : B x) → P x y) → h a b) ∘
@@ -102,7 +102,7 @@ total-contr-to-id-sys {A} {a} {B} b f p Σ-contr P =
     sh = proj₂ si
 
 -- iii → i
-id-sys-to-fam-equiv : {A : Set} → {a : A} → {B : A → Set} → (b : B a) → (f : (x : A) → (a ≡ x) → B x) → (p : f a refl ≡ b) → is-id-sys A B a b → (x : A) → is-equiv (f x)
+id-sys-to-fam-equiv : {A : Set} → {a : A} → {B : A → Set} → (b : B a) → (f : (x : A) → (a ≡ x) → B x) → (p : f a refl ≡ b) → is-id-sys B a b → (x : A) → is-equiv (f x)
 id-sys-to-fam-equiv {A} {a} {B} b f refl id-sys x =
   (g-fam x , sec-htpy x) , (g-fam x , retr-htpy x)
   where
@@ -201,27 +201,27 @@ inr-≡-inr-equiv : {A B : Set} → (y y' : B) → (inr {A} {B} y ≡ inr y') �
 inr-≡-inr-equiv y y' = ≡-to-Eq-copr (inr y) (inr y') , ≡-to-Eq-copr-equiv (inr y) (inr y')
 
 -- Definition 11.6.1 (dependent identity system)
-is-dep-id-sys : (A : Set) → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
-  → is-id-sys A C a c
+is-dep-id-sys : {A : Set} → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
+  → is-id-sys C a c
   → (D : (x : A) → B x → C x → Set) → (d : D a b c) → Set₁
-is-dep-id-sys A B C a b c _ D d = is-id-sys (B a) (λ y → D a y c) b d
+is-dep-id-sys B C a b c _ D d = is-id-sys (λ y → D a y c) b d
 
 -- Theorem 11.6.2 (Structure identity principle)
 
 -- The key total-space equivalence: swap order of (B,C) Σ's
-SIP-Σ-equiv : (A : Set) → (B C : A → Set)
+SIP-Σ-equiv : {A : Set} → (B C : A → Set)
   → (D : (x : A) → B x → C x → Set)
   → Σ (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w))
   ≃ Σ (Σ A C) (λ z → Σ (B (proj₁ z)) (λ y → D (proj₁ z) y (proj₂ z)))
-SIP-Σ-equiv A B C D = (λ { ((a , b) , (c , d)) → (a , c) , (b , d)}) , (((λ {((a , c) ,  (b , d)) → (a , b) , (c , d)}) , λ { ((a , c) , (b , d)) → refl}) , (((λ {((a , c) ,  (b , d)) → (a , b) , (c , d)}) , λ { ((a , c) , (b , d)) → refl})))
+SIP-Σ-equiv B C D = (λ { ((a , b) , (c , d)) → (a , c) , (b , d)}) , (((λ {((a , c) ,  (b , d)) → (a , b) , (c , d)}) , λ { ((a , c) , (b , d)) → refl}) , (((λ {((a , c) ,  (b , d)) → (a , b) , (c , d)}) , λ { ((a , c) , (b , d)) → refl})))
 
 -- (ii) ⇒ (v): contractibility of inner total space implies contractibility of outer
-inner-contr-to-outer-contr : (A : Set) → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
-  → is-id-sys A C a c
+inner-contr-to-outer-contr : {A : Set} → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
+  → is-id-sys C a c
   → (D : (x : A) → B x → C x → Set)
   → is-contractible (Σ (B a) (λ y → D a y c))
   → is-contractible (Σ (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)))
-inner-contr-to-outer-contr A B C a b c C-id-sys D inner-contr = equiv-contr-to-contr (collapse ∘ swap) inner-contr (equiv-comp swap collapse swap-equiv collapse-equiv)
+inner-contr-to-outer-contr {A} B C a b c C-id-sys D inner-contr = equiv-contr-to-contr (collapse ∘ swap) inner-contr (equiv-comp swap collapse swap-equiv collapse-equiv)
   where
   swap : Σ (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)) → Σ (Σ A C) (λ z → Σ (B (proj₁ z)) (λ y → D (proj₁ z) y (proj₂ z)))
   swap ((a , b) , (c , d)) = (a , c) , (b , d)
@@ -262,12 +262,12 @@ inner-contr-to-outer-contr A B C a b c C-id-sys D inner-contr = equiv-contr-to-c
                → collapse-inv (collapse xzyw) ≡ xzyw
       ret-htpy ((x , z) , yw) = proj₁ (C-id-sys Q) Q-base x z yw
 -- (v) ⇒ (ii): converse
-outer-contr-to-inner-contr : (A : Set) → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
-  → is-id-sys A C a c
+outer-contr-to-inner-contr : {A : Set} → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
+  → is-id-sys C a c
   → (D : (x : A) → B x → C x → Set)
   → is-contractible (Σ (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)))
   → is-contractible (Σ (B a) (λ y → D a y c))
-outer-contr-to-inner-contr A B C a b c C-id-sys D outer-contr =
+outer-contr-to-inner-contr {A} B C a b c C-id-sys D outer-contr =
   contr-equiv-to-contr (collapse ∘ swap) outer-contr (equiv-comp swap collapse swap-equiv collapse-equiv)
   where
   swap : Σ (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)) → Σ (Σ A C) (λ z → Σ (B (proj₁ z)) (λ y → D (proj₁ z) y (proj₂ z)))
@@ -316,33 +316,33 @@ outer-contr-to-inner-contr A B C a b c C-id-sys D outer-contr =
 -- (iv) ⇔ (v) ⇔ (vi): apply the same to the outer family on Σ A B at (a , b).
 
 -- Main theorem direction: (iii) ⇒ (vi)
-dep-id-sys-to-Σ-id-sys : (A : Set) → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
-  → (C-id-sys : is-id-sys A C a c)
+dep-id-sys-to-Σ-id-sys : {A : Set} → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
+  → (C-id-sys : is-id-sys C a c)
   → (D : (x : A) → B x → C x → Set) → (d : D a b c)
-  → is-dep-id-sys A B C a b c C-id-sys D d
-  → is-id-sys (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)) (a , b) (c , d)
-dep-id-sys-to-Σ-id-sys A B C a b c C-id-sys D d D-dep-id-sys =
+  → is-dep-id-sys B C a b c C-id-sys D d
+  → is-id-sys (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)) (a , b) (c , d)
+dep-id-sys-to-Σ-id-sys {A} B C a b c C-id-sys D d D-dep-id-sys =
   total-contr-to-id-sys (c , d) f-outer refl outer-contr
   where
     f-inner : (y : B a) → (b ≡ y) → D a y c
     f-inner .b refl = d
 
     inner-contr : is-contractible (Σ (B a) (λ y → D a y c))
-    inner-contr = fam-equiv-to-total-contr d f-inner refl (id-sys-to-fam-equiv d f-inner refl D-dep-id-sys) 
+    inner-contr = fam-equiv-to-total-contr d f-inner refl (id-sys-to-fam-equiv d f-inner refl D-dep-id-sys)
 
     outer-contr : is-contractible (Σ (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)))
-    outer-contr = inner-contr-to-outer-contr A B C a b c C-id-sys D inner-contr
+    outer-contr = inner-contr-to-outer-contr B C a b c C-id-sys D inner-contr
 
     f-outer : (z : Σ A B) → ((a , b) ≡ z) → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)
     f-outer .(a , b) refl = c , d
 
 -- and the converse
-Σ-id-sys-to-dep-id-sys : (A : Set) → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
-  → (C-id-sys : is-id-sys A C a c)
+Σ-id-sys-to-dep-id-sys : {A : Set} → (B C : A → Set) → (a : A) → (b : B a) → (c : C a)
+  → (C-id-sys : is-id-sys C a c)
   → (D : (x : A) → B x → C x → Set) → (d : D a b c)
-  → is-id-sys (Σ A B) (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)) (a , b) (c , d)
-  → is-dep-id-sys A B C a b c C-id-sys D d
-Σ-id-sys-to-dep-id-sys A B C a b c C-id-sys D d Σ-id-sys =
+  → is-id-sys (λ z → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)) (a , b) (c , d)
+  → is-dep-id-sys B C a b c C-id-sys D d
+Σ-id-sys-to-dep-id-sys {A} B C a b c C-id-sys D d Σ-id-sys =
   total-contr-to-id-sys d f-inner refl inner-contr
   where
     f-outer : (z : Σ A B) → ((a , b) ≡ z) → Σ (C (proj₁ z)) (λ w → D (proj₁ z) (proj₂ z) w)
@@ -352,7 +352,7 @@ dep-id-sys-to-Σ-id-sys A B C a b c C-id-sys D d D-dep-id-sys =
     outer-contr = fam-equiv-to-total-contr (c , d) f-outer refl (id-sys-to-fam-equiv (c , d) f-outer refl Σ-id-sys)
 
     inner-contr : is-contractible (Σ (B a) (λ y → D a y c))
-    inner-contr = outer-contr-to-inner-contr A B C a b c C-id-sys D outer-contr
+    inner-contr = outer-contr-to-inner-contr B C a b c C-id-sys D outer-contr
 
     f-inner : (y : B a) → (b ≡ y) → D a y c
     f-inner .b refl = d
@@ -360,7 +360,7 @@ dep-id-sys-to-Σ-id-sys A B C a b c C-id-sys D d D-dep-id-sys =
 -- Example 11.6.3: characterization of the identity type of fib
 
 -- The identity-system structure on path types
-path-id-sys : {A : Set} → (x : A) → is-id-sys A (λ y → x ≡ y) x refl
+path-id-sys : {A : Set} → (x : A) → is-id-sys (λ y → x ≡ y) x refl
 path-id-sys x = λ P → (λ { z a refl → z}) , λ z → refl
 
 -- The D family for Example 11.6.3
@@ -391,7 +391,7 @@ fib-inner-contr {A} {B} f b x p =
 
 -- The dependent identity system property for D
 fib-D-dep-id-sys : {A B : Set} → (f : A → B) → (b : B) → (x : A) → (p : f x ≡ b)
-  → is-dep-id-sys A (λ y → f y ≡ b) (λ y → x ≡ y) x p refl
+  → is-dep-id-sys (λ y → f y ≡ b) (λ y → x ≡ y) x p refl
       (path-id-sys x) (fib-D f b x p) (fib-d f b x p)
 fib-D-dep-id-sys f b x refl = total-contr-to-id-sys refl (λ { refl p → refl}) refl (fib-inner-contr f b x refl)
 
@@ -408,10 +408,9 @@ fib-≡-equiv {A} {B} f b x y p q =
                 → Σ (x ≡ proj₁ z) (λ α → ap f α ≡ concat p (inv (proj₂ z)))
   canonical-map .(x , p) refl = refl , fib-d f b x p
 
-  Σ-id-sys : is-id-sys (Σ A (λ y' → f y' ≡ b))
-               (λ z → Σ (x ≡ proj₁ z) (λ α → ap f α ≡ concat p (inv (proj₂ z))))
+  Σ-id-sys : is-id-sys (λ z → Σ (x ≡ proj₁ z) (λ α → ap f α ≡ concat p (inv (proj₂ z))))
                (x , p) (refl , fib-d f b x p)
-  Σ-id-sys = dep-id-sys-to-Σ-id-sys A (λ y' → f y' ≡ b) (λ y' → x ≡ y')
+  Σ-id-sys = dep-id-sys-to-Σ-id-sys (λ y' → f y' ≡ b) (λ y' → x ≡ y')
                x p refl (path-id-sys x)
                (fib-D f b x p) (fib-d f b x p)
                (fib-D-dep-id-sys f b x p)
@@ -420,8 +419,8 @@ fib-≡-equiv {A} {B} f b x y p q =
 -- Exercises
 -- Ex 11.1
 -- a
-empty-embeds : (A : Set) → (f : 𝟘 → A) → is-emb f
-empty-embeds A f () ()
+empty-embeds : {A : Set} → (f : 𝟘 → A) → is-emb f
+empty-embeds f () ()
 
 -- b
 inl-emb : (A B : Set) → is-emb (inl {A} {B}) 
@@ -468,3 +467,84 @@ adj-equiv {A} {B} (e' , ((f , ef) , (g , ge))) x y = forward , forward-equiv
       equiv-comp (ap f) (concat (inv (fe x)))
         (equiv-to-emb f f-equiv (e' x) y)
         (is-equiv-concat (inv (fe x)))
+
+--b
+adj-G : {A B : Set} → (e : A ≃ B) → (y : B) → (proj₁ e) (proj₁ (proj₁ (proj₂ e)) y) ≡ y
+adj-G (e' , ((f , ef) , (g , ge))) =
+  proj₁ (proj₂ (inv-to-coh-inv e' (equiv-to-inverse e' ((f , ef) , (g , ge)))))
+
+adj-equiv-triangle : {A B : Set} → (e : A ≃ B) → (x : A) → (y : B) → (p : (proj₁ e) x ≡ y) →
+                     concat (ap (proj₁ e) (proj₁ (adj-equiv e x y) p)) (adj-G e y) ≡ p
+adj-equiv-triangle {A} {B} (e' , ((f , ef) , (g , ge))) x .(e' x) refl =
+  concat
+    (ap (λ q → concat q (G (e' x)))
+        (concat (ap (ap e') (right-unit (inv (fe x)))) (ap-inv e' (fe x))))
+    (concat
+      (ap (concat (inv (ap e' (fe x)))) (K x))
+      (left-inv (ap e' (fe x))))
+  where
+    coh : is-coh-inv e'
+    coh = inv-to-coh-inv e' (equiv-to-inverse e' ((f , ef) , (g , ge)))
+    fe : (a : A) → f (e' a) ≡ a
+    fe = proj₁ (proj₂ (proj₂ coh))
+    G : (b : B) → e' (f b) ≡ b
+    G = proj₁ (proj₂ coh)
+    K : (a : A) → G (e' a) ≡ ap e' (fe a)
+    K = proj₂ (proj₂ (proj₂ coh))
+
+-- 11.3
+-- a
+htpy-of-emb-is-emb : {A B : Set} → (f g : A → B) → (f ∼ g) → is-emb f → is-emb g
+htpy-of-emb-is-emb {A} {B} f g H femb x y = htpy-of-equiv-is-equiv (composite) (ap g) (λ { refl → concat (ap (concat (inv (H x))) (left-unit (H x))) (left-inv (H x))}) (equiv-comp (ap f) (λ {p → concat (inv (H x)) (concat p (H y))}) (femb x y) (equiv-comp (λ q → concat q (H y)) (concat (inv (H x))) (is-equiv-concat' (H y)) (is-equiv-concat (inv (H x)))))
+  where
+  composite : (x ≡ y) → (g x ≡ g y)
+  composite p = concat (inv (H x)) (concat (ap f p) (H y))
+
+emb-comp : {A B C : Set} → (f : A → B) → (g : B → C) → is-emb f → is-emb g → is-emb (g ∘ f)
+emb-comp f g femb gemb x y = htpy-of-equiv-is-equiv (ap g ∘ ap f) (ap (g ∘ f)) (λ p → ap-comp f g p) (equiv-comp (ap f) (ap g) (femb x y) (gemb (f x) (f y)))
+
+emb-cancel : {A B C : Set} → (f : A → B) → (g : B → C) → is-emb g → is-emb (g ∘ f) → is-emb f
+emb-cancel f g gemb gfemb x y = 3-for-2-f-g-to-h (ap (g ∘ f)) (ap g) (ap f) (λ p → inv (ap-comp f g p)) (gfemb x y) (gemb (f x) (f y))
+
+-- 11.4
+-- a
+comm-tri-emb-g-to-emb-f-iff-emb-h : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-emb g → (is-emb f ↔ is-emb h)
+comm-tri-emb-g-to-emb-f-iff-emb-h f g h H gemb = (to , from)
+  where
+  to : is-emb f → is-emb h
+  to femb = emb-cancel h g gemb (htpy-of-emb-is-emb f (g ∘ h) H femb)
+  from : is-emb h → is-emb f
+  from hemb = htpy-of-emb-is-emb (g ∘ h) f (inv-htpy H) (emb-comp h g hemb gemb)
+-- b
+comm-tri-equiv-h-to-emb-f-iff-emb-g : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-equiv h → (is-emb f ↔ is-emb g)
+comm-tri-equiv-h-to-emb-f-iff-emb-g f g h H hequiv = (to , from)
+  where
+  to : is-emb f → is-emb g
+  to femb = htpy-of-emb-is-emb (f ∘ k) g (λ x → concat (H (k x)) (ap g (kh x)))
+      (emb-comp k f (equiv-to-emb k (3-for-2-f-g-to-h id h k (inv-htpy kh) (is-equiv-id _) hequiv)) femb)
+    where
+    k = proj₁ (proj₁ hequiv)
+    kh = proj₂ (proj₁ hequiv)
+  from : is-emb g → is-emb f
+  from gemb = htpy-of-emb-is-emb (g ∘ h) f (inv-htpy H) (emb-comp h g (equiv-to-emb h hequiv) gemb)
+
+-- 11.5
+-- composition of equivalences is an equivalence by equiv-comp, so we only prove the reverse direction
+
+emb-comp-equiv-to-fac-equiv : {A B C : Set} → (f : A → B) → (g : B → C) → is-emb f → is-emb g → is-equiv (g ∘ f) → is-equiv f × is-equiv g
+emb-comp-equiv-to-fac-equiv {A} {B} {C} f g femb gemb gfequiv = fequiv , gequiv
+  where
+  fequiv : is-equiv f
+  fequiv = contr-map-to-equiv f (λ b →
+    equiv-contr-to-contr
+      (tot (λ a (p : f a ≡ b) → ap g p))
+      (equiv-to-contr-map (g ∘ f) gfequiv (g b))
+      (fam-equiv-to-tot-equiv (λ a (p : f a ≡ b) → ap g p) (λ a → gemb (f a) b)))
+  gequiv : is-equiv g
+  gequiv = contr-map-to-equiv g (λ c →
+    contr-equiv-to-contr
+      (base-change f (λ b → g b ≡ c))
+      (equiv-to-contr-map (g ∘ f) gfequiv c)
+      (f-equiv-to-base-change-equiv f (λ b → g b ≡ c) fequiv))

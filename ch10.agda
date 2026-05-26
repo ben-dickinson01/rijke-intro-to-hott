@@ -20,23 +20,23 @@ const-centre-equiv-id (c , f) = λ {x → inv (concat (f x) refl)}
 ev-pt : {A : Set} → {B : A → Set} → (a : A) → ((x : A) → B x) → B a
 ev-pt a f = f a
 
-has-sing-ind : (A : Set) → (a : A) → Set₁
-has-sing-ind A a = (B : A → Set) → sec (ev-pt {A} {B} a)
+has-sing-ind : {A : Set} → (a : A) → Set₁
+has-sing-ind {A} a = (B : A → Set) → sec (ev-pt {A} {B} a)
 
-ind-sing : {A : Set} → {B : A → Set} → (a : A) → has-sing-ind A a → B a → (x : A) → B x
+ind-sing : {A : Set} → {B : A → Set} → (a : A) → has-sing-ind a → B a → (x : A) → B x
 ind-sing {A} {B} a sing ba x = proj₁ (sing B) ba x
 
-comp-sing : {A : Set} → {B : A → Set} → (a : A) → (si : has-sing-ind A a) → (ev-pt a) ∘ (proj₁ (si B)) ∼ id
-comp-sing {A} {B} a si x = proj₂ (si B) x 
+comp-sing : {A : Set} → {B : A → Set} → (a : A) → (si : has-sing-ind a) → (ev-pt a) ∘ (proj₁ (si B)) ∼ id
+comp-sing {A} {B} a si x = proj₂ (si B) x
 
-𝟙-sing-ind : has-sing-ind 𝟙 *
+𝟙-sing-ind : has-sing-ind *
 𝟙-sing-ind = λ B → (λ {b * → b}) , λ { b → refl}
 
-contr-to-sing-ind : (A : Set) → (a : A) → is-contractible A → has-sing-ind A a
-contr-to-sing-ind A a (x , f) = λ B → (λ ba y → tr B (concat (f a) (inv (f y))) ba) , (λ z → ap (λ p → tr B p z) (right-inv (f a)))
+contr-to-sing-ind : {A : Set} → (a : A) → is-contractible A → has-sing-ind a
+contr-to-sing-ind a (x , f) = λ B → (λ ba y → tr B (concat (f a) (inv (f y))) ba) , (λ z → ap (λ p → tr B p z) (right-inv (f a)))
 
-sing-ind-to-contr : (A : Set) → (a : A) → has-sing-ind A a → is-contractible A
-sing-ind-to-contr A a si = a , ind-sing a si refl
+sing-ind-to-contr : {A : Set} → (a : A) → has-sing-ind a → is-contractible A
+sing-ind-to-contr a si = a , ind-sing a si refl
 
 fib : {A B : Set} → (f : A → B) → (b : B) → Set
 fib {A} {B} f b = Σ A (λ a → f a ≡ b)
@@ -118,23 +118,23 @@ identity-contr a = (a , refl) , λ { (x , refl) → refl}
 contr-to-eq-contr : {A : Set} → is-contractible A → (x y : A) → is-contractible (x ≡ y)
 contr-to-eq-contr (a , f) x y = concat (f x) (inv (f y)) , λ {refl → inv (right-inv (f x))}
 
-retr-to-contr-to-contr : (A B : Set) → (f : A → B) → retr f → is-contractible B → is-contractible A 
-retr-to-contr-to-contr A B f (g , gf) (b , p) = g b , λ {a → concat (inv (gf a)) (ap g (p (f a)))}
+retr-to-contr-to-contr : {A B : Set} → (f : A → B) → retr f → is-contractible B → is-contractible A
+retr-to-contr-to-contr f (g , gf) (b , p) = g b , λ {a → concat (inv (gf a)) (ap g (p (f a)))}
 
-const𝟙-equiv-to-A-contr : (A : Set) → is-equiv (const {A} {𝟙} {*}) → is-contractible A
-const𝟙-equiv-to-A-contr A ((f , cf) , (g , gc)) = g * , λ a → concat (inv (gc a)) (ap g refl)
+const𝟙-equiv-to-A-contr : {A : Set} → is-equiv (const {A} {𝟙} {*}) → is-contractible A
+const𝟙-equiv-to-A-contr ((f , cf) , (g , gc)) = g * , λ a → concat (inv (gc a)) (ap g refl)
 
-A-contr-to-const𝟙-equiv : (A : Set) → is-contractible A → is-equiv (const {A} {𝟙} {*})
-A-contr-to-const𝟙-equiv A (a , p) = (const {𝟙} {A} {a} , λ { * → refl}) , ((const {𝟙} {A} {a} , λ {x →  concat (p ((const ∘ const {A} {𝟙} {*}) x)) (inv (p x))}))
+A-contr-to-const𝟙-equiv : {A : Set} → is-contractible A → is-equiv (const {A} {𝟙} {*})
+A-contr-to-const𝟙-equiv {A} (a , p) = (const {𝟙} {A} {a} , λ { * → refl}) , ((const {𝟙} {A} {a} , λ {x →  concat (p ((const ∘ const {A} {𝟙} {*}) x)) (inv (p x))}))
 
-ex-10-3i : {A B : Set} → (f : A → B) → is-contractible A → is-contractible B → is-equiv f
-ex-10-3i f (a , pA) (b , pB) = ((λ x → a) , λ x → concat (pB (f a)) (inv (pB x))) , ((λ x → a) , λ x → concat (pA a) (inv (pA x)))
+contr-contr-to-equiv : {A B : Set} → (f : A → B) → is-contractible A → is-contractible B → is-equiv f
+contr-contr-to-equiv f (a , pA) (b , pB) = ((λ x → a) , λ x → concat (pB (f a)) (inv (pB x))) , ((λ x → a) , λ x → concat (pA a) (inv (pA x)))
 
-ex-10-3ii : {A B : Set} → (f : A → B) → is-contractible A → is-equiv f → is-contractible B
-ex-10-3ii f (a , pA) ((g , fg) , (h , hf)) = f a , λ b → concat (inv (fg b)) (ap f (pA (g b)))
+contr-equiv-to-contr : {A B : Set} → (f : A → B) → is-contractible A → is-equiv f → is-contractible B
+contr-equiv-to-contr f (a , pA) ((g , fg) , (h , hf)) = f a , λ b → concat (inv (fg b)) (ap f (pA (g b)))
 
-ex-10-3iii : {A B : Set} → (f : A → B) → is-contractible B → is-equiv f → is-contractible A
-ex-10-3iii f (b , pB) ((g , fg) , (h , hf)) = h b , λ a → concat (inv (hf a)) (ap h (pB (f a)))
+equiv-contr-to-contr : {A B : Set} → (f : A → B) → is-contractible B → is-equiv f → is-contractible A
+equiv-contr-to-contr f (b , pB) ((g , fg) , (h , hf)) = h b , λ a → concat (inv (hf a)) (ap h (pB (f a)))
 
 -- TODO Fin k is not contr for k != 1
 

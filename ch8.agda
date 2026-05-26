@@ -56,8 +56,8 @@ Eq-ℕ-is-decidable (succℕ m) (succℕ n) = Eq-ℕ-is-decidable m n
 has-decidable-eq : (A : Set) → Set
 has-decidable-eq A = (x y : A) → is-decidable (x ≡ y)
 
-iff-to-iff-decidable : (A B : Set) → (A ↔ B) → is-decidable A ↔ is-decidable B
-iff-to-iff-decidable A B (A→B , B→A) = (⊎functor (A→B) (contrapositive B→A) , ⊎functor (B→A) (contrapositive A→B))
+iff-to-iff-decidable : {A B : Set} → (A ↔ B) → is-decidable A ↔ is-decidable B
+iff-to-iff-decidable (A→B , B→A) = (⊎functor (A→B) (contrapositive B→A) , ⊎functor (B→A) (contrapositive A→B))
 
 ℕ-decidable-eq : has-decidable-eq ℕ
 ℕ-decidable-eq 0ℕ 0ℕ = inl refl
@@ -73,7 +73,7 @@ Eq-Fin-is-decidable (succℕ k) (inr *) (inr *) = 𝟙-is-decidable
 
 Fin-decidable-eq : (k : ℕ) → has-decidable-eq (Fin k)
 Fin-decidable-eq (succℕ k) x y =
-  proj₁ (iff-to-iff-decidable (Eq-Fin (succℕ k) x y) (x ≡ y)
+  proj₁ (iff-to-iff-decidable
     (Eq-Fin-to-≡Fin (succℕ k) x y , ≡Fin-to-Eq-Fin (succℕ k) x y))
     (Eq-Fin-is-decidable (succℕ k) x y)
 
@@ -85,10 +85,10 @@ Fin-decidable-eq (succℕ k) x y =
 0ℕdiv-iff-eq0ℕ x = (0ℕdiv x , λ p → (0ℕ , inv p))
 
 divℕ-decidable : (d x : ℕ) → is-decidable (d ∣ x)
-divℕ-decidable 0ℕ 0ℕ = proj₂ (iff-to-iff-decidable (0ℕ ∣ 0ℕ) (0ℕ ≡ 0ℕ) (0ℕdiv-iff-eq0ℕ 0ℕ)) (inl refl)
-divℕ-decidable 0ℕ (succℕ x) = proj₂ (iff-to-iff-decidable (0ℕ ∣ succℕ x) (succℕ x ≡ 0ℕ) (0ℕdiv-iff-eq0ℕ (succℕ x))) (inr λ p → zero-ne-succℕ x (inv p))
+divℕ-decidable 0ℕ 0ℕ = proj₂ (iff-to-iff-decidable (0ℕdiv-iff-eq0ℕ 0ℕ)) (inl refl)
+divℕ-decidable 0ℕ (succℕ x) = proj₂ (iff-to-iff-decidable (0ℕdiv-iff-eq0ℕ (succℕ x))) (inr λ p → zero-ne-succℕ x (inv p))
 divℕ-decidable (succℕ d) x =
-  proj₁ (iff-to-iff-decidable ([ x ] (succℕ d) ≡ [ 0ℕ ] (succℕ d)) ((succℕ d) ∣ x)
+  proj₁ (iff-to-iff-decidable
     ((λ p → tr ((succℕ d) ∣_) (dist-zero-rightℕ x) (proj₁ (Fin-k-is-ℕmod-k d x 0ℕ) p)) ,
      (λ q → proj₂ (Fin-k-is-ℕmod-k d x 0ℕ) (tr ((succℕ d) ∣_) (inv (dist-zero-rightℕ x)) q))))
     (Fin-decidable-eq (succℕ d) ([ x ] (succℕ d)) ([ 0ℕ ] (succℕ d)))
@@ -103,17 +103,17 @@ collatz-helper n (inr d) = 3ℕ ·ℕ n +ℕ 1ℕ
 collatz : ℕ → ℕ
 collatz n = collatz-helper n (is-evenℕ n)
 
-with-decidable-prod : (A B : Set) → is-decidable A → (A → is-decidable B) → is-decidable (A × B)
-with-decidable-prod A B (inl x) f with f x
+with-decidable-prod : {A B : Set} → is-decidable A → (A → is-decidable B) → is-decidable (A × B)
+with-decidable-prod (inl x) f with f x
 ... | inl b = inl (x , b)
 ... | inr nb = inr λ ab → nb (proj₂ ab)
-with-decidable-prod A B (inr x) f = inr λ p → x (proj₁ p)
+with-decidable-prod (inr x) f = inr λ p → x (proj₁ p)
 
-with-decidable-arrow : (A B : Set) → is-decidable A → (A → is-decidable B) → is-decidable (A → B)
-with-decidable-arrow A B (inl x) f with f x
+with-decidable-arrow : {A B : Set} → is-decidable A → (A → is-decidable B) → is-decidable (A → B)
+with-decidable-arrow (inl x) f with f x
 ... | inl b = inl λ a → b
 ... | inr nb = inr λ ab → nb (ab x)
-with-decidable-arrow A B (inr x) f = inl λ a → ex-falso (x a)
+with-decidable-arrow (inr x) f = inl λ a → ex-falso (x a)
 
 pi-type-decidable : (P : ℕ → Set) → ((x : ℕ) → is-decidable (P x)) → (m : ℕ) → is-decidable ((x : ℕ) → (m ≤ℕ x) → P x) → is-decidable ((x : ℕ) → P x)
 pi-type-decidable P dP 0ℕ (inl f) = inl (λ n → f n (0ℕ-leℕ n))
@@ -130,7 +130,7 @@ pi-arrow-decidable : (P Q : ℕ → Set) → ((x : ℕ) → is-decidable (P x)) 
   (m : ℕ) → ((x : ℕ) → P x → x <ℕ m) →
   is-decidable ((n : ℕ) → P n → Q n)
 pi-arrow-decidable P Q dP dQ m ub =
-  pi-type-decidable (λ n → P n → Q n) (λ n → with-decidable-arrow (P n) (Q n) (dP n) (λ _ → dQ n)) m
+  pi-type-decidable (λ n → P n → Q n) (λ n → with-decidable-arrow (dP n) (λ _ → dQ n)) m
     (inl (λ x h px → ex-falso (<-to-≱ x m (ub x px) h)))
 
 is-lower-bound : (P : ℕ → Set) → (n : ℕ) → Set
@@ -182,7 +182,7 @@ divℕ-to-≤ℕ d x (succℕ k , p) xne0 = ≤-transℕ {d} {succℕ k ·ℕ d}
 ≤-to-<-succℕ (succℕ m) (succℕ n) p = ≤-to-<-succℕ m n p
 
 gcd-helper-decidable : (a b : ℕ) → (n : ℕ) → is-decidable (gcd-helper-type a b n)
-gcd-helper-decidable a b n = with-decidable-arrow (¬ (a +ℕ b ≡ 0ℕ)) (¬ (n ≡ 0ℕ) × ((x : ℕ) → ((x ∣ a) × (x ∣ b)) → (x ∣ n))) (with-decidable-arrow (a +ℕ b ≡ 0ℕ) Empty (ℕ-decidable-eq (a +ℕ b) 0ℕ) λ p → inr id) λ abne0 → with-decidable-prod (¬ (n ≡ 0ℕ)) ((x : ℕ) → x ∣ a × x ∣ b → x ∣ n) ((with-decidable-arrow (n ≡ 0ℕ) Empty (ℕ-decidable-eq n 0ℕ) (λ p → inr id))) λ nneq0 → pi-arrow-decidable (λ x → x ∣ a × x ∣ b) (λ x → x ∣ n) (λ x → ×-is-decidable (divℕ-decidable x a) (divℕ-decidable x b)) (λ x → divℕ-decidable x n) (succℕ (a +ℕ b)) (λ x p → ≤-to-<-succℕ x (a +ℕ b) (divℕ-to-≤ℕ x (a +ℕ b) (div-sumℕ a b x (proj₁ p) (proj₂ p)) abne0))
+gcd-helper-decidable a b n = with-decidable-arrow (with-decidable-arrow (ℕ-decidable-eq (a +ℕ b) 0ℕ) λ p → inr id) λ abne0 → with-decidable-prod (with-decidable-arrow (ℕ-decidable-eq n 0ℕ) (λ p → inr id)) λ nneq0 → pi-arrow-decidable (λ x → x ∣ a × x ∣ b) (λ x → x ∣ n) (λ x → ×-is-decidable (divℕ-decidable x a) (divℕ-decidable x b)) (λ x → divℕ-decidable x n) (succℕ (a +ℕ b)) (λ x p → ≤-to-<-succℕ x (a +ℕ b) (divℕ-to-≤ℕ x (a +ℕ b) (div-sumℕ a b x (proj₁ p) (proj₂ p)) abne0))
 
 gcd-helper-add : (a b : ℕ) → gcd-helper-type a b (a +ℕ b)
 gcd-helper-add a b = λ sumne0 → (sumne0 , λ x p → div-sumℕ a b x (proj₁ p) (proj₂ p))
@@ -264,14 +264,14 @@ is-prime'-to-is-primeℕ n (n≢1 , f) = λ x →
   ((λ div → f x div) , λ x≡1 → (tr (λ z → ¬ (z ≡ n)) (inv x≡1) (λ p → n≢1 (inv p)) , tr (_∣ n) (inv x≡1) (one-divℕ n)))
 
 is-prime-decidableℕ : (n : ℕ) →  is-decidable (is-primeℕ n)
-is-prime-decidableℕ 0ℕ = proj₂ (iff-to-iff-decidable (is-primeℕ 0ℕ) (is-prime'ℕ 0ℕ) ((is-prime-to-is-prime'ℕ 0ℕ , is-prime'-to-is-primeℕ 0ℕ))) (with-decidable-prod (¬ (0ℕ ≡ 1ℕ)) ((x : ℕ) → is-proper-divisorℕ 0ℕ x → (x ≡ 1ℕ)) (with-decidable-arrow (0ℕ ≡ 1ℕ) (Empty) (ℕ-decidable-eq 0ℕ 1ℕ) λ x → inr id) λ nne1 → inr λ f → zero-ne-succℕ 0ℕ (inv (proj₂ (succ-injℕ 1ℕ 0ℕ) (f 2ℕ (((λ p → zero-ne-succℕ 1ℕ (inv p)) , ((0ℕ , refl))))))))
-is-prime-decidableℕ (succℕ n) = proj₂ (iff-to-iff-decidable (is-primeℕ (succℕ n)) (is-prime'ℕ (succℕ n)) ((is-prime-to-is-prime'ℕ (succℕ n) , is-prime'-to-is-primeℕ (succℕ n)))) (with-decidable-prod (¬ ((succℕ n) ≡ 1ℕ)) ((x : ℕ) → is-proper-divisorℕ (succℕ n) x → (x ≡ 1ℕ)) (with-decidable-arrow ((succℕ n) ≡ 1ℕ) (Empty) (ℕ-decidable-eq (succℕ n) 1ℕ) λ x → inr id) λ nne1 → pi-arrow-decidable (is-proper-divisorℕ (succℕ n)) (λ x → x ≡ 1ℕ) (λ x → with-decidable-prod (¬ (x ≡ (succℕ n))) (x ∣ (succℕ n)) (with-decidable-arrow (x ≡ succℕ n) Empty (ℕ-decidable-eq x (succℕ n)) λ _ → inr id) λ xnesn → divℕ-decidable x (succℕ n)) (λ x → ℕ-decidable-eq x 1ℕ) (succℕ (succℕ n)) λ x div → ≤-to-<-succℕ x (succℕ n) (divℕ-to-≤ℕ x (succℕ n) (proj₂ div) λ p → zero-ne-succℕ n (inv p)))
+is-prime-decidableℕ 0ℕ = proj₂ (iff-to-iff-decidable ((is-prime-to-is-prime'ℕ 0ℕ , is-prime'-to-is-primeℕ 0ℕ))) (with-decidable-prod (with-decidable-arrow (ℕ-decidable-eq 0ℕ 1ℕ) λ x → inr id) λ nne1 → inr λ f → zero-ne-succℕ 0ℕ (inv (proj₂ (succ-injℕ 1ℕ 0ℕ) (f 2ℕ (((λ p → zero-ne-succℕ 1ℕ (inv p)) , ((0ℕ , refl))))))))
+is-prime-decidableℕ (succℕ n) = proj₂ (iff-to-iff-decidable ((is-prime-to-is-prime'ℕ (succℕ n) , is-prime'-to-is-primeℕ (succℕ n)))) (with-decidable-prod (with-decidable-arrow (ℕ-decidable-eq (succℕ n) 1ℕ) λ x → inr id) λ nne1 → pi-arrow-decidable (is-proper-divisorℕ (succℕ n)) (λ x → x ≡ 1ℕ) (λ x → with-decidable-prod (with-decidable-arrow (ℕ-decidable-eq x (succℕ n)) λ _ → inr id) λ xnesn → divℕ-decidable x (succℕ n)) (λ x → ℕ-decidable-eq x 1ℕ) (succℕ (succℕ n)) λ x div → ≤-to-<-succℕ x (succℕ n) (divℕ-to-≤ℕ x (succℕ n) (proj₂ div) λ p → zero-ne-succℕ n (inv p)))
 
 infinitude-helperℕ : (n m : ℕ) → Set
 infinitude-helperℕ n m = (n <ℕ m) × ((x : ℕ) → (x ≤ℕ n) → ((x ∣ m) → (x ≡ 1ℕ)))
 
 infinitude-helper-decidable : (n m : ℕ) → is-decidable (infinitude-helperℕ n m)
-infinitude-helper-decidable n m = with-decidable-prod (n <ℕ m) ((x : ℕ) → (x ≤ℕ n) → ((x ∣ m) → (x ≡ 1ℕ))) (<ℕ-is-decidable n m) λ n>m → pi-arrow-decidable (λ x → x ≤ℕ n) (λ x → x ∣ m → x ≡ 1ℕ) (λ x → ≤ℕ-is-decidable x n) (λ x → with-decidable-arrow (x ∣ m) (x ≡ 1ℕ) (divℕ-decidable x m) λ xdivm → ℕ-decidable-eq x 1ℕ) (succℕ n) λ x p → ≤-to-<-succℕ x n p
+infinitude-helper-decidable n m = with-decidable-prod (<ℕ-is-decidable n m) λ n>m → pi-arrow-decidable (λ x → x ≤ℕ n) (λ x → x ∣ m → x ≡ 1ℕ) (λ x → ≤ℕ-is-decidable x n) (λ x → with-decidable-arrow (divℕ-decidable x m) λ xdivm → ℕ-decidable-eq x 1ℕ) (succℕ n) λ x p → ≤-to-<-succℕ x n p
 
 not-0ℕ-div-x : (x : ℕ) → ¬ (x ≡ 0ℕ) → ¬ (0ℕ ∣ x)
 not-0ℕ-div-x x xne0 0divx = xne0 (0ℕdiv x 0divx)
@@ -362,10 +362,10 @@ iterate f (succℕ n) x = f (iterate f n x)
 
 --8.2
 
-is-decidable-idempotent : (P : Set) → is-decidable (is-decidable P) → is-decidable P
-is-decidable-idempotent P (inl (inl x)) = inl x
-is-decidable-idempotent P (inl (inr x)) = inr x
-is-decidable-idempotent P (inr ndp) = inr (λ p → ndp (inl p))
+is-decidable-idempotent : {P : Set} → is-decidable (is-decidable P) → is-decidable P
+is-decidable-idempotent (inl (inl x)) = inl x
+is-decidable-idempotent (inl (inr x)) = inr x
+is-decidable-idempotent (inr ndp) = inr (λ p → ndp (inl p))
 
 --8.3
 ex-8-3 : (k : ℕ) → (P : Fin k → Set)→ ((x : Fin k) → is-decidable (P x)) → ¬ ((x : Fin k) → P x) → Σ (Fin k) (λ x → ¬ (P x))
@@ -379,7 +379,7 @@ ex-8-3 (succℕ k) P f nxPx with f (inr *)
 --8.4
 primeℕ : ℕ → ℕ
 primeℕ 0ℕ = 2ℕ
-primeℕ (succℕ n) = proj₁ (ℕ-well-ordered (λ x → (is-primeℕ x) × (primeℕ n <ℕ x)) (λ x → with-decidable-prod (is-primeℕ x) (primeℕ n <ℕ x) (is-prime-decidableℕ x) λ xprime → <ℕ-is-decidable (primeℕ n) x) (n-≤-prime (primeℕ n)))
+primeℕ (succℕ n) = proj₁ (ℕ-well-ordered (λ x → (is-primeℕ x) × (primeℕ n <ℕ x)) (λ x → with-decidable-prod (is-prime-decidableℕ x) λ xprime → <ℕ-is-decidable (primeℕ n) x) (n-≤-prime (primeℕ n)))
 
 prime-countingℕ : ℕ → ℕ
 prime-countingℕ 0ℕ = 0ℕ
@@ -423,8 +423,8 @@ ex-8-6i A B = (to , from)
   from dAB = ((λ a b b' → ⊎functor (ap proj₂) (λ ne eq → ne (ap (a ,_) eq)) (dAB (a , b) (a , b'))) ,
     (λ b a a' → ⊎functor (ap proj₁) (λ ne eq → ne (ap (_, b) eq)) (dAB (a , b) (a' , b)))) 
 
-ex-8-6ii : (A B : Set) → (has-decidable-eq A) → (has-decidable-eq B) → has-decidable-eq (A × B)
-ex-8-6ii A B dA dB = proj₁ (ex-8-6i A B) (((λ _ → dB) , λ _ → dA)) 
+ex-8-6ii : {A B : Set} → (has-decidable-eq A) → (has-decidable-eq B) → has-decidable-eq (A × B)
+ex-8-6ii {A} {B} dA dB = proj₁ (ex-8-6i A B) (((λ _ → dB) , λ _ → dA))
 
 --8.7
 Eq⊎ : {A B : Set} → A ⊎ B → A ⊎ B → Set
@@ -786,7 +786,7 @@ Bezout-identityℕ x y = (proj₁ bez , (proj₁ (proj₂ bez) , concat (proj₂
 has-prime-factorℕ : (n : ℕ) → 2ℕ ≤ℕ n → Σ ℕ (λ p → (is-primeℕ p) × (p ∣ n) × ((d : ℕ) → 2ℕ ≤ℕ d → d ∣ n → p ≤ℕ d))
 has-prime-factorℕ n 2len = m , (m-is-prime , (mdivn , (λ d 2≤d d∣n → mlb d (2≤d , d∣n))))
   where
-  wo = ℕ-well-ordered (λ m → (2ℕ ≤ℕ m) × (m ∣ n)) (λ x → with-decidable-prod (2ℕ ≤ℕ x) (x ∣ n) (≤ℕ-is-decidable 2ℕ x) λ 2lex → divℕ-decidable x n) (n , (2len , (1ℕ , one-mulℕ n)))
+  wo = ℕ-well-ordered (λ m → (2ℕ ≤ℕ m) × (m ∣ n)) (λ x → with-decidable-prod (≤ℕ-is-decidable 2ℕ x) λ 2lex → divℕ-decidable x n) (n , (2len , (1ℕ , one-mulℕ n)))
   m = proj₁ wo
   2≤m = proj₁ (proj₁ (proj₂ wo))
   mdivn = proj₂ (proj₁ (proj₂ wo))
@@ -1374,7 +1374,7 @@ mul-inv-modℤ p pprime x xne0 = {!!}
 -- ∈ Fin n × Fin n; once a pair repeats, F is purely periodic from index 0
 -- since the recurrence runs backwards too, so some k > 0 has F_k ≡ 0 mod n.
 cofib : ℕ → ℕ
-cofib n = proj₁ (ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (n ∣ fibℕ x)) (λ x → with-decidable-prod (0ℕ <ℕ x) (n ∣ fibℕ x) (<ℕ-is-decidable 0ℕ x) λ 0<x → divℕ-decidable n (fibℕ x)) {!(!})
+cofib n = proj₁ (ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (n ∣ fibℕ x)) (λ x → with-decidable-prod (<ℕ-is-decidable 0ℕ x) λ 0<x → divℕ-decidable n (fibℕ x)) {!(!})
 
 -- Proof idea: the key arithmetic fact is the addition formula
 --   F_{a+b} = F_a · F_{b+1} + F_{a-1} · F_b
@@ -1388,7 +1388,7 @@ cofib n = proj₁ (ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (n ∣ fibℕ x))
 cofib-prop : (n m : ℕ) → ((cofib n ∣ m) ↔ (n ∣ fibℕ m))
 cofib-prop n m = (to , from)
   where
-  cofib-wo = (ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (n ∣ fibℕ x)) (λ x → with-decidable-prod (0ℕ <ℕ x) (n ∣ fibℕ x) (<ℕ-is-decidable 0ℕ x) λ 0<x → divℕ-decidable n (fibℕ x)) {!(!})
+  cofib-wo = (ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (n ∣ fibℕ x)) (λ x → with-decidable-prod (<ℕ-is-decidable 0ℕ x) λ 0<x → divℕ-decidable n (fibℕ x)) {!(!})
   to : (cofib n ∣ m) → (n ∣ fibℕ m)
   to = λ cofibndivm → {!!}
   from : (n ∣ fibℕ m) → (cofib n ∣ m)

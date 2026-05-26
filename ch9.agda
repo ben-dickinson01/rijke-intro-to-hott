@@ -162,14 +162,14 @@ inv-equiv-is-equiv f ((g , fg) , (h , hf)) (k , (fk , kf)) = (((f , kf)) , ((f ,
 Σ-A-𝟙 : (A : Set) → Σ A (λ a → 𝟙) ≃ A
 Σ-A-𝟙 A = (λ { (x , *) → x}) , (((λ {x → x , *}) , λ x → refl) , ((λ z → z , *) , (λ { (x , *) → refl})))
 
-Σ-assoc : (A : Set) → (B : A → Set) → (C : Σ A B → Set) → Σ (Σ A B) C ≃ Σ A (λ a → Σ (B a) (λ b → C (a , b)))
-Σ-assoc A B C = (λ { ((x , x₂) , x₁) → x , (x₂ , x₁)}) , (((λ { (x , (x₁ , x₂)) → (x , x₁) , x₂}) , λ { (x , (x₁ , x₂)) → refl}) , ((λ { (x , (x₁ , x₂)) → (x , x₁) , x₂}) , λ { ((x , x₂) , x₁) → refl}))
+Σ-assoc : {A : Set} → (B : A → Set) → (C : Σ A B → Set) → Σ (Σ A B) C ≃ Σ A (λ a → Σ (B a) (λ b → C (a , b)))
+Σ-assoc B C = (λ { ((x , x₂) , x₁) → x , (x₂ , x₁)}) , (((λ { (x , (x₁ , x₂)) → (x , x₁) , x₂}) , λ { (x , (x₁ , x₂)) → refl}) , ((λ { (x , (x₁ , x₂)) → (x , x₁) , x₂}) , λ { ((x , x₂) , x₁) → refl}))
 
-Σ-⊎-distrib : (A B : Set) → (C : A ⊎ B → Set)  → Σ (A ⊎ B) C ≃ Σ A (λ a → C (inl a)) ⊎ Σ B (λ b → C (inr b))
-Σ-⊎-distrib A B C = (λ { (inl x , x₁) → inl (x , x₁) ; (inr x , x₁) → inr (x , x₁)}) , (((λ { (inl (x , x₁)) → inl x , x₁ ; (inr (x , x₁)) → inr x , x₁}) , λ { (inl (x , x₁)) → refl ; (inr (x , x₁)) → refl}) , ((λ { (inl (x , x₁)) → inl x , x₁ ; (inr (x , x₁)) → inr x , x₁}) , λ { (inl x , x₁) → refl ; (inr x , x₁) → refl}))
+Σ-⊎-distrib : {A B : Set} → (C : A ⊎ B → Set)  → Σ (A ⊎ B) C ≃ Σ A (λ a → C (inl a)) ⊎ Σ B (λ b → C (inr b))
+Σ-⊎-distrib C = (λ { (inl x , x₁) → inl (x , x₁) ; (inr x , x₁) → inr (x , x₁)}) , (((λ { (inl (x , x₁)) → inl x , x₁ ; (inr (x , x₁)) → inr x , x₁}) , λ { (inl (x , x₁)) → refl ; (inr (x , x₁)) → refl}) , ((λ { (inl (x , x₁)) → inl x , x₁ ; (inr (x , x₁)) → inr x , x₁}) , λ { (inl x , x₁) → refl ; (inr x , x₁) → refl}))
 
-Σ-distrib-⊎ : (A : Set) → (B C : A → Set) → Σ A (λ a → B a ⊎ C a) ≃ Σ A B ⊎ Σ A C
-Σ-distrib-⊎ A B C = (λ { (x , inl x₁) → inl (x , x₁) ; (x , inr x₁) → inr (x , x₁)}) , (((λ { (inl (x , x₁)) → x , inl x₁ ; (inr (x , x₁)) → x , inr x₁}) , λ { (inl (x , x₁)) → refl ; (inr (x , x₁)) → refl}) , ((λ { (inl (x , x₁)) → x , inl x₁ ; (inr (x , x₁)) → x , inr x₁}) , λ { (x , inl x₁) → refl ; (x , inr x₁) → refl}))
+Σ-distrib-⊎ : {A : Set} → (B C : A → Set) → Σ A (λ a → B a ⊎ C a) ≃ Σ A B ⊎ Σ A C
+Σ-distrib-⊎ B C = (λ { (x , inl x₁) → inl (x , x₁) ; (x , inr x₁) → inr (x , x₁)}) , (((λ { (inl (x , x₁)) → x , inl x₁ ; (inr (x , x₁)) → x , inr x₁}) , λ { (inl (x , x₁)) → refl ; (inr (x , x₁)) → refl}) , ((λ { (inl (x , x₁)) → x , inl x₁ ; (inr (x , x₁)) → x , inr x₁}) , λ { (x , inl x₁) → refl ; (x , inr x₁) → refl}))
 
 Eq-Σ : {A : Set} → {B : A → Set} → (x y : Σ A B) → Set
 Eq-Σ {A} {B} x y = Σ (proj₁ x ≡ proj₁ y) (λ α → tr B α (proj₂ x) ≡ proj₂ y)
@@ -241,17 +241,17 @@ htpy-of-equiv-is-equiv f g H ((h , fh) , (k , kf)) = (h , concat-htpy (right-whi
 htpy-to-inv-htpy : {A B : Set} → (f g : A → B) → (H : f ∼ g) → (finv : has-inverse f) → (ginv : has-inverse g) → proj₁ finv ∼ proj₁ ginv
 htpy-to-inv-htpy f g H (h , (fh , hf)) (k , (fk , kf)) = λ x → concat (ap h (inv (fk x))) (concat (ap h (inv (H (k x)))) (hf (k x)))
 
-comm-tri-to-sec-comm-tri : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (sech : sec h) → triangle-commutes g (proj₁ sech) f
-comm-tri-to-sec-comm-tri f g h comm (s , hs) = λ x → inv (concat (comm (s x)) (ap g (hs x)))
+comm-tri-sec-h-to-comm-tri : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (sech : sec h) → triangle-commutes g (proj₁ sech) f
+comm-tri-sec-h-to-comm-tri f g h comm (s , hs) = λ x → inv (concat (comm (s x)) (ap g (hs x)))
 
-comm-tri-sec-to-sec-iff-sec : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (sech : sec h) → (sec f ↔ sec g)
-comm-tri-sec-to-sec-iff-sec f g h comm (s , hs) = (λ {(k , fk) → (h ∘ k) , concat-htpy (right-whisker k (g ∘ h) f (inv-htpy comm)) fk}) , λ {(k , gk) → (s ∘ k) , concat-htpy (right-whisker k (f ∘ s) g (inv-htpy (comm-tri-to-sec-comm-tri f g h comm (s , hs)))) gk}
+comm-tri-sec-h-to-sec-f-iff-sec-g : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (sech : sec h) → (sec f ↔ sec g)
+comm-tri-sec-h-to-sec-f-iff-sec-g f g h comm (s , hs) = (λ {(k , fk) → (h ∘ k) , concat-htpy (right-whisker k (g ∘ h) f (inv-htpy comm)) fk}) , λ {(k , gk) → (s ∘ k) , concat-htpy (right-whisker k (f ∘ s) g (inv-htpy (comm-tri-sec-h-to-comm-tri f g h comm (s , hs)))) gk}
 
-comm-tri-to-retr-comm-tri : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (retg : retr g) → triangle-commutes h f (proj₁ retg)  
-comm-tri-to-retr-comm-tri f g h comm (r , rg) = λ x → inv (concat (ap r (comm x)) (rg (h x)))
+comm-tri-retr-g-to-comm-tri : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (retg : retr g) → triangle-commutes h f (proj₁ retg)
+comm-tri-retr-g-to-comm-tri f g h comm (r , rg) = λ x → inv (concat (ap r (comm x)) (rg (h x)))
 
-comm-tri-retr-to-retr-iff-retr : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (retg : retr g) → (retr f ↔ retr h)
-comm-tri-retr-to-retr-iff-retr f g h comm (r , rg) = (λ {(k , kf) → (k ∘ g) , concat-htpy (λ x → ap k (inv (comm x))) kf}) , λ {(k , kh) → (k ∘ r) , concat-htpy (λ x → ap k (inv (comm-tri-to-retr-comm-tri f g h comm (r , rg) x))) kh}
+comm-tri-retr-g-to-retr-f-iff-retr-h : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (retg : retr g) → (retr f ↔ retr h)
+comm-tri-retr-g-to-retr-f-iff-retr-h f g h comm (r , rg) = (λ {(k , kf) → (k ∘ g) , concat-htpy (λ x → ap k (inv (comm x))) kf}) , λ {(k , kh) → (k ∘ r) , concat-htpy (λ x → ap k (inv (comm-tri-retr-g-to-comm-tri f g h comm (r , rg) x))) kh}
 
 
 3-for-2-f-g-to-h : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → is-equiv f → is-equiv g → is-equiv h
@@ -270,11 +270,11 @@ comm-tri-retr-to-retr-iff-retr f g h comm (r , rg) = (λ {(k , kf) → (k ∘ g)
   ((s' ∘ s) , λ x → concat (comm (s' (s x))) (concat (ap g (hs' (s x))) (gs x))) ,
   ((r' ∘ r) , λ a → concat (ap r' (ap r (comm a))) (concat (ap r' (rg (h a))) (r'h a)))
 
-Σ-swap : (A B : Set) → (C : A → B → Set) → Σ A (λ a → Σ B (λ b → C a b)) ≃ Σ B (λ b → Σ A (λ a → C a b))
-Σ-swap A B C = (λ { (a , (b , c)) → b , (a , c)}) , (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl}) , (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl})))
+Σ-swap : {A B : Set} → (C : A → B → Set) → Σ A (λ a → Σ B (λ b → C a b)) ≃ Σ B (λ b → Σ A (λ a → C a b))
+Σ-swap C = (λ { (a , (b , c)) → b , (a , c)}) , (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl}) , (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl})))
 
-Σ-Σ-swap : (A : Set) → (B C : A → Set) → Σ (Σ A B) (λ b → C (proj₁ b)) ≃ Σ (Σ A C) (λ c → B (proj₁ c))
-Σ-Σ-swap A B C = (λ { ((a , b) , c) → (a , c) , b}) , (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl}) , (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl})))
+Σ-Σ-swap : {A : Set} → (B C : A → Set) → Σ (Σ A B) (λ b → C (proj₁ b)) ≃ Σ (Σ A C) (λ c → B (proj₁ c))
+Σ-Σ-swap B C = (λ { ((a , b) , c) → (a , c) , b}) , (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl}) , (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl})))
 
 infix 1 _⊎'_
 _⊎'_ : {A B A' B' : Set} → (f : A → A') → (g : B → B') → A ⊎ B → A' ⊎ B'
