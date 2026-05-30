@@ -13,7 +13,6 @@ is-equiv-fam : {A : Set} → {B C : A → Set} → (f : (x : A) → B x → C x)
 is-equiv-fam {A} f = (x : A) → is-equiv (f x)
 
 tot : {A : Set} → {B C : A → Set} → (f : (x : A) → (B x → C x)) → Σ A B → Σ A C
-
 tot f x = proj₁ x , f (proj₁ x) (proj₂ x)
 
 fib-tot-equiv-fib : {A : Set} → {B C : A → Set} → (f : (x : A) → B x → C x) → (t : Σ A C) → fib (tot f) t ≃ fib (f (proj₁ t)) (proj₂ t)
@@ -429,7 +428,7 @@ inl-emb A B x y = ((λ { refl → refl}) , λ {refl → refl}) , ((λ { refl →
 inr-emb : (A B : Set) → is-emb (inr {A} {B})
 inr-emb A B x y = ((λ { refl → refl}) , λ {refl → refl}) , ((λ { refl → refl}) , λ {refl → refl})
 
---c
+-- c
 inl-equiv-to-B-empty : (A B : Set) → is-equiv (inl {A} {B}) → is-empty B
 inl-equiv-to-B-empty A B ((f , inf) , (g , gin)) x = ≡-to-Eq-copr (inl (f (inr x))) (inr x) (inf (inr x)) 
 
@@ -443,7 +442,7 @@ A-empty-to-inr-equiv : (A B : Set) → is-empty A → is-equiv (inr {A} {B})
 A-empty-to-inr-equiv A B Aempty = (⊎-elim-right Aempty , λ { (inr x) → refl ; (inl x) → ex-falso (Aempty x)}) , ((⊎-elim-right Aempty , λ { x → refl }))
 
 -- Ex 11.2
---a
+-- a
 adj-equiv : {A B : Set} → (e : A ≃ B) → (x : A) → (y : B) → ((proj₁ e) x ≡ y) ≃ (x ≡ proj₁ (proj₁ (proj₂ e)) y)
 adj-equiv {A} {B} (e' , ((f , ef) , (g , ge))) x y = forward , forward-equiv
   where
@@ -468,7 +467,7 @@ adj-equiv {A} {B} (e' , ((f , ef) , (g , ge))) x y = forward , forward-equiv
         (equiv-to-emb f f-equiv (e' x) y)
         (is-equiv-concat (inv (fe x)))
 
---b
+-- b
 adj-G : {A B : Set} → (e : A ≃ B) → (y : B) → (proj₁ e) (proj₁ (proj₁ (proj₂ e)) y) ≡ y
 adj-G (e' , ((f , ef) , (g , ge))) =
   proj₁ (proj₂ (inv-to-coh-inv e' (equiv-to-inverse e' ((f , ef) , (g , ge)))))
@@ -533,8 +532,8 @@ comm-tri-equiv-h-to-emb-f-iff-emb-g f g h H hequiv = (to , from)
 -- 11.5
 -- composition of equivalences is an equivalence by equiv-comp, so we only prove the reverse direction
 
-emb-comp-equiv-to-fac-equiv : {A B C : Set} → (f : A → B) → (g : B → C) → is-emb f → is-emb g → is-equiv (g ∘ f) → is-equiv f × is-equiv g
-emb-comp-equiv-to-fac-equiv {A} {B} {C} f g femb gemb gfequiv = fequiv , gequiv
+emb-comp-equiv-to-f-equiv : {A B C : Set} → (f : A → B) → (g : B → C) → is-emb f → is-emb g → is-equiv (g ∘ f) → is-equiv f × is-equiv g
+emb-comp-equiv-to-f-equiv {A} {B} {C} f g femb gemb gfequiv = fequiv , gequiv
   where
   fequiv : is-equiv f
   fequiv = contr-map-to-equiv f (λ b →
@@ -548,3 +547,153 @@ emb-comp-equiv-to-fac-equiv {A} {B} {C} f g femb gemb gfequiv = fequiv , gequiv
       (base-change f (λ b → g b ≡ c))
       (equiv-to-contr-map (g ∘ f) gfequiv c)
       (f-equiv-to-base-change-equiv f (λ b → g b ≡ c) fequiv))
+
+-- 11.6
+-- a
+⊎-elim-emb-to-emb-f-and-emb-g-and-ne : {A B C : Set} → (f : A → C) → (g : B → C) → is-emb (ind⊎ f g) → is-emb f × is-emb g × ((a : A) → (b : B) → ¬ (f a ≡ g b))
+⊎-elim-emb-to-emb-f-and-emb-g-and-ne {A} {B} {C} f g fgemb = fequiv , (gequiv , ne)
+  where
+  fequiv = proj₂ (comm-tri-emb-g-to-emb-f-iff-emb-h f (ind⊎ {P = λ _ → C} f g) (inl {A} {B}) (λ x → refl) fgemb) (inl-emb A B)
+  gequiv = proj₂ (comm-tri-emb-g-to-emb-f-iff-emb-h g (ind⊎ {P = λ _ → C} f g) (inr {A} {B}) (λ x → refl) fgemb) (inr-emb A B)
+  ne : (a : A) → (b : B) → ¬ (f a ≡ g b)
+  ne a b fagb = proj₁ (inl-≡-inr-equiv a b) (proj₁ (proj₁ (fgemb (inl a) (inr b))) fagb)
+
+empty-equiv : (f : 𝟘 → 𝟘) → is-equiv f
+empty-equiv f = ((λ ()) , (λ ())) , ((λ ()) , λ ())
+
+-- b
+emb-f-and-emb-g-and-ne-to-⊎-elim-emb : {A B C : Set} → (f : A → C) → (g : B → C)  → is-emb f → is-emb g → ((a : A) → (b : B) → ¬ (f a ≡ g b)) → is-emb (ind⊎ f g)
+emb-f-and-emb-g-and-ne-to-⊎-elim-emb {A} {B} {C} f g femb gemb p (inl x) (inl y) = 
+  3-for-2-f-h-to-g (ap f) (ap (ind⊎ f g)) (ap inl) (λ q → inv (ap-comp inl (ind⊎ f g) q)) (femb x y) (inl-emb A B x y)
+emb-f-and-emb-g-and-ne-to-⊎-elim-emb {A} {B} {C} f g femb gemb p (inl x) (inr y) = 
+  ((λ q → ex-falso (p x y q)) , λ {q → ex-falso (p x y q)}) , ((λ q → ex-falso ((p x y q))) , λ ())
+emb-f-and-emb-g-and-ne-to-⊎-elim-emb {A} {B} {C} f g femb gemb p (inr x) (inl y) = 
+  ((λ q → ex-falso (p y x (inv q))) , (λ q → ex-falso (p y x (inv q)))) , (((λ q → ex-falso (p y x (inv q)))) , (λ ()))
+emb-f-and-emb-g-and-ne-to-⊎-elim-emb {A} {B} {C} f g femb gemb p (inr x) (inr y) = 
+  3-for-2-f-h-to-g (ap g) (ap (ind⊎ f g)) (ap inr) (λ q → inv (ap-comp inr (ind⊎ f g) q)) (gemb x y) (inr-emb A B x y)
+
+-- 11.7
+-- a
+coprod-map-equiv-to-maps-equiv : {A B A' B' : Set} → (f : A → A') → (g : B → B') → is-equiv (f ⊎' g) → (is-equiv f × is-equiv g)
+coprod-map-equiv-to-maps-equiv {A} {B} {A'} {B'} f g fgequiv = fequiv , gequiv 
+  where
+  fequiv : is-equiv f
+  fequiv = contr-map-to-equiv f λ a' → equiv-contr-to-contr (λ {(a , p) → (inl a , ap inl p)}) (equiv-to-contr-map (f ⊎' g) fgequiv (inl a')) 
+    (((λ {(inl x , p) → x , ≡-to-Eq-copr (inl (f x)) (inl a') p }) , λ {(inl x , refl) → refl}) , ((λ {(inl x , p) → (x , ≡-to-Eq-copr (inl (f x)) (inl a') p)}) , λ {(a , refl) → refl}))
+
+  gequiv : is-equiv g
+  gequiv = contr-map-to-equiv g λ a' → equiv-contr-to-contr (λ {(a , p) → (inr a , ap inr p)}) (equiv-to-contr-map (f ⊎' g) fgequiv (inr a'))
+    ((((λ {(inr x , p) → x , ≡-to-Eq-copr (inr (g x)) (inr a') p }) , λ {(inr x , refl) → refl}) , ((λ {(inr x , p) → (x , ≡-to-Eq-copr (inr (g x)) (inr a') p)}) , λ {(a , refl) → refl})))
+
+-- 11.7b
+⊎'-emb-iff-emb-f-and-emb-g : {A B A' B' : Set} → (f : A → A') → (g : B → B')
+  → is-emb (f ⊎' g) ↔ (is-emb f × is-emb g)
+⊎'-emb-iff-emb-f-and-emb-g {A} {B} {A'} {B'} f g = (to , from)
+  where
+  to : is-emb (f ⊎' g) → is-emb f × is-emb g
+  to fgemb =
+    emb-cancel f (inl {A'} {B'}) (inl-emb A' B')
+      (htpy-of-emb-is-emb (inl {A'} {B'} ∘ f) ((f ⊎' g) ∘ inl {A} {B}) (λ _ → refl)
+        (emb-comp (inl {A} {B}) (f ⊎' g) (inl-emb A B) fgemb)) ,
+    emb-cancel g (inr {A'} {B'}) (inr-emb A' B')
+      (htpy-of-emb-is-emb (inr {A'} {B'} ∘ g) ((f ⊎' g) ∘ inr {A} {B}) (λ _ → refl)
+        (emb-comp (inr {A} {B}) (f ⊎' g) (inr-emb A B) fgemb))
+  from : is-emb f × is-emb g → is-emb (f ⊎' g)
+  from (femb , gemb) (inl x) (inl y) =
+    3-for-2-f-h-to-g (ap (inl {A'} {B'}) ∘ ap f) (ap (f ⊎' g)) (ap (inl {A} {B}))
+      (λ p → concat (ap-comp f (inl {A'} {B'}) p) (inv (ap-comp (inl {A} {B}) (f ⊎' g) p)))
+      (equiv-comp (ap f) (ap (inl {A'} {B'})) (femb x y) (inl-emb A' B' (f x) (f y)))
+      (inl-emb A B x y)
+  from (femb , gemb) (inl x) (inr y) =
+    ((λ q → ex-falso (≡-to-Eq-copr (inl (f x)) (inr (g y)) q)) ,
+     λ q → ex-falso (≡-to-Eq-copr (inl (f x)) (inr (g y)) q)) ,
+    ((λ q → ex-falso (≡-to-Eq-copr (inl (f x)) (inr (g y)) q)) , λ ())
+  from (femb , gemb) (inr x) (inl y) =
+    ((λ q → ex-falso (≡-to-Eq-copr (inr (g x)) (inl (f y)) q)) ,
+     λ q → ex-falso (≡-to-Eq-copr (inr (g x)) (inl (f y)) q)) ,
+    ((λ q → ex-falso (≡-to-Eq-copr (inr (g x)) (inl (f y)) q)) , λ ())
+  from (femb , gemb) (inr x) (inr y) =
+    3-for-2-f-h-to-g (ap (inr {A'} {B'}) ∘ ap g) (ap (f ⊎' g)) (ap (inr {A} {B}))
+      (λ p → concat (ap-comp g (inr {A'} {B'}) p) (inv (ap-comp (inr {A} {B}) (f ⊎' g) p)))
+      (equiv-comp (ap g) (ap (inr {A'} {B'})) (gemb x y) (inr-emb A' B' (g x) (g y)))
+      (inr-emb A B x y)
+
+-- 11.8
+-- a
+htpy-to-tot-htpy : {A : Set} → {B C : A → Set} → (f g : (x : A) → B x → C x) → ((x : A) → f x ∼ g x) → tot f ∼ tot g
+htpy-to-tot-htpy f g H (a , b) = eq-pair (tot f (a , b)) (tot g (a , b)) (refl , H a b)
+
+-- b
+tot-comp-htpy : {A : Set} → {B C D : A → Set} → (f : (x : A) → B x → C x) → (g : (x : A) → C x → D x) → tot (λ x → (g x) ∘ (f x)) ∼ tot g ∘ tot f
+tot-comp-htpy f g (a , b) = eq-pair (tot (λ x → g x ∘ f x) (a , b)) ((tot g ∘ tot f) (a , b)) (refl , refl)
+
+-- c
+tot-id : {A : Set} → {B : A → Set} → tot (λ x → id {B x}) ∼ id 
+tot-id (a , b) = eq-pair (tot (λ x → id) (a , b)) (a , b) (refl , refl)
+
+-- d
+fam-retr-≡-to-fam-equiv-≡ : {A : Set} → {a : A} → {B : A → Set} → (f : (x : A) → B x → (a ≡ x)) → ((x : A) → retr (f x)) → (x : A) → B x ≃ (a ≡ x)
+fam-retr-≡-to-fam-equiv-≡ {A} {a} {B} f r x = f x , 3-for-2-f-g-to-h id (proj₁ (r x)) (f x) (λ a → inv (proj₂ (r x) a)) (is-equiv-id (B x)) 
+  (total-contr-to-fam-equiv (proj₁ (r a) refl) (λ a p → proj₁ (r a) p) refl 
+    (retr-to-contr-to-contr (tot f) (tot (λ y → proj₁ (r y)) , λ {(a' , b') → eq-pair _ _ (refl , proj₂ (r a') b')}) (Σ-≡-contractible a)) 
+  x)
+
+-- 11.8e
+fam-sec-≡-to-fam-equiv-≡ : {A : Set} → {a : A} → (B : A → Set)
+  → (f : (x : A) → (a ≡ x) → B x)
+  → ((x : A) → sec (f x))
+  → is-equiv-fam f
+fam-sec-≡-to-fam-equiv-≡ {A} {a} B f s = 
+  total-contr-to-fam-equiv (f a refl) f refl 
+    (retr-to-contr-to-contr (tot (λ x → proj₁ (s x))) 
+      ((tot f) , λ {(x , b) → eq-pair ((tot f ∘ tot (λ x₁ → proj₁ (s x₁))) (x , b)) ((x , b)) ((refl , (proj₂ (s x) b)))}) 
+      (Σ-≡-contractible a))
+
+-- 11.9
+ap-sec-to-emb : {A B : Set} → (f : A → B) → ((x y : A) → sec (ap f {x} {y}))  → is-emb f
+ap-sec-to-emb {A} {B} f s x y = fam-sec-≡-to-fam-equiv-≡ (λ y → f x ≡ f y) (λ y p → ap f p) (s x) y
+
+-- 11.10
+is-path-split : {A B : Set} → (f : A → B) → Set
+is-path-split {A} {B} f = sec f × ((x y : A) → sec (ap f {x} {y}))
+
+path-split-to-equiv : {A B : Set} → (f : A → B) → is-path-split f → is-equiv f
+path-split-to-equiv f ((s , fs) , aps) = (s , fs) , (s , λ x → proj₁ (aps (s (f x)) x) (fs (f x)))
+
+equiv-to-path-split : {A B : Set} → (f : A → B) → is-equiv f → is-path-split f
+equiv-to-path-split f ((s , fs) , (r , rf)) = (s , fs) , λ x y → proj₁ (equiv-to-emb f ((s , fs) , (r , rf)) x y)
+
+-- 11.11a
+fib-triangle : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → (x : X) → fib f x → fib g x
+fib-triangle f g h H x (a , p) = h a , concat (inv (H a)) p
+
+fib-triangle-htpy : {B X : Set} → (g : B → X) → (b : B) → (x : X) → (p : x ≡ g b)
+  → _≡_ {A = Σ X (fib g)} (g b , (b , refl)) (x , (b , concat (inv p) refl))
+fib-triangle-htpy g b _ refl = refl
+
+-- 11.11b
+comm-tri-equiv-h-iff-fam-equiv-fib-tri : {A B X : Set} → (f : A → X) → (g : B → X) → (h : A → B)
+  → (H : triangle-commutes f h g)
+  → is-equiv h ↔ is-equiv-fam (fib-triangle f g h H)
+comm-tri-equiv-h-iff-fam-equiv-fib-tri {A} {B} {X} f g h H = (λ hequiv x → 
+  htpy-of-equiv-is-equiv (tot-fam h λ a → concat (inv (H a))) (fib-triangle f g h H x) (λ {(a , refl) → refl}) 
+  (g-equiv-to-tot-fam-equiv h (λ a p → concat (inv (H a)) p) hequiv λ a' → is-equiv-concat (inv (H a')))) , 
+  
+  λ eqfam →
+    htpy-of-equiv-is-equiv
+      (sec-g ∘ tot (fib-triangle f g h H) ∘ fwd-f)
+      h
+      (λ a → ap sec-g (inv (htpy a)))
+      (equiv-comp fwd-f (sec-g ∘ tot (fib-triangle f g h H)) fwd-f-equiv
+        (equiv-comp (tot (fib-triangle f g h H)) sec-g
+          (fam-equiv-to-tot-equiv (fib-triangle f g h H) eqfam)
+          sec-g-equiv))
+    where
+      fwd-f       = proj₁ (proj₁ (fib-repl f))
+      fwd-f-equiv = proj₂ (proj₁ (fib-repl f))
+      sec-g       = proj₁ (inv-≃ (proj₁ (fib-repl g)))
+      sec-g-equiv = proj₂ (inv-≃ (proj₁ (fib-repl g)))
+      htpy : (a : A) → (g (h a) , (h a , refl)) ≡ (f a , (h a , concat (inv (H a)) refl))
+      htpy a = fib-triangle-htpy g (h a) (f a) ((H a))
+

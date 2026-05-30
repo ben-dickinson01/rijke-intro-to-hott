@@ -78,26 +78,122 @@ is-equiv-addℤ k = ((((λ z → z -ℤ k) , λ y → concat (add-assocℤ y (-�
 is-equiv-negℤ : is-equiv (-ℤ_)
 is-equiv-negℤ = (((-ℤ_ , λ x → neg-negℤ x)) , (((-ℤ_ , λ x → neg-negℤ x))))
 
--- TODO: prove the Fin k analogues of the equivalences above (cyclic
--- successor / predecessor / addition by a constant on Fin k).
---
--- Proof idea:
---   * Define cyclic successor succ-Fin : (k : ℕ) → Fin k → Fin k by
---     induction on k. With Fin (succ k) = Fin k ⊎ 𝟙, send (inl x) ↦ inl (succ-Fin k x)
---     for x not the maximum, and the maximum (inr *) ↦ inl (inl (...0)).
---     Cleanest is probably to recurse: succ-Fin (succ (succ k)) (inl x) =
---     inl (succ-Fin (succ k) x), succ-Fin (succ (succ k)) (inr *) = inl (inl (... zero ...));
---     base cases succ-Fin 0 = id (vacuous), succ-Fin 1 = id.
---   * Define pred-Fin similarly (cyclic predecessor: zero ↦ max).
---   * Show succ-Fin and pred-Fin are mutual inverses by induction on k and on
---     the Fin k argument. Then (pred-Fin , succ-pred) and (pred-Fin , pred-succ)
---     give the section/retraction parts of is-equiv.
---   * For "addition by a constant" on Fin k (analogue of is-equiv-addℤ), iterate
---     succ-Fin: λ x → iterate (succ-Fin k) n x. Its inverse is iterate (pred-Fin k) n,
---     and the homotopy reduces to succ-Fin/pred-Fin being inverses, by induction on n.
---
--- An alternative high-level route: transport across the equivalence Fin k ≃ ℤ-mod k
--- and reuse is-equiv-succℤ-style proofs there, if ℤ-mod arithmetic is ergonomic enough.
+zero-Fin : (k : ℕ) → Fin (succℕ k)
+zero-Fin 0ℕ       = inr *
+zero-Fin (succℕ k) = inl (zero-Fin k)
+
+succ-Fin-nc : (k : ℕ) → Fin (succℕ k) → Fin (succℕ k) ⊎ 𝟙
+succ-Fin-nc k       (inr *) = inr *
+succ-Fin-nc 0ℕ      (inl ())
+succ-Fin-nc (succℕ k) (inl x) with succ-Fin-nc k x
+... | inl y = inl (inl y)
+... | inr * = inl (inr *)
+
+succ-Fin : (k : ℕ) → Fin (succℕ k) → Fin (succℕ k)
+succ-Fin k x with succ-Fin-nc k x
+... | inl y = y
+... | inr * = zero-Fin k
+
+succ-Fin-nc-inr : (k : ℕ) → (x : Fin (succℕ k)) → succ-Fin-nc k x ≡ inr * → x ≡ inr *
+succ-Fin-nc-inr k (inr *) _ = refl
+succ-Fin-nc-inr 0ℕ (inl ()) _
+succ-Fin-nc-inr (succℕ k) (inl x) p with succ-Fin-nc k x
+succ-Fin-nc-inr (succℕ k) (inl x) () | inl _
+succ-Fin-nc-inr (succℕ k) (inl x) () | inr *
+
+pred-Fin-nc : (k : ℕ) → Fin (succℕ k) → Fin (succℕ k) ⊎ 𝟙
+pred-Fin-nc 0ℕ        (inr *)  = inr *
+pred-Fin-nc (succℕ k) (inr *)  = inl (inl (inr *))
+pred-Fin-nc (succℕ k) (inl x) with pred-Fin-nc k x
+... | inl y = inl (inl y)
+... | inr * = inr *
+
+pred-Fin : (k : ℕ) → Fin (succℕ k) → Fin (succℕ k)
+pred-Fin k x with pred-Fin-nc k x
+... | inl y = y
+... | inr * = inr *
+
+pred-Fin-nc-zero : (k : ℕ) → pred-Fin-nc k (zero-Fin k) ≡ inr *
+pred-Fin-nc-zero 0ℕ = refl
+pred-Fin-nc-zero (succℕ k) with pred-Fin-nc k (zero-Fin k) | pred-Fin-nc-zero k
+... | inr * | _ = refl
+... | inl _ | ()
+
+pred-Fin-nc-inr : (k : ℕ) → (x : Fin (succℕ k)) → pred-Fin-nc k x ≡ inr * → x ≡ zero-Fin k
+pred-Fin-nc-inr 0ℕ (inr *) _ = refl
+pred-Fin-nc-inr (succℕ k) (inl x) p with pred-Fin-nc k x | pred-Fin-nc-inr k x
+pred-Fin-nc-inr (succℕ k) (inl x) refl | inr * | ih = ap inl (ih refl)
+pred-Fin-nc-inr (succℕ k) (inl x) () | inl _ | _
+pred-Fin-nc-inr (succℕ k) (inr *) ()
+
+succ-pred-nc : (k : ℕ) → (x : Fin (succℕ k)) → (y : Fin (succℕ k))
+  → pred-Fin-nc k x ≡ inl y → succ-Fin-nc k y ≡ inl x
+succ-pred-nc 0ℕ (inr *) y ()
+succ-pred-nc (succℕ k) (inr *) .(inl (inr *)) refl = refl
+succ-pred-nc (succℕ k) (inl x) y p with pred-Fin-nc k x | succ-pred-nc k x
+succ-pred-nc (succℕ k) (inl x) .(inl y') refl | inl y' | ih
+  with succ-Fin-nc k y' | ih y' refl
+... | inl z | q = ap inl q
+... | inr * | q = ex-falso (tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) (inv q) *)
+succ-pred-nc (succℕ k) (inl x) y () | inr * | _
+
+pred-succ-nc : (k : ℕ) → (x : Fin (succℕ k)) → (y : Fin (succℕ k))
+  → succ-Fin-nc k x ≡ inl y → pred-Fin-nc k y ≡ inl x
+pred-succ-nc 0ℕ (inr *) y ()
+pred-succ-nc (succℕ k) (inr *) y ()
+pred-succ-nc (succℕ k) (inl x) y p with succ-Fin-nc k x | pred-succ-nc k x | succ-Fin-nc-inr k x
+pred-succ-nc (succℕ k) (inl x) .(inl y') refl | inl y' | ih | _
+  with pred-Fin-nc k y' | ih y' refl
+... | inl z | q = ap inl q
+... | inr * | q = ex-falso (tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) (inv q) *)
+pred-succ-nc (succℕ k) (inl x) .(inr *) refl | inr * | _ | f
+  = ap inl (ap inl (inv (f refl)))
+
+succ-pred-Fin : (k : ℕ) → (x : Fin (succℕ k)) → succ-Fin k (pred-Fin k x) ≡ x
+succ-pred-Fin k x with pred-Fin-nc k x | succ-pred-nc k x | pred-Fin-nc-inr k x
+succ-pred-Fin k x | inl y | ih | _ with succ-Fin-nc k y | ih y refl
+succ-pred-Fin k x | inl y | _ | _ | inl z | p = ap (λ { (inl w) → w ; (inr *) → z }) p
+succ-pred-Fin k x | inl y | _ | _ | inr * | p = ex-falso (tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) (inv p) *)
+succ-pred-Fin k x | inr * | _ | f = inv (f refl)
+
+pred-succ-Fin : (k : ℕ) → (x : Fin (succℕ k)) → pred-Fin k (succ-Fin k x) ≡ x
+pred-succ-Fin k x with succ-Fin-nc k x | pred-succ-nc k x | succ-Fin-nc-inr k x
+pred-succ-Fin k x | inl y | ih | _ with pred-Fin-nc k y | ih y refl
+pred-succ-Fin k x | inl y | _ | _ | inl z | p = ap (λ { (inl w) → w ; (inr *) → z }) p
+pred-succ-Fin k x | inl y | _ | _ | inr * | p = ex-falso (tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) (inv p) *)
+pred-succ-Fin k x | inr * | _ | f
+  with pred-Fin-nc k (zero-Fin k) | pred-Fin-nc-zero k
+pred-succ-Fin k x | inr * | _ | f | inr * | _ = inv (f refl)
+pred-succ-Fin k x | inr * | _ | f | inl _ | p =
+  ex-falso (tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) p *)
+
+is-equiv-succ-Fin : (k : ℕ) → is-equiv (succ-Fin k)
+is-equiv-succ-Fin k = (pred-Fin k , succ-pred-Fin k) , (pred-Fin k , pred-succ-Fin k)
+
+add-Fin : (k : ℕ) → ℕ → Fin (succℕ k) → Fin (succℕ k)
+add-Fin k n = iterate (succ-Fin k) n
+
+is-equiv-add-Fin : (k : ℕ) → (n : ℕ) → is-equiv (add-Fin k n)
+is-equiv-add-Fin k n =
+  (iterate (pred-Fin k) n , add-Fin-pred-Fin n) ,
+  (iterate (pred-Fin k) n , pred-Fin-add-Fin n)
+  where
+    shift : (m : ℕ) → (x : Fin (succℕ k))
+          → iterate (pred-Fin k) m (pred-Fin k x) ≡ pred-Fin k (iterate (pred-Fin k) m x)
+    shift 0ℕ       x = refl
+    shift (succℕ m) x = ap (pred-Fin k) (shift m x)
+    add-Fin-pred-Fin : (m : ℕ) → (x : Fin (succℕ k)) → add-Fin k m (iterate (pred-Fin k) m x) ≡ x
+    add-Fin-pred-Fin 0ℕ       x = refl
+    add-Fin-pred-Fin (succℕ m) x =
+      concat (ap (succ-Fin k) (concat (ap (add-Fin k m) (inv (shift m x)))
+                                      (add-Fin-pred-Fin m (pred-Fin k x))))
+             (succ-pred-Fin k x)
+    pred-Fin-add-Fin : (m : ℕ) → (x : Fin (succℕ k)) → iterate (pred-Fin k) m (add-Fin k m x) ≡ x
+    pred-Fin-add-Fin 0ℕ       x = refl
+    pred-Fin-add-Fin (succℕ m) x =
+      concat (inv (shift m (succ-Fin k (add-Fin k m x))))
+             (concat (ap (iterate (pred-Fin k) m) (pred-succ-Fin k (add-Fin k m x)))
+                     (pred-Fin-add-Fin m x))
 
 has-inverse : {A B : Set} → (f : A → B) → Set
 has-inverse {A} {B} f = Σ (B → A) (λ g → ((f ∘ g ∼ id) × (g ∘ f ∼ id)))

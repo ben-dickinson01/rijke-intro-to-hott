@@ -136,7 +136,15 @@ contr-equiv-to-contr f (a , pA) ((g , fg) , (h , hf)) = f a , λ b → concat (i
 equiv-contr-to-contr : {A B : Set} → (f : A → B) → is-contractible B → is-equiv f → is-contractible A
 equiv-contr-to-contr f (b , pB) ((g , fg) , (h , hf)) = h b , λ a → concat (inv (hf a)) (ap h (pB (f a)))
 
--- TODO Fin k is not contr for k != 1
+-- Fin k is not contr for k ≠ 1
+inl-ne-inr : {A B : Set} → (a : A) → (b : B) → ¬ (inl a ≡ inr b)
+inl-ne-inr a b p = tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) p *
+
+Fin-0-not-contr : ¬ (is-contractible (Fin 0ℕ))
+Fin-0-not-contr (c , _) = c
+
+Fin-2+-not-contr : (k : ℕ) → ¬ (is-contractible (Fin (succℕ (succℕ k))))
+Fin-2+-not-contr k (_ , f) = inl-ne-inr (inr *) * (concat (f (inl (inr *))) (inv (f (inr *))))
 
 contr-to-prod-contr : {A B : Set} → is-contractible A → is-contractible B → is-contractible (A × B)
 contr-to-prod-contr (a , pA) (b , pB) = (a , b) , λ {(x , y) → eq-pair (x , y) (a , b) (pA x , pB (tr (λ v → _) (pA x) y))}
