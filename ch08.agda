@@ -1,6 +1,6 @@
-module ch8 where
+module ch08 where
 
-open import ch7 public
+open import ch07 public
 
 is-decidable : Set lzero → Set lzero
 is-decidable A = A ⊎ ¬ A

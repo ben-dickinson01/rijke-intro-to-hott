@@ -1,6 +1,6 @@
-module ch6 where
+module ch06 where
 
-open import ch5 public
+open import ch05 public
 open import Agda.Primitive using (Level; lzero; lsuc; _⊔_) public
 
 Eq-ℕ : ℕ → ℕ → Set (lzero)

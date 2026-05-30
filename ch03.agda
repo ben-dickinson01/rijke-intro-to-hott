@@ -1,6 +1,6 @@
-module ch3 where
+module ch03 where
 
-open import ch2 public
+open import ch02 public
 
 
 data ℕ : Set where

@@ -1,4 +1,4 @@
-module ch2 where
+module ch02 where
 
 -- Def 2.2.3
 

@@ -1,6 +1,6 @@
-module ch5 where
+module ch05 where
 
-open import ch4 public
+open import ch04 public
 
 infix 4 _≡_
 data _≡_ {A : Set} (a : A) : A → Set where

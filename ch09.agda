@@ -1,6 +1,6 @@
-module ch9 where
+module ch09 where
 
-open import ch8 public
+open import ch08 public
 
 infix 1 _∼_
 _∼_ : {A : Set} → {B : A → Set} → (f g : (x : A) → B x) → Set

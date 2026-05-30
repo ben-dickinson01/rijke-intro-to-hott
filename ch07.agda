@@ -1,6 +1,6 @@
-module ch7 where
+module ch07 where
 
-open import ch6 public
+open import ch06 public
 
 infix 4 _∣_
 _∣_ : (n : ℕ) → (m : ℕ) → Set lzero

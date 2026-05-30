@@ -1,6 +1,6 @@
 module ch10 where
 
-open import ch9 public
+open import ch09 public
 
 is-contractible : (A : Set) → Set
 is-contractible A = Σ A (λ a → (x : A) → x ≡ a)

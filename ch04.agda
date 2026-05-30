@@ -1,6 +1,6 @@
-module ch4 where
+module ch04 where
 
-open import ch3 public
+open import ch03 public
 
 data Unit : Set where
   * : Unit
