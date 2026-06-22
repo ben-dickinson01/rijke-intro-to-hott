@@ -1,6 +1,8 @@
+{-# OPTIONS --without-K #-}
 module ch04 where
 
 open import ch03 public
+open import Agda.Primitive using (Level; lzero; lsuc; _⊔_) public
 
 data Unit : Set where
   * : Unit
@@ -89,19 +91,18 @@ succℤ (in-neg 0ℕ) = 0ℤ
 succℤ (in-neg (succℕ x)) = in-neg x
 succℤ (in-pos x) = in-pos (succℕ x)
 
-data Σ (A : Set) (B : A → Set) : Set where
+data Σ {ℓ₁ ℓ₂ : Level} (A : Set ℓ₁) (B : A → Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where
   _,_ : (x : A) → (B x → Σ A B)
 
-
-indΣ : {A : Set} → {B : A → Set} → {P : Σ A B → Set} →
+indΣ : {ℓ₁ ℓ₂ ℓ₃ : Level} → {A : Set ℓ₁} → {B : A → Set ℓ₂} → {P : Σ A B → Set ℓ₃} →
   ((x : A) → (y : B x) → P (x , y)) →
   ((z : Σ A B) → P z)
 indΣ fxy (a , b) = fxy a b
 
-proj₁ : {A : Set} → {B : A → Set} → Σ A B → A
+proj₁ : {ℓ₁ ℓ₂ : Level} → {A : Set ℓ₁} → {B : A → Set ℓ₂} → Σ A B → A
 proj₁ (x , y) = x
 
-proj₂ : {A : Set} → {B : A → Set} → (z : Σ A B) → B (proj₁ z)
+proj₂ : {ℓ₁ ℓ₂ : Level} → {A : Set ℓ₁} → {B : A → Set ℓ₂} → (z : Σ A B) → B (proj₁ z)
 proj₂ (x , y) = y
 
 infixr 2 _×_

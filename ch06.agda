@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module ch06 where
 
 open import ch05 public
@@ -55,7 +56,7 @@ mul-injℕ m n k = (to m n k , from m n k) where
   to m n k refl = refl
 
   from : (m n k : ℕ) → (m ·ℕ (succℕ k)) ≡ (n ·ℕ (succℕ k)) → m ≡ n
-  from 0ℕ 0ℕ k refl = refl
+  from 0ℕ 0ℕ k _ = refl
   from 0ℕ (succℕ n) k p = ex-falso (zero-ne-succℕ (n +ℕ succℕ n ·ℕ k) (concat (inv (zero-mulℕ k)) (concat (inv (zero-addℕ (0ℕ ·ℕ k))) (concat p (succ-addℕ n (succℕ n ·ℕ k))))))
   from (succℕ m) 0ℕ k p = ex-falso (zero-ne-succℕ (m +ℕ succℕ m ·ℕ k) (concat (inv (zero-mulℕ k)) (concat (inv (zero-addℕ (0ℕ ·ℕ k))) (concat (inv p) (succ-addℕ m (succℕ m ·ℕ k))))))
   from (succℕ m) (succℕ n) k p = ap succℕ (from m n k (proj₂ (add-injℕ (m ·ℕ succℕ k) (n ·ℕ succℕ k) (succℕ k)) (concat (inv (succ-mulℕ m (succℕ k))) (concat p (succ-mulℕ n (succℕ k))))))

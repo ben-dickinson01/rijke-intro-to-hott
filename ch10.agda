@@ -1,9 +1,12 @@
+{-# OPTIONS --without-K #-}
 module ch10 where
 
 open import ch09 public
 
 is-contractible : (A : Set) → Set
 is-contractible A = Σ A (λ a → (x : A) → x ≡ a)
+
+is-contr = is-contractible
 
 fiber-of-map : {A B : Set} → (f : A → B) → (b : B) → Set
 fiber-of-map {A} {B} f b = Σ A (λ a → f a ≡ b)
@@ -165,18 +168,18 @@ contr-loop-refl a pA = concat (proj₂ c (pA a)) (inv (proj₂ c refl))
 is-equiv-pair-contr-base : {A : Set} (Ac : is-contractible A) (B : A → Set) → let a = proj₁ Ac in is-equiv {A = B a} {B = Σ A B} (λ y → (a , y))
 is-equiv-pair-contr-base (a , pA) B = ((λ { (x , b) → tr B (pA x) b}) , λ {(x , b) → eq-pair ((a , tr B (pA x) b)) ((x , b)) (inv (pA x) , tr-inv-tr (pA x) b)}) , ((λ {(x , b) → tr B (pA x) b}) , λ {b → ap (λ p → tr B p b) (contr-loop-refl a pA)})
 
-is-equiv-fib-proj₁ : {A : Set} → {B : A → Set} → (a : A) → is-equiv {fib (proj₁ {A} {B}) a} {B a} (λ { ((x , y) , p) → tr B p y})
+is-equiv-fib-proj₁ : {A : Set} → {B : A → Set} → (a : A) → is-equiv {fib (proj₁ {A = A} {B = B}) a} {B a} (λ { ((x , y) , p) → tr B p y})
 is-equiv-fib-proj₁ a = ((λ {ba → (a , ba) , refl}) , λ x → refl) , ((λ x → (a , x) , refl) , λ { ((x , bx) , refl) → refl})
 
-proj₁-equiv-to-fib-contr : {A : Set} → {B : A → Set} → is-equiv (proj₁ {A} {B}) → (x : A) → is-contractible (B x)
+proj₁-equiv-to-fib-contr : {A : Set} → {B : A → Set} → is-equiv (proj₁ {A = A} {B = B}) → (x : A) → is-contractible (B x)
 proj₁-equiv-to-fib-contr {A} {B} ((f , pf) , (g , gp)) a = tr B (proj₂ centre-fib) (proj₂ (proj₁ centre-fib)) , λ ba → ap (λ s → tr B (proj₂ s) (proj₂ (proj₁ s))) (proj₂ fib-contr ((a , ba) , refl)) 
   where
-    fib-contr : is-contractible (fib (proj₁ {A} {B}) a)
-    fib-contr = equiv-to-contr-map (proj₁ {A} {B}) ((f , pf) , (g , gp)) a
-    centre-fib : fib (proj₁ {A} {B}) a
+    fib-contr : is-contractible (fib (proj₁ {A = A} {B = B}) a)
+    fib-contr = equiv-to-contr-map (proj₁ {A = A} {B = B}) ((f , pf) , (g , gp)) a
+    centre-fib : fib (proj₁ {A = A} {B = B}) a
     centre-fib = proj₁ fib-contr
 
-fib-contr-to-proj₁-equiv : {A : Set} → {B : A → Set} → ((x : A) → is-contractible (B x)) → is-equiv (proj₁ {A} {B})
+fib-contr-to-proj₁-equiv : {A : Set} → {B : A → Set} → ((x : A) → is-contractible (B x)) → is-equiv (proj₁ {A = A} {B = B})
 fib-contr-to-proj₁-equiv {A} {B} a→contrBa = ((λ a → a , proj₁ (a→contrBa a)) , λ x → refl) , ((λ a → a , proj₁ (a→contrBa a)) , λ { (x , y) → eq-pair (x , proj₁ (a→contrBa x)) (x , y) (refl , inv (proj₂ (a→contrBa x) y))})
 
 sec-pair-equiv-to-fib-contr : {A : Set} → {B : A → Set} → (b : (x : A) → B x) → is-equiv {A} {Σ A B} (λ x → x , b x) → (x : A) → is-contractible (B x)

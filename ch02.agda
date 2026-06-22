@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module ch02 where
 
 -- Def 2.2.3

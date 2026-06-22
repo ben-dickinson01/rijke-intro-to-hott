@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module ch07 where
 
 open import ch06 public

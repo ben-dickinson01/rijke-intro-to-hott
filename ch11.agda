@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module ch11 where
 
 open import ch10 public
@@ -392,7 +393,7 @@ fib-inner-contr {A} {B} f b x p =
 fib-D-dep-id-sys : {A B : Set} → (f : A → B) → (b : B) → (x : A) → (p : f x ≡ b)
   → is-dep-id-sys (λ y → f y ≡ b) (λ y → x ≡ y) x p refl
       (path-id-sys x) (fib-D f b x p) (fib-d f b x p)
-fib-D-dep-id-sys f b x refl = total-contr-to-id-sys refl (λ { refl p → refl}) refl (fib-inner-contr f b x refl)
+fib-D-dep-id-sys f b x refl = total-contr-to-id-sys refl (λ y p → tr (λ z → refl ≡ concat refl (inv z)) p refl) refl (fib-inner-contr f b x refl)
 
 -- Main equivalence (Example 11.6.3)
 fib-≡-equiv : {A B : Set} → (f : A → B) → (b : B)
@@ -696,4 +697,5 @@ comm-tri-equiv-h-iff-fam-equiv-fib-tri {A} {B} {X} f g h H = (λ hequiv x →
       sec-g-equiv = proj₂ (inv-≃ (proj₁ (fib-repl g)))
       htpy : (a : A) → (g (h a) , (h a , refl)) ≡ (f a , (h a , concat (inv (H a)) refl))
       htpy a = fib-triangle-htpy g (h a) (f a) ((H a))
+
 

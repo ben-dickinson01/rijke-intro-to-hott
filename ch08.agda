@@ -1,3 +1,5 @@
+{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K #-}
 module ch08 where
 
 open import ch07 public
@@ -487,35 +489,11 @@ Eq-ℤ-to-≡ (in-pos n) (in-pos m) p = ap in-pos p
 
 -- Exercise 8.8
 -- (i) → (ii) → (iii)
-ex-8-8-a : {A : Set} → {B : A → Set} →
-  has-decidable-eq A →
-  ((x : A) → has-decidable-eq (B x)) →
-  has-decidable-eq (Σ A B)
-ex-8-8-a dA dB (x , y) (a , b) with dA x a
-... | inr p = inr λ eq → p (ap proj₁ eq)
-... | inl refl with dB x y b
-... | inl refl = inl refl
-... | inr yneqb = inr λ {refl → yneqb refl}
-
-
--- (i) → (iii) → (ii)
-ex-8-8-b : {A : Set} → {B : A → Set} →
-  has-decidable-eq A →
-  has-decidable-eq (Σ A B) →
-  ((x : A) → has-decidable-eq (B x))
-ex-8-8-b dA dΣ x b b' with dΣ (x , b) (x , b')
-... | inl refl = inl refl
-... | inr np = inr λ {refl → np refl}
-
---section of B + (ii) + (iii) → (i)
-ex-8-8-c : {A : Set} → {B : A → Set} →
-  ((x : A) → B x) →
-  ((x : A) → has-decidable-eq (B x)) →
-  has-decidable-eq (Σ A B) →
-  has-decidable-eq A
-ex-8-8-c sec dB dΣ a a' with dΣ (a , sec a) (a' , sec a')
-... | inl refl = inl refl
-... | inr np = inr λ {refl → np refl}
+-- ex-8-8-a/b/c: commented out — proofs use K implicitly.
+-- K-free versions require Hedberg's theorem (ch12): decidable-eq → is-set → uip.
+-- ex-8-8-a : has-decidable-eq A → (∀ x → has-decidable-eq (B x)) → has-decidable-eq (Σ A B)
+-- ex-8-8-b : has-decidable-eq A → has-decidable-eq (Σ A B) → ∀ x → has-decidable-eq (B x)
+-- ex-8-8-c : section + (∀ x → has-decidable-eq (B x)) + has-decidable-eq (Σ A B) → has-decidable-eq A
 
 -- 8.9
 ex-8-9a : (k : ℕ) → (B : Fin k → Set) → ((x : Fin k) → is-decidable (B x)) → is-decidable ((x : Fin k) → B x)
