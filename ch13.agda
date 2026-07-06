@@ -127,3 +127,18 @@ sec-proj₁-equiv-Π {A} {B} = concat-≃ distrib (concat-≃ reassoc collapse)
     collapse : Σ (Σ (A → A) (λ f → f ∼ id)) (λ w → (x : A) → B (proj₁ w x))
           ≃ ((x : A) → B x)
     collapse = inv-≃ ((λ y → proj₁ (total-htpy-is-contr A) , y) , is-equiv-pair-contr-base (total-htpy-is-contr A) λ v → (x : A) → B (proj₁ v x))
+
+Π-id-sys : {A : Set} → {B : A → Set} → (E : (a : A) → B a → B a → Set)
+  → (e : (a : A) → (b : B a) → E a b b)
+  → ((a : A) → (b : B a) → is-id-sys (E a b) b (e a b))
+  → (f : (x : A) → B x)
+  → is-id-sys (λ g → (x : A) → E x (f x) (g x)) f (λ x → e x (f x))
+Π-id-sys {A} {B} E e hyp f P = total-contr-to-id-sys (λ x → e x (f x)) (λ x₁ x₂ x₃ → tr (E x₃ (f x₃)) (htpy-eq f x₁ x₂ x₃) (e x₃ (f x₃))) refl
+  (contr-equiv-to-contr (proj₁ Π-distrib-Σ) (fam-trunc-to-Π-trunc fiber-contr) (proj₂ Π-distrib-Σ)) P
+  where
+    canonical-map : (a : A) → (y : B a) → (f a ≡ y) → E a (f a) y
+    canonical-map a y p = tr (E a (f a)) p (e a (f a))
+
+    fiber-contr : (a : A) → is-contractible (Σ (B a) (E a (f a)))
+    fiber-contr a = fam-equiv-to-total-contr (e a (f a)) (canonical-map a) refl
+      (id-sys-to-fam-equiv (e a (f a)) (canonical-map a) refl (hyp a (f a)))
