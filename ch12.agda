@@ -6,8 +6,8 @@ open import ch11 public
 is-prop : (A : Set) → Set
 is-prop A = (x y : A) → is-contr (x ≡ y)
 
-Prop : Set₁
-Prop = Σ Set is-prop
+hProp : Set₁
+hProp = Σ Set is-prop
 
 empty-prop : is-prop 𝟘
 empty-prop = λ ()
