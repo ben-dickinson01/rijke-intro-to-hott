@@ -1,5 +1,5 @@
 {-# OPTIONS --without-K #-}
-{-# OPTIONS --without-K #-}
+
 module ch08 where
 
 open import ch07 public

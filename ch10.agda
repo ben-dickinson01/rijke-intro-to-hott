@@ -65,11 +65,18 @@ is-coh-inv {A} {B} f = Σ (B → A) (λ g → Σ (f ∘ g ∼ id) (λ G → Σ (
 eq-pair : {A : Set} → {B : A → Set} → (s t : Σ A B) → Eq-Σ s t → s ≡ t
 eq-pair (s1 , s2) (t1 , t2) (refl , refl) = refl
 
+eq-pair× : {A B : Set} → {p p' : A} → {q q' : B} → p ≡ p' → q ≡ q' → (p , q) ≡ (p' , q')
+eq-pair× refl refl = refl
+
 inv-inv : {A : Set} → {x y : A} → (p : x ≡ y) → inv (inv p) ≡ p
 inv-inv refl = refl
 
 tr-fib : {A B : Set} → (f : A → B) → {b : B} → {x y : A} → (p : x ≡ y) → (q : f x ≡ b) → tr (λ z → f z ≡ b) p q ≡ concat (inv (ap f p)) q
 tr-fib f refl q = inv (left-unit q)
+
+tr-× : {A : Set} → (P Q : A → Set) → {u v : A} → (α : u ≡ v) → (w : P u × Q u)
+     → tr (λ a → P a × Q a) α w ≡ (tr P α (proj₁ w) , tr Q α (proj₂ w))
+tr-× P Q refl (p , q) = refl
 
 coh-inv-to-contr-fib : {A B : Set} → (f : A → B) → is-coh-inv f → is-contr-map f
 coh-inv-to-contr-fib f (g , (G , (H , K))) b =

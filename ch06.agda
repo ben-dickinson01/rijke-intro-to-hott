@@ -249,6 +249,18 @@ succ-≤-to-<ℕ (succℕ m) (succℕ n) p = succ-≤-to-<ℕ m n p
 <-to-≱ 0ℕ (succℕ n) * ()
 <-to-≱ (succℕ m) (succℕ n) p q = <-to-≱ m n p q
 
+<-zeroℕ : (m : ℕ) → ¬ (m <ℕ 0ℕ)
+<-zeroℕ 0ℕ ()
+<-zeroℕ (succℕ m) ()
+
+<-succ-to-<-or-≡ℕ : (m k : ℕ) → m <ℕ succℕ k → (m <ℕ k) ⊎ (m ≡ k)
+<-succ-to-<-or-≡ℕ 0ℕ 0ℕ * = inr refl
+<-succ-to-<-or-≡ℕ 0ℕ (succℕ k) * = inl *
+<-succ-to-<-or-≡ℕ (succℕ m) 0ℕ p = ex-falso (<-zeroℕ m p)
+<-succ-to-<-or-≡ℕ (succℕ m) (succℕ k) p with <-succ-to-<-or-≡ℕ m k p
+... | inl q = inl q
+... | inr q = inr (ap succℕ q)
+
 -- Ex 6.5
 distℕ : ℕ → ℕ → ℕ
 distℕ m 0ℕ = m

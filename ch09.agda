@@ -211,6 +211,10 @@ equiv-to-inverse f ((g , fg) , (h , hf)) = (g , ((fg , concat-htpy (right-whiske
 inv-equiv-is-equiv : {A B : Set} → (f : A → B) → is-equiv f → (invf : has-inverse f) → is-equiv (proj₁ invf) 
 inv-equiv-is-equiv f ((g , fg) , (h , hf)) (k , (fk , kf)) = (((f , kf)) , ((f , fk)))
 
+-- the section component of an equivalence is itself an equivalence
+sec-map-is-equiv : {A B : Set} → (g : A → B) → (ge : is-equiv g) → is-equiv (proj₁ (proj₁ ge))
+sec-map-is-equiv g ge@((s , gs) , (r , rg)) = inv-equiv-is-equiv g ge (equiv-to-inverse g ge)
+
 𝟘-⊎ : (B : Set) → 𝟘 ⊎ B ≃ B
 𝟘-⊎ B = (⊎-elim-right id , ((((inr , λ x → refl)) , ((inr , λ {(inr x) → refl})))))
 
