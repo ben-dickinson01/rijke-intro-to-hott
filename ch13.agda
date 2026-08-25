@@ -72,10 +72,10 @@ funext-principle-to-weak-funext : funext-principle → weak-funext
 funext-principle-to-weak-funext fext A B xcontrBx = (λ a → proj₁ (xcontrBx a)) , λ aBa → proj₁ (proj₁ (fext A B aBa λ a → proj₁ (xcontrBx a))) λ a → proj₂ (xcontrBx a) (aBa a)
 
 weak-funext-to-funext-principle : weak-funext → funext-principle
-weak-funext-to-funext-principle wfext A B f g = total-contr-to-fam-equiv (rfl-htpy f) (htpy-eq f) refl 
-  (retr-to-contr-to-contr (λ {(h , fh) → (λ x → (h x , fh x)) }) 
-    ((λ p → (λ x → proj₁ (p x)) , (λ x → proj₂ (p x))) , λ {(h , fh) → refl}) 
-    (wfext A (λ x → Σ (B x) λ b → f x ≡ b) λ a → Σ-≡-contractible (f a))) 
+weak-funext-to-funext-principle wfext A B f g = total-contr-to-fam-equiv (rfl-htpy f) (htpy-eq f) refl
+  (retr-to-contr-to-contr (λ {(h , fh) → (λ x → (h x , fh x)) })
+    ((λ p → (λ x → proj₁ (p x)) , (λ x → proj₂ (p x))) , λ {(h , fh) → refl})
+    (wfext A (λ x → Σ (B x) λ b → f x ≡ b) λ a → Σ-≡-contractible (f a)))
   g
 
 fam-trunc-to-Π-trunc : {A : Set} → {B : A → Set} → {k : 𝕋} → ((x : A) → is-trunc k (B x)) → is-trunc k ((x : A) → B x)
@@ -85,7 +85,7 @@ fam-trunc-to-Π-trunc {A} {B} { -2𝕋} xcontrBx = (λ a → xcentre a) , λ aBa
     xcentre a = proj₁ (xcontrBx a)
     eqcentre : (a : A) → (x : B a) → x ≡ (xcentre a)
     eqcentre a x = proj₂ (xcontrBx a) x
-fam-trunc-to-Π-trunc {A} {B} {succ𝕋 k} xtruncBx f g = equiv-to-same-k-type ((htpy-eq f g , fun-ext f g)) (fam-trunc-to-Π-trunc {k = k} λ a → xtruncBx a (f a) (g a)) 
+fam-trunc-to-Π-trunc {A} {B} {succ𝕋 k} xtruncBx f g = equiv-to-same-k-type ((htpy-eq f g , fun-ext f g)) (fam-trunc-to-Π-trunc {k = k} λ a → xtruncBx a (f a) (g a))
 
 codom-trunc-to-→-trunc : {A B : Set} → {k : 𝕋} → is-trunc k B → is-trunc k (A → B)
 codom-trunc-to-→-trunc Btrunc = fam-trunc-to-Π-trunc λ a → Btrunc
@@ -106,14 +106,30 @@ codom-trunc-to-→-trunc Btrunc = fam-trunc-to-Π-trunc λ a → Btrunc
 choice : {A : Set} → {B : A → Set} → {C : (x : A) → B x → Set} → ((x : A) → Σ (B x) (C x)) → (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x)))
 choice h = (λ x → proj₁ (h x)) , λ x → proj₂ (h x)
 
-choice-inv : {A : Set} → {B : A → Set} → {C : (x : A) → B x → Set} → (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x))) → ((x : A) → Σ (B x) (C x)) 
-choice-inv (f , g) x = f x , g x 
+choice-inv : {A : Set} → {B : A → Set} → {C : (x : A) → B x → Set} → (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x))) → ((x : A) → Σ (B x) (C x))
+choice-inv (f , g) x = f x , g x
 
 choice-equiv : {A : Set} → {B : A → Set} → {C : (x : A) → B x → Set} → is-equiv (choice {A} {B} {C})
 choice-equiv {A} {B} {C} = (choice-inv , λ {(f , g) → refl}) , (choice-inv , λ {h → eq-htpy ((choice-inv ∘ choice) h) (id h) λ x → eq-pair _ _ (refl , refl)})
 
 Π-distrib-Σ : {A : Set} → {B : A → Set} → {C : (x : A) → B x → Set} → ((x : A) → Σ (B x) (C x)) ≃ (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x)))
 Π-distrib-Σ {A} {B} {C} = choice , choice-equiv
+
+Π-distrib-× : {I : Set} → (P Q : I → Set)
+  → ((i : I) → P i × Q i) ≃ (((i : I) → P i) × ((i : I) → Q i))
+Π-distrib-× {I} P Q = fwd , ((bwd , sec-htpy) , (bwd , retr-htpy))
+  where
+  fwd : ((i : I) → P i × Q i) → ((i : I) → P i) × ((i : I) → Q i)
+  fwd iPQ = (λ i → proj₁ (iPQ i)) , λ i → proj₂ (iPQ i)
+
+  bwd : ((i : I) → P i) × ((i : I) → Q i) → ((i : I) → P i × Q i)
+  bwd (iP , iQ) i = (iP i , iQ i)
+
+  sec-htpy : fwd ∘ bwd ∼ id
+  sec-htpy (iP , iQ) = eq-pair× refl refl
+
+  retr-htpy : bwd ∘ fwd ∼ id
+  retr-htpy iPQ = eq-htpy _ _ λ i → η-pair (iPQ i)
 
 Π-fib-equiv-sec : {A B : Set} → (f : A → B) → ((b : B) → fib f b) ≃ sec f
 Π-fib-equiv-sec {A} {B} f = choice , choice-equiv
@@ -175,7 +191,7 @@ ev-refl-dep : {A : Set} → {a : A} → {B : (x : A) → a ≡ x → Set} → ((
 ev-refl-dep f = f _ refl
 
 dep-univ-prop-id : {A : Set} → {a : A} → {B : (x : A) → a ≡ x → Set} → is-equiv (ev-refl-dep {A} {a} {B})
-dep-univ-prop-id {A} {a} {B} = (ind≡ , (λ x → refl)) , (ind≡ , λ f → eq-htpy _ _ λ y → eq-htpy _ _ (ind≡ {A} {a} {λ x p → ind≡ (ev-refl-dep f) x p ≡ f x p} refl y)) 
+dep-univ-prop-id {A} {a} {B} = (ind≡ , (λ x → refl)) , (ind≡ , λ f → eq-htpy _ _ λ y → eq-htpy _ _ (ind≡ {A} {a} {λ x p → ind≡ (ev-refl-dep f) x p ≡ f x p} refl y))
 
 univ-prop-id-map : {A : Set} → {a : A} → {B : A → Set} → ((x : A) → (a ≡ x) → B x) → B a
 univ-prop-id-map f = f _ refl
@@ -725,7 +741,7 @@ has-inv-id-≃-id-rfl-htpy {A} =
       (λ y → proj₁ (total-htpy-is-contr A) , y)
       , is-equiv-pair-contr-base (total-htpy-is-contr A) (λ w → proj₁ w ∼ id)
 
--- 13.6 
+-- 13.6
 
 -- (ii)
 empty-dep-up : (A : Set) → Set₁
@@ -772,7 +788,7 @@ const-up-endo A = is-equiv (λ (x : A) → λ (y : A) → x)
 
 -- (i) → (ii)
 contr-to-dep-up : {A : Set} → is-contr A → contr-dep-up A
-contr-to-dep-up (a , xeqa) = a , λ P → ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → ap (λ p → tr P p pa) (right-inv (xeqa a))) , 
+contr-to-dep-up (a , xeqa) = a , λ P → ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → ap (λ p → tr P p pa) (right-inv (xeqa a))) ,
   ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → eq-htpy _ _ λ x → apd pa (concat (xeqa a) (inv (xeqa x))))
 
 -- (ii) → (iii)
@@ -854,8 +870,8 @@ pt-fam-up-to-fam-equiv {A} B a b up x = (f x , sect x) , (f x , ret x)
     k z y = ≡-to-fam B a b z (f z y)
 
     k≡id : k ≡ (λ z y → y)
-    k≡id = concat (inv (proj₂ (proj₂ (up B)) k)) 
-      (concat (ap (proj₁ (proj₂ (up B))) (ap (≡-to-fam B a b a) fab)) 
+    k≡id = concat (inv (proj₂ (proj₂ (up B)) k))
+      (concat (ap (proj₁ (proj₂ (up B))) (ap (≡-to-fam B a b a) fab))
         (proj₂ (proj₂ (up B)) (λ z y → y)))
 
     sect : (z : A) → (y : B z) → ≡-to-fam B a b z (f z y) ≡ y
@@ -979,7 +995,13 @@ fib-map-Π-equiv-Π-fib {I} A B f b =
   htpy g p = htpy-eq _ _ p
 
 trunc-map-Π : {I : Set} → {k : 𝕋} → (A B : I → Set) → (f : (i : I) → A i → B i) → ((i : I) → is-trunc-map k (f i)) → is-trunc-map k (map-Π A B f)
-trunc-map-Π A B f ftrunc iBi = equiv-to-same-k-type (fib-map-Π-equiv-Π-fib A B f iBi) (fam-trunc-to-Π-trunc λ i → ftrunc i (iBi i)) 
+trunc-map-Π A B f ftrunc iBi = equiv-to-same-k-type (fib-map-Π-equiv-Π-fib A B f iBi) (fam-trunc-to-Π-trunc λ i → ftrunc i (iBi i))
+
+-- a fibrewise equivalence induces an equivalence on Π-types
+fam-equiv-to-Π-equiv : {I : Set} → (A B : I → Set) → (f : (i : I) → A i → B i)
+  → is-equiv-fam f → is-equiv (map-Π A B f)
+fam-equiv-to-Π-equiv {I} A B f fequiv = contr-map-to-equiv (map-Π A B f) (trunc-map-Π A B f λ i → equiv-to-contr-map (f i) (fequiv i))
+
 
 -- (b) transporting a fibrewise equivalence along an equivalence of index types
 map-Π-≃ : {I J : Set} → (e : I ≃ J) → (A : I → Set) → (B : J → Set)
@@ -992,7 +1014,7 @@ map-Π-≃ e A B f =
 equiv-map-Π-≃ : {I J : Set} → (e : I ≃ J) → (A : I → Set) → (B : J → Set)
   → (f : (i : I) → A i → B (proj₁ e i)) → is-equiv-fam f
   → is-equiv (map-Π-≃ e A B f)
-equiv-map-Π-≃ e A B f fequiv = equiv-comp (map-Π A (λ i → B (proj₁ e i)) f) (proj₁ (proj₁ pre)) 
+equiv-map-Π-≃ e A B f fequiv = equiv-comp (map-Π A (λ i → B (proj₁ e i)) f) (proj₁ (proj₁ pre))
   (contr-map-to-equiv (map-Π A (λ i → B (proj₁ e i)) f)
     (trunc-map-Π {k = -2𝕋} A (λ i → B (proj₁ e i)) f (λ i → equiv-to-contr-map (f i) (fequiv i))))
   (sec-map-is-equiv (precomp-Π (proj₁ e) B) pre)
@@ -1047,3 +1069,120 @@ postcomp-emb-to-emb : {A B : Set} → (f : A → B)
   → ((X : Set) → is-emb (postcomp f X)) → is-emb f
 postcomp-emb-to-emb f H = fib-prop-to-emb f
   (postcomp-trunc-map-to-trunc-map {k = succ𝕋 -2𝕋} f (λ X → emb-to-fib-prop (postcomp f X) (H X)))
+
+-- 13.13, proved first over 𝟚: the two-element type with constructors is easier to
+-- compute with than Fin 2ℕ = (𝟘 ⊎ 𝟙) ⊎ 𝟙.  Π-distrib-⊎ below recodes this into the
+-- form the book states.
+𝟚-≃-Fin2 : 𝟚 ≃ Fin 2ℕ
+𝟚-≃-Fin2 = fwd , ((bwd , λ {(inl (inr *)) → refl
+                           ; (inr *) → refl}) , (bwd , λ {true → refl
+                                                        ; false → refl}))
+  where
+  fwd : 𝟚 → Fin 2ℕ
+  fwd true = inr *
+  fwd false = inl (inr *)
+
+  bwd : Fin 2ℕ → 𝟚
+  bwd (inl (inr *)) = false
+  bwd (inr *) = true
+
+Π-distrib-⊎-𝟚 : {X : Set} → (A B : X → Set) →
+  ((x : X) → ((A x) ⊎ (B x)))
+  ≃ (Σ (X → 𝟚) (λ g → ((x : X) → ((g x ≡ false → A x))) × ((x : X) → ((g x ≡ true) → B x))))
+Π-distrib-⊎-𝟚 {X} A B = concat-≃ E1 (concat-≃ E2 E3)
+  where
+  -- the pointwise fibre: which summand was chosen, plus the payload
+  Dec : (x : X) → 𝟚 → Set
+  Dec x b = (b ≡ false → A x) × (b ≡ true → B x)
+
+  step1 : (x : X) → (A x ⊎ B x) → Σ 𝟚 (Dec x)
+  step1 x (inl a) = false , ((λ z → a) , (λ ()))
+  step1 x (inr b) = true , ((λ ()) , λ z → b)
+
+  step1-inv : (x : X) → Σ 𝟚 (Dec x) → (A x ⊎ B x)
+  step1-inv x (true , d) = inr ((proj₂ d) refl)
+  step1-inv x (false , d) = inl ((proj₁ d) refl)
+
+  step1-equiv : is-equiv-fam step1
+  step1-equiv x = (step1-inv x , sec-htpy) , (step1-inv x , retr-htpy)
+    where
+    sec-htpy : step1 x ∘ step1-inv x ∼ id
+    sec-htpy (true , (df , dt)) = eq-pair _ _ (refl , eq-pair× (eq-htpy _ _ (λ ())) (eq-htpy _ _ λ {refl → refl}))
+    sec-htpy (false , (df , dt)) = eq-pair _ _ (refl , eq-pair× (eq-htpy _ _ (λ {refl → refl})) (eq-htpy _ _ λ ()))
+
+    retr-htpy : step1-inv x ∘ step1 x ∼ id
+    retr-htpy (inl a) = refl
+    retr-htpy (inr b) = refl
+
+  -- lift the pointwise equivalence to Π
+  E1 : ((x : X) → (A x ⊎ B x)) ≃ ((x : X) → Σ 𝟚 (Dec x))
+  E1 = map-Π (λ x → A x ⊎ B x) (λ x → Σ 𝟚 (Dec x)) step1
+     , fam-equiv-to-Π-equiv (λ x → A x ⊎ B x) (λ x → Σ 𝟚 (Dec x)) step1 step1-equiv
+
+  -- Π distributes over Σ (type-theoretic choice, Theorem 13.2.1)
+  E2 : ((x : X) → Σ 𝟚 (Dec x)) ≃ (Σ (X → 𝟚) (λ g → (x : X) → Dec x (g x)))
+  E2 = Π-distrib-Σ {X} {λ _ → 𝟚} {Dec}
+
+  -- Π distributes over × in each fibre
+  E3 : (Σ (X → 𝟚) (λ g → (x : X) → Dec x (g x)))
+     ≃ (Σ (X → 𝟚) (λ g → ((x : X) → ((g x ≡ false → A x))) × ((x : X) → ((g x ≡ true) → B x))))
+  E3 = tot fibrewise , fam-equiv-to-tot-equiv fibrewise fibrewise-equiv
+    where
+    fibrewise : (g : X → 𝟚) → ((x : X) → Dec x (g x))
+      → ((x : X) → ((g x ≡ false → A x))) × ((x : X) → ((g x ≡ true) → B x))
+    fibrewise g = proj₁ (Π-distrib-× (λ x → g x ≡ false → A x) (λ x → g x ≡ true → B x))
+
+    fibrewise-equiv : is-equiv-fam fibrewise
+    fibrewise-equiv g = proj₂ (Π-distrib-× (λ x → g x ≡ false → A x) (λ x → g x ≡ true → B x))
+
+-- 13.13 as the book states it: recode Π-distrib-⊎-𝟚 along e : 𝟚 ≃ Fin 2ℕ, the base by
+-- postcomposition with e and each fibre by precomposition with ap e (e false and e true
+-- reduce to inl (inr *) and inr *, so the component types match on the nose)
+Π-distrib-⊎ : {X : Set} → (A B : X → Set)
+  → ((x : X) → ((A x) ⊎ (B x)))
+  ≃ (Σ (X → Fin 2ℕ) (λ g → ((x : X) → ((g x ≡ inl (inr *) → A x)))
+                         × ((x : X) → ((g x ≡ inr *) → B x))))
+Π-distrib-⊎ {X} A B = concat-≃ (Π-distrib-⊎-𝟚 A B) recode
+  where
+  e : 𝟚 → Fin 2ℕ
+  e = proj₁ 𝟚-≃-Fin2
+
+  e-emb : is-emb e
+  e-emb = equiv-to-emb e (proj₂ 𝟚-≃-Fin2)
+
+  post-e : (X → 𝟚) → (X → Fin 2ℕ)
+  post-e = postcomp e X
+
+  C : (X → 𝟚) → Set
+  C g = ((x : X) → ((g x ≡ false → A x))) × ((x : X) → ((g x ≡ true) → B x))
+
+  D : (X → Fin 2ℕ) → Set
+  D h = ((x : X) → ((h x ≡ inl (inr *) → A x))) × ((x : X) → ((h x ≡ inr *) → B x))
+
+  -- fibrewise: precomposing with ap e reindexes a component from Fin 2ℕ to 𝟚
+  recodeA : (g : X → 𝟚) → (x : X) → (e (g x) ≡ e false → A x) → (g x ≡ false → A x)
+  recodeA g x = precomp-Π (ap e) (λ _ → A x)
+
+  recodeB : (g : X → 𝟚) → (x : X) → (e (g x) ≡ e true → B x) → (g x ≡ true → B x)
+  recodeB g x = precomp-Π (ap e) (λ _ → B x)
+
+  recodeA-equiv : (g : X → 𝟚) → is-equiv-fam (recodeA g)
+  recodeA-equiv g x = is-equiv-to-precomp-Π-is-equiv (ap e) (e-emb (g x) false) (λ _ → A x)
+
+  recodeB-equiv : (g : X → 𝟚) → is-equiv-fam (recodeB g)
+  recodeB-equiv g x = is-equiv-to-precomp-Π-is-equiv (ap e) (e-emb (g x) true) (λ _ → B x)
+
+  fib-map : (g : X → 𝟚) → D (post-e g) → C g
+  fib-map g = map-Π (λ x → e (g x) ≡ e false → A x) (λ x → g x ≡ false → A x) (recodeA g)
+           ×' map-Π (λ x → e (g x) ≡ e true → B x) (λ x → g x ≡ true → B x) (recodeB g)
+
+  fib-map-equiv : is-equiv-fam fib-map
+  fib-map-equiv g = equiv×equiv-to-equiv _ _
+    (fam-equiv-to-Π-equiv _ _ (recodeA g) (recodeA-equiv g))
+    (fam-equiv-to-Π-equiv _ _ (recodeB g) (recodeB-equiv g))
+
+  recode : (Σ (X → 𝟚) C) ≃ (Σ (X → Fin 2ℕ) D)
+  recode = concat-≃
+    (inv-≃ (tot fib-map , fam-equiv-to-tot-equiv fib-map fib-map-equiv))
+    (base-change post-e D , f-equiv-to-base-change-equiv post-e D
+      (equiv-to-postcomp-equiv e (proj₂ 𝟚-≃-Fin2) X))
