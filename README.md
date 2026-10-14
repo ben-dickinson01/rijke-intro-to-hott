@@ -1,3 +1,3 @@
-This code follows this version (arXiv:2212.11082) of Rijke's Introduction ot Homotopy Type Theory book. This project serves as an introduction to both HoTT and Agda for me. I will be adding to this repository as I work my way through the book!  
-Generative AI (Claude) has been used for clarifying parts of the book and asking related questions to help understanding. All code in this repo was written by me.  
+This code follows this version [arXiv:2212.11082](https://arxiv.org/abs/2212.11082) of Rijke's Introduction to Homotopy Type Theory book. This project serves as an introduction to both HoTT and Agda for me. I will be adding to this repository as I work my way through the book.  
+Generative AI (Claude) has been used as a discussion tool for clarifying concepts and exploring related questions. All code in this repository was written by me independently.
 Tested with Agda 2.8.0  
