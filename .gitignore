@@ -3,3 +3,6 @@
 !*/
 !*.agda
 !.gitignore
+!.github
+!.github/workflows
+!.github/workflows/*.yml

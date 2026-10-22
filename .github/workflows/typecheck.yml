@@ -1,0 +1,22 @@
+name: Typecheck
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Agda 2.8.0
+        run: |
+          curl -fsSL https://github.com/agda/agda/releases/download/v2.8.0/Agda-v2.8.0-linux.tar.xz \
+            | sudo tar -xJ -C /usr/local/bin
+          agda --version
+
+      - name: Typecheck all chapters
+        run: for f in ch*.agda; do agda "$f"; done
