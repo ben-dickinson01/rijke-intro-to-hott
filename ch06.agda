@@ -106,10 +106,6 @@ neg-ne-self𝟚 : (b : 𝟚) → ¬ (b ≡ neg𝟚 b)
 neg-ne-self𝟚 true ()
 neg-ne-self𝟚 false ()
 
-𝟚-cases : (b : 𝟚) → (b ≡ false) ⊎ (b ≡ true)
-𝟚-cases true = inr refl
-𝟚-cases false = inl refl
-
 infix 4 _≤ℕ_
 _≤ℕ_ : ℕ → ℕ → Set
 0ℕ ≤ℕ 0ℕ = 𝟙

@@ -28,10 +28,10 @@ inhab-emb-to-emb : {X Y : Set} → (f : X → Y) → (X → is-emb f) → is-emb
 inhab-emb-to-emb f emb x y = emb x x y
 
 inhab-contr-to-emb-𝟙 : {A : Set} → (A → is-contr A) → is-emb (const {A} {𝟙} {*})
-inhab-contr-to-emb-𝟙 {A} f = inhab-emb-to-emb (const {A} {𝟙} {*}) λ a → equiv-to-emb (const {A} {𝟙} {*}) (A-contr-to-const𝟙-equiv (f a)) 
+inhab-contr-to-emb-𝟙 {A} f = inhab-emb-to-emb (const {A} {𝟙} {*}) λ a → equiv-to-emb (const {A} {𝟙} {*}) (A-contr-to-const𝟙-equiv (f a))
 
 emb-𝟙-to-is-prop : {A : Set} → is-emb (const {A} {𝟙} {*}) → is-prop A
-emb-𝟙-to-is-prop {A} emb x y = equiv-contr-to-contr (ap (const {A} {𝟙} {*})) (unit-prop * *) (emb x y)
+emb-𝟙-to-is-prop {A} emb x y = is-contr-domain-equiv (ap (const {A} {𝟙} {*})) (unit-prop * *) (emb x y)
 
 ≃-to-iff : {P Q : Set} → is-prop P → is-prop Q → (P ≃ Q) → (P ↔ Q)
 ≃-to-iff propP propQ (f , ((g , fg) , (h , hf))) = f , g
@@ -62,7 +62,7 @@ is-subtype A B = (x : A) → is-prop (B x)
       (ap (λ q → concat (inv (fg x)) (concat (ap f q) (fg y)))
           (proj₂ (propA (g x) (g y)) (ap g p))))) ,
   (λ propB x y →
-    concat (inv (hf x)) (concat (ap h (proj₁ (propB (f x) (f y)))) (hf y)) , 
+    concat (inv (hf x)) (concat (ap h (proj₁ (propB (f x) (f y)))) (hf y)) ,
     (λ p → concat
       (concat
         (inv (ap-id p))
@@ -80,8 +80,8 @@ is-subtype A B = (x : A) → is-prop (B x)
           (proj₂ (propB (f x) (f y)) (ap f p)))))
 
 emb-to-fib-prop : {A B : Set} → (f : A → B) → is-emb f → (b : B) → is-prop (fib f b)
-emb-to-fib-prop {A} {B} f femb b (a , p) (a' , p') = 
-  equiv-contr-to-contr
+emb-to-fib-prop {A} {B} f femb b (a , p) (a' , p') =
+  is-contr-domain-equiv
     (pair-eq (a , p) (a' , p'))
     (equiv-to-contr-map
       (λ α → tr (λ z → f z ≡ b) α p)
@@ -94,16 +94,16 @@ emb-to-fib-prop {A} {B} f femb b (a , p) (a' , p') =
           (is-equiv-concat' p)))
       p')
     (pair-eq-is-equiv (a , p) (a' , p'))
-    
+
 fib-prop-to-emb : {A B : Set} → (f : A → B) → ((b : B) → is-prop (fib f b)) → is-emb f
 fib-prop-to-emb {A} {B} f bpropfib x y =
   contr-map-to-equiv (ap f) (λ q →
-    equiv-contr-to-contr
+    is-contr-domain-equiv
       (tot (λ p e →
         concat (tr-fib f p q)
                (concat (ap (concat (inv (ap f p))) (inv e))
                        (left-inv (ap f p)))))
-      (contr-equiv-to-contr
+      (is-contr-codomain-equiv
         (pair-eq (x , q) (y , refl))
         (bpropfib (f y) (x , q) (y , refl))
         (pair-eq-is-equiv (x , q) (y , refl)))
@@ -319,7 +319,7 @@ is-poset A _≤A_ = (((a b : A) → is-prop (a ≤A b)) × ((x : A) → x ≤A x
 
 prop-× : {A B : Set} → is-prop A → is-prop B → is-prop (A × B)
 prop-× {A} {B} Aprop Bprop (a , b) (a' , b') =
-  equiv-contr-to-contr
+  is-contr-domain-equiv
     (pair-eq (a , b) (a' , b'))
     (retr-to-contr-to-contr proj₁
       ( (λ α → α , proj₁ (Bprop (tr (λ (_ : A) → B) α b) b'))
@@ -328,7 +328,7 @@ prop-× {A} {B} Aprop Bprop (a , b) (a' , b') =
     (pair-eq-is-equiv (a , b) (a' , b'))
 
 poset-is-set : {A : Set} → {≤A : A → A → Set} → is-poset A ≤A → is-set A
-poset-is-set {A} {≤A} (≤prop , (≤rfl , (≤antisym , ≤trans))) = 
+poset-is-set {A} {≤A} (≤prop , (≤rfl , (≤antisym , ≤trans))) =
   rfl-prop-rel-to-set (λ a b → (≤A a  b) × (≤A b a)) (λ a b → prop-× (≤prop a b) (≤prop b a)) (λ x → ≤rfl x , (≤rfl x)) (λ {a b (a≤b , b≤a) → ≤antisym a b a≤b b≤a})
 
 -- 12.3
@@ -365,7 +365,7 @@ left-+ℕ-emb m = inj-to-set-is-emb (λ n → m +ℕ n)
   backward 0ℕ 0ℕ (k , p) = *
   backward 0ℕ (succℕ n) (k , p) = *
   backward (succℕ m) 0ℕ (k , p) = ex-falso (zero-ne-succℕ (m +ℕ k) (concat (inv p) (succ-addℕ m k)))
-  backward (succℕ m) (succℕ n) (k , p) = backward m n (k , proj₂ (succ-injℕ (m +ℕ k) n) (concat (inv (succ-addℕ m k)) p)) 
+  backward (succℕ m) (succℕ n) (k , p) = backward m n (k , proj₂ (succ-injℕ (m +ℕ k) n) (concat (inv (succ-addℕ m k)) p))
 
   left-·ℕ-emb : (m : ℕ) → is-emb (λ (n : ℕ) → succℕ m ·ℕ n)
   left-·ℕ-emb m = inj-to-set-is-emb (λ n → succℕ m ·ℕ n)
@@ -465,7 +465,7 @@ fam-trunc-to-Σ-trunc {k = succ𝕋 k} Atrunc aBtrunc (a , b) (a' , b') =
     (pair-eq (a , b) (a' , b') , pair-eq-is-equiv (a , b) (a' , b'))
     (fam-trunc-to-Σ-trunc (Atrunc a a') (λ p → aBtrunc a' (tr _ p b) b'))
 
-Σ-trunc-to-fam-trunc : {A : Set} → {B : A → Set} → {k : 𝕋} → is-trunc k A → is-trunc k (Σ A B)  → ((x : A) → is-trunc k (B x)) 
+Σ-trunc-to-fam-trunc : {A : Set} → {B : A → Set} → {k : 𝕋} → is-trunc k A → is-trunc k (Σ A B)  → ((x : A) → is-trunc k (B x))
 Σ-trunc-to-fam-trunc Atrunc ABtrunc a =
   equiv-to-same-k-type
     (inv-≃ (_ , is-equiv-fib-proj₁ a))
@@ -480,11 +480,11 @@ trunc-funs-to-prod-trunc f g (a , b) (x , y) = equiv-to-same-k-type ((pair-eq _ 
 
 retr-k-type : {A B : Set} → {k : 𝕋} → (f : A → B) → retr f → is-trunc k B → is-trunc k A
 retr-k-type {k = -2𝕋} f (g , gf) (b , eqb) = (g b) , λ x → concat (inv (gf x)) (ap g (eqb (f x)))
-retr-k-type {k = succ𝕋 k} f (g , gf) Btrunc a a' = 
-  retr-k-type {k = k} 
-    (ap f) 
-    ((λ fafa' → concat (inv (gf a)) (concat (ap g (fafa')) (gf a'))) , 
-      λ {refl → concat (ap (concat (inv (gf a))) (left-unit (gf a))) (left-inv (gf a))}) 
+retr-k-type {k = succ𝕋 k} f (g , gf) Btrunc a a' =
+  retr-k-type {k = k}
+    (ap f)
+    ((λ fafa' → concat (inv (gf a)) (concat (ap g (fafa')) (gf a'))) ,
+      λ {refl → concat (ap (concat (inv (gf a))) (left-unit (gf a))) (left-inv (gf a))})
     (Btrunc (f a) (f a'))
 
 prod-trunc-to-trunc-funs : {A B : Set} {k : 𝕋} → is-trunc (succ𝕋 k) (A × B) → (B → is-trunc (succ𝕋 k) A) × (A → is-trunc (succ𝕋 k) B)
@@ -582,8 +582,8 @@ list-concat-0-trunc {A} lst = ind lst
 
 -- 12.10
 k+1-trunc-to-const-k-trunc : {A : Set} → {k : 𝕋} → is-trunc (succ𝕋 k) A → (x : A) → is-trunc-map k (const {𝟙} {A} {x})
-k+1-trunc-to-const-k-trunc Atrunc x a = equiv-to-same-k-type ((λ {(* , p) → p}) , 
-  (((_,_ *) , λ x₁ → refl) , ((_,_ *) , λ {(* , p) → refl}))) 
+k+1-trunc-to-const-k-trunc Atrunc x a = equiv-to-same-k-type ((λ {(* , p) → p}) ,
+  (((_,_ *) , λ x₁ → refl) , ((_,_ *) , λ {(* , p) → refl})))
   (Atrunc (const *) a)
 
 const-k-trunc-to-k+1-trunc : {A : Set} → {k : 𝕋} → ((x : A) → is-trunc-map k (const {𝟙} {A} {x})) → is-trunc (succ𝕋 k) A
@@ -691,7 +691,7 @@ const-dec-fib-to-isolated a xdecfib x with (xdecfib x)
 
 isolated-to-eq-prop : {A : Set} → (a : A) → is-isolated a → (x : A) → is-prop (a ≡ x)
 isolated-to-eq-prop {A} a aiso x = emb-𝟙-to-is-prop (inhab-contr-to-emb-𝟙 (is-prop'-to-inhab-contr all-paths-eq))
-  where 
+  where
     collapse-path : (y : A) → a ≡ y → a ≡ y
     collapse-path y p with aiso y
     ... | inl q = q

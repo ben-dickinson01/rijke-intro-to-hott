@@ -190,10 +190,6 @@ Fin-to-modℕ k (succℕ x) =
 <-or-≤ℕ 0ℕ (succℕ y) = inl *
 <-or-≤ℕ (succℕ x) (succℕ y) = <-or-≤ℕ x y
 
-¬<0ℕ : (x : ℕ) → ¬ (x <ℕ 0ℕ)
-¬<0ℕ 0ℕ ()
-¬<0ℕ (succℕ x) ()
-
 <-div-to-zeroℕ : (d x : ℕ) → x <ℕ d → d ∣ x → x ≡ 0ℕ
 <-div-to-zeroℕ d 0ℕ p div = refl
 <-div-to-zeroℕ d (succℕ x) p (k , pk) with <-or-≤ℕ (succℕ x) d
@@ -206,7 +202,7 @@ eqℕ-to-eq-modℕ : (k : ℕ) → (x y : ℕ) → (x ≡ y) → (x ≡ℕ y mod
 eqℕ-to-eq-modℕ k x y p = (0ℕ , concat (zero-mulℕ k) (inv (≡-to-dist0ℕ x y p)))
 
 eq-modℕ-to-eqℕ : (k : ℕ) → (x y : ℕ) → (x ≡ℕ y mod k) → (distℕ x y <ℕ k) → x ≡ y
-eq-modℕ-to-eqℕ 0ℕ x y (kxy , pxy) d = ex-falso (¬<0ℕ (distℕ x y) d)
+eq-modℕ-to-eqℕ 0ℕ x y (kxy , pxy) d = ex-falso (<-zeroℕ (distℕ x y) d)
 eq-modℕ-to-eqℕ (succℕ k) x y (kxy , pxy) d = dist0-to-≡ℕ x y (concat (inv pxy) (concat pxy (<-div-to-zeroℕ (succℕ k) (distℕ x y) d (kxy , pxy))))
 
 dist-bounded-<ℕ : (x y k : ℕ) → x <ℕ k → y <ℕ k → distℕ x y <ℕ k
@@ -280,13 +276,13 @@ Fin-k-is-ℕmod-k k x y = (to k x y , from k x y)
 ℤ-mod 0ℕ = ℤ
 ℤ-mod (succℕ k) = Fin (succℕ k)
 
-add-ℤ-mod : (k : ℕ) → ℤ-mod k → ℤ-mod k → ℤ-mod k
-add-ℤ-mod 0ℕ x y = x +ℤ y
-add-ℤ-mod (succℕ k) x y = [ ιFin (succℕ k) x +ℕ ιFin (succℕ k) y ] (succℕ k)
+add-ℤmod : (k : ℕ) → ℤ-mod k → ℤ-mod k → ℤ-mod k
+add-ℤmod 0ℕ x y = x +ℤ y
+add-ℤmod (succℕ k) x y = [ ιFin (succℕ k) x +ℕ ιFin (succℕ k) y ] (succℕ k)
 
-neg-ℤ-mod : (k : ℕ) → ℤ-mod k → ℤ-mod k
-neg-ℤ-mod 0ℕ x = -ℤ x
-neg-ℤ-mod (succℕ k) x = [ distℕ (ιFin (succℕ k) x) (succℕ k) ] (succℕ k)
+neg-ℤmod : (k : ℕ) → ℤ-mod k → ℤ-mod k
+neg-ℤmod 0ℕ x = -ℤ x
+neg-ℤmod (succℕ k) x = [ distℕ (ιFin (succℕ k) x) (succℕ k) ] (succℕ k)
 
 zero-ℤmod : (k : ℕ) → ℤ-mod k
 zero-ℤmod 0ℕ = 0ℤ
@@ -294,11 +290,11 @@ zero-ℤmod (succℕ k) = zeroFin k
 
 infix 6 _+ℤmod_
 _+ℤmod_ : {k : ℕ} → ℤ-mod k → ℤ-mod k → ℤ-mod k
-_+ℤmod_ {k} x y = add-ℤ-mod k x y
+_+ℤmod_ {k} x y = add-ℤmod k x y
 
 infix 8 -ℤmod_
 -ℤmod_ : {k : ℕ} → ℤ-mod k → ℤ-mod k
--ℤmod_ {k} x = neg-ℤ-mod k x
+-ℤmod_ {k} x = neg-ℤmod k x
 
 ι-ℤmod : (k : ℕ) → (x : ℤ-mod (succℕ k)) → ℕ
 ι-ℤmod k x = ιFin (succℕ k) x
@@ -325,74 +321,74 @@ add-≡-left-modℕ k c a b p =
     p
 
 
-comm-ℤmod : (k : ℕ) → (x y : ℤ-mod k) → add-ℤ-mod k x y ≡ add-ℤ-mod k y x
-comm-ℤmod 0ℕ x y = add-commℤ x y
-comm-ℤmod (succℕ k) x y = ap (ℕ-to-Fin k) (add-commℕ (ιFin (succℕ k) x) (ιFin (succℕ k) y))
+add-comm-ℤmod : (k : ℕ) → (x y : ℤ-mod k) → add-ℤmod k x y ≡ add-ℤmod k y x
+add-comm-ℤmod 0ℕ x y = add-commℤ x y
+add-comm-ℤmod (succℕ k) x y = ap (ℕ-to-Fin k) (add-commℕ (ιFin (succℕ k) x) (ιFin (succℕ k) y))
 
-add-zero-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤ-mod k x (zero-ℤmod k) ≡ x
+add-zero-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤmod k x (zero-ℤmod k) ≡ x
 add-zero-ℤmod 0ℕ x = refl
 add-zero-ℤmod (succℕ k) x =
   concat
     (ap (ℕ-to-Fin k) (ap (ιFin (succℕ k) x +ℕ_) (zeroFin-to-0ℕ k)))
     (proj₂ (ℕ-to-Fin-split-surj k x))
 
-zero-add-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤ-mod k (zero-ℤmod k) x ≡ x
-zero-add-ℤmod k x = concat (comm-ℤmod k (zero-ℤmod k) x) (add-zero-ℤmod k x)
+zero-add-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤmod k (zero-ℤmod k) x ≡ x
+zero-add-ℤmod k x = concat (add-comm-ℤmod k (zero-ℤmod k) x) (add-zero-ℤmod k x)
 
-add-assoc-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → add-ℤ-mod k (add-ℤ-mod k x y) z ≡ add-ℤ-mod k x (add-ℤ-mod k y z)
+add-assoc-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → add-ℤmod k (add-ℤmod k x y) z ≡ add-ℤmod k x (add-ℤmod k y z)
 add-assoc-ℤmod 0ℕ x y z = add-assocℤ x y z
 add-assoc-ℤmod (succℕ k) x y z =
   proj₂ (Fin-k-is-ℕmod-k k
-    (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x y) +ℕ ιFin (succℕ k) z)
-    (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤ-mod (succℕ k) y z)))
+    (ιFin (succℕ k) (add-ℤmod (succℕ k) x y) +ℕ ιFin (succℕ k) z)
+    (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤmod (succℕ k) y z)))
     (mod-is-transℕ (succℕ k)
-      (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x y) +ℕ ιFin (succℕ k) z)
+      (ιFin (succℕ k) (add-ℤmod (succℕ k) x y) +ℕ ιFin (succℕ k) z)
       ((ιFin (succℕ k) x +ℕ ιFin (succℕ k) y) +ℕ ιFin (succℕ k) z)
-      (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤ-mod (succℕ k) y z))
+      (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤmod (succℕ k) y z))
       (add-≡-right-modℕ (succℕ k)
-        (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x y))
+        (ιFin (succℕ k) (add-ℤmod (succℕ k) x y))
         (ιFin (succℕ k) x +ℕ ιFin (succℕ k) y)
         (ιFin (succℕ k) z)
         (ι-ℤmod-add k x y))
       (mod-is-transℕ (succℕ k)
         ((ιFin (succℕ k) x +ℕ ιFin (succℕ k) y) +ℕ ιFin (succℕ k) z)
         (ιFin (succℕ k) x +ℕ (ιFin (succℕ k) y +ℕ ιFin (succℕ k) z))
-        (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤ-mod (succℕ k) y z))
+        (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤmod (succℕ k) y z))
         (eqℕ-to-eq-modℕ (succℕ k)
           ((ιFin (succℕ k) x +ℕ ιFin (succℕ k) y) +ℕ ιFin (succℕ k) z)
           (ιFin (succℕ k) x +ℕ (ιFin (succℕ k) y +ℕ ιFin (succℕ k) z))
           (add-assocℕ (ιFin (succℕ k) x) (ιFin (succℕ k) y) (ιFin (succℕ k) z)))
         (mod-is-symmℕ (succℕ k)
-          (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤ-mod (succℕ k) y z))
+          (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (add-ℤmod (succℕ k) y z))
           (ιFin (succℕ k) x +ℕ (ιFin (succℕ k) y +ℕ ιFin (succℕ k) z))
           (add-≡-left-modℕ (succℕ k)
             (ιFin (succℕ k) x)
-            (ιFin (succℕ k) (add-ℤ-mod (succℕ k) y z))
+            (ιFin (succℕ k) (add-ℤmod (succℕ k) y z))
             (ιFin (succℕ k) y +ℕ ιFin (succℕ k) z)
             (ι-ℤmod-add k y z)))))
 
 add-dist-succℕ : (x k : ℕ) → x <ℕ succℕ k → x +ℕ distℕ x (succℕ k) ≡ succℕ k
 add-dist-succℕ x k p = add-distℕ x (succℕ k) (≤-transℕ {x} {k} {succℕ k} (<-to-succ-≤ℕ x (succℕ k) p) (≤-succℕ k))
 
-add-neg-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤ-mod k x (neg-ℤ-mod k x) ≡ zero-ℤmod k
+add-neg-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤmod k x (neg-ℤmod k x) ≡ zero-ℤmod k
 add-neg-ℤmod 0ℕ x = add-negℤ x
 add-neg-ℤmod (succℕ k) x =
   proj₂ (Fin-k-is-ℕmod-k k
-    (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (neg-ℤ-mod (succℕ k) x))
+    (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (neg-ℤmod (succℕ k) x))
     0ℕ)
     (mod-is-transℕ (succℕ k)
-      (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (neg-ℤ-mod (succℕ k) x))
+      (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (neg-ℤmod (succℕ k) x))
       (ιFin (succℕ k) x +ℕ distℕ (ιFin (succℕ k) x) (succℕ k))
       0ℕ
       (mod-is-symmℕ (succℕ k)
         (ιFin (succℕ k) x +ℕ distℕ (ιFin (succℕ k) x) (succℕ k))
-        (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (neg-ℤ-mod (succℕ k) x))
+        (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (neg-ℤmod (succℕ k) x))
         (add-≡-left-modℕ (succℕ k)
           (ιFin (succℕ k) x)
           (distℕ (ιFin (succℕ k) x) (succℕ k))
-          (ιFin (succℕ k) (neg-ℤ-mod (succℕ k) x))
+          (ιFin (succℕ k) (neg-ℤmod (succℕ k) x))
           (mod-is-symmℕ (succℕ k)
-            (ιFin (succℕ k) (neg-ℤ-mod (succℕ k) x))
+            (ιFin (succℕ k) (neg-ℤmod (succℕ k) x))
             (distℕ (ιFin (succℕ k) x) (succℕ k))
             (ι-ℤmod-neg k x))))
       (mod-is-transℕ (succℕ k)
@@ -405,15 +401,15 @@ add-neg-ℤmod (succℕ k) x =
           (add-dist-succℕ (ιFin (succℕ k) x) k (Fin-to-ℕ-bounded (succℕ k) x)))
         (k-is-zero-mod-kℕ (succℕ k))))
 
-neg-add-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤ-mod k (neg-ℤ-mod k x) x ≡ zero-ℤmod k
+neg-add-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤmod k (neg-ℤmod k x) x ≡ zero-ℤmod k
 neg-add-ℤmod 0ℕ x = neg-addℤ x
 neg-add-ℤmod (succℕ k) x =
   concat
     {Fin (succℕ k)}
-    {add-ℤ-mod (succℕ k) (neg-ℤ-mod (succℕ k) x) x}
-    {add-ℤ-mod (succℕ k) x (neg-ℤ-mod (succℕ k) x)}
+    {add-ℤmod (succℕ k) (neg-ℤmod (succℕ k) x) x}
+    {add-ℤmod (succℕ k) x (neg-ℤmod (succℕ k) x)}
     {zero-ℤmod (succℕ k)}
-    (comm-ℤmod (succℕ k) (neg-ℤ-mod (succℕ k) x) x)
+    (add-comm-ℤmod (succℕ k) (neg-ℤmod (succℕ k) x) x)
     (add-neg-ℤmod (succℕ k) x)
 
 -- Ex 7.1
@@ -461,20 +457,20 @@ le-to-div-fact (succℕ n') (succℕ x) ne0 x≤n' with <-or-≤ℕ x n'
 
 succ-eq-add-one-Fin : (k : ℕ) → (x : Fin (succℕ k)) → (succFin (succℕ k) x) ≡ x +ℤmod (1-Fin k)
 succ-eq-add-one-Fin k x =
-  Fin-to-ℕ-injective (succℕ k) (succFin (succℕ k) x) (add-ℤ-mod (succℕ k) x (1-Fin k))
+  Fin-to-ℕ-injective (succℕ k) (succFin (succℕ k) x) (add-ℤmod (succℕ k) x (1-Fin k))
     (eq-modℕ-to-eqℕ (succℕ k)
       (ιFin (succℕ k) (succFin (succℕ k) x))
-      (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x (1-Fin k)))
+      (ιFin (succℕ k) (add-ℤmod (succℕ k) x (1-Fin k)))
       (mod-is-transℕ (succℕ k)
         (ιFin (succℕ k) (succFin (succℕ k) x))
         (ιFin (succℕ k) x +ℕ 1ℕ)
-        (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x (1-Fin k)))
+        (ιFin (succℕ k) (add-ℤmod (succℕ k) x (1-Fin k)))
         (succFin-to-succℕ-mod (succℕ k) x)
         (mod-is-symmℕ (succℕ k)
-          (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x (1-Fin k)))
+          (ιFin (succℕ k) (add-ℤmod (succℕ k) x (1-Fin k)))
           (ιFin (succℕ k) x +ℕ 1ℕ)
           (mod-is-transℕ (succℕ k)
-            (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x (1-Fin k)))
+            (ιFin (succℕ k) (add-ℤmod (succℕ k) x (1-Fin k)))
             (ιFin (succℕ k) x +ℕ ιFin (succℕ k) (1-Fin k))
             (ιFin (succℕ k) x +ℕ 1ℕ)
             (ι-ℤmod-add k x (1-Fin k))
@@ -485,10 +481,10 @@ succ-eq-add-one-Fin k x =
               (Fin-to-modℕ k 1ℕ)))))
       (dist-bounded-<ℕ
         (ιFin (succℕ k) (succFin (succℕ k) x))
-        (ιFin (succℕ k) (add-ℤ-mod (succℕ k) x (1-Fin k)))
+        (ιFin (succℕ k) (add-ℤmod (succℕ k) x (1-Fin k)))
         (succℕ k)
         (Fin-to-ℕ-bounded (succℕ k) (succFin (succℕ k) x))
-        (Fin-to-ℕ-bounded (succℕ k) (add-ℤ-mod (succℕ k) x (1-Fin k)))))
+        (Fin-to-ℕ-bounded (succℕ k) (add-ℤmod (succℕ k) x (1-Fin k)))))
 
 Eq-Fin : (k : ℕ) → Fin k → Fin k → Set lzero
 Eq-Fin (succℕ k) (inl x) (inl y) = Eq-Fin k x y
@@ -657,14 +653,14 @@ one-ℤmod : (k : ℕ) → ℤ-mod k
 one-ℤmod 0ℕ = 1ℤ
 one-ℤmod (succℕ k) = 1-Fin k
 
-mul-ℤ-mod : (k : ℕ) → ℤ-mod k → ℤ-mod k → ℤ-mod k
-mul-ℤ-mod k x y = _·ℤmod_ {k} x y
+mul-ℤmod : (k : ℕ) → ℤ-mod k → ℤ-mod k → ℤ-mod k
+mul-ℤmod k x y = _·ℤmod_ {k} x y
 
-comm-mul-ℤmod : (k : ℕ) → (x y : ℤ-mod k) → mul-ℤ-mod k x y ≡ mul-ℤ-mod k y x
-comm-mul-ℤmod 0ℕ x y = mul-commℤ x y
-comm-mul-ℤmod (succℕ k) x y = ap (ℕ-to-Fin k) (mul-commℕ (ιFin (succℕ k) x) (ιFin (succℕ k) y))
+mul-comm-ℤmod : (k : ℕ) → (x y : ℤ-mod k) → mul-ℤmod k x y ≡ mul-ℤmod k y x
+mul-comm-ℤmod 0ℕ x y = mul-commℤ x y
+mul-comm-ℤmod (succℕ k) x y = ap (ℕ-to-Fin k) (mul-commℕ (ιFin (succℕ k) x) (ιFin (succℕ k) y))
 
-mul-one-ℤmod : (k : ℕ) → (x : ℤ-mod k) → mul-ℤ-mod k x (one-ℤmod k) ≡ x
+mul-one-ℤmod : (k : ℕ) → (x : ℤ-mod k) → mul-ℤmod k x (one-ℤmod k) ≡ x
 mul-one-ℤmod 0ℕ x = refl
 mul-one-ℤmod (succℕ k) x =
   concat
@@ -678,12 +674,12 @@ mul-one-ℤmod (succℕ k) x =
         (Fin-to-modℕ k 1ℕ)))
     (proj₂ (ℕ-to-Fin-split-surj k x))
 
-one-mul-ℤmod : (k : ℕ) → (x : ℤ-mod k) → mul-ℤ-mod k (one-ℤmod k) x ≡ x
-one-mul-ℤmod k x = concat (comm-mul-ℤmod k (one-ℤmod k) x) (mul-one-ℤmod k x)
+one-mul-ℤmod : (k : ℕ) → (x : ℤ-mod k) → mul-ℤmod k (one-ℤmod k) x ≡ x
+one-mul-ℤmod k x = concat (mul-comm-ℤmod k (one-ℤmod k) x) (mul-one-ℤmod k x)
 
-assoc-mul-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → mul-ℤ-mod k (mul-ℤ-mod k x y) z ≡ mul-ℤ-mod k x (mul-ℤ-mod k y z)
-assoc-mul-ℤmod 0ℕ x y z = mul-assocℤ x y z
-assoc-mul-ℤmod (succℕ k) x y z =
+mul-assoc-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → mul-ℤmod k (mul-ℤmod k x y) z ≡ mul-ℤmod k x (mul-ℤmod k y z)
+mul-assoc-ℤmod 0ℕ x y z = mul-assocℤ x y z
+mul-assoc-ℤmod (succℕ k) x y z =
   proj₂ (Fin-k-is-ℕmod-k k
     (ιFin (succℕ k) (x ·ℤmod y) ·ℕ ιFin (succℕ k) z)
     (ιFin (succℕ k) x ·ℕ ιFin (succℕ k) (y ·ℤmod z)))
@@ -719,7 +715,7 @@ add-≡-modℕ k a b c d pab pcd =
     (add-≡-right-modℕ k a b c pab)
     (add-≡-left-modℕ k b c d pcd)
 
-left-distrib-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → mul-ℤ-mod k x (add-ℤ-mod k y z) ≡ add-ℤ-mod k (mul-ℤ-mod k x y) (mul-ℤ-mod k x z)
+left-distrib-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → mul-ℤmod k x (add-ℤmod k y z) ≡ add-ℤmod k (mul-ℤmod k x y) (mul-ℤmod k x z)
 left-distrib-ℤmod 0ℕ x y z = left-distribℤ x y z
 left-distrib-ℤmod (succℕ k) x y z =
   proj₂ (Fin-k-is-ℕmod-k k
@@ -753,12 +749,12 @@ left-distrib-ℤmod (succℕ k) x y z =
             (ι-ℤmod-mul k x y)
             (ι-ℤmod-mul k x z)))))
 
-right-distrib-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → mul-ℤ-mod k (add-ℤ-mod k x y) z ≡ add-ℤ-mod k (mul-ℤ-mod k x z) (mul-ℤ-mod k y z)
+right-distrib-ℤmod : (k : ℕ) → (x y z : ℤ-mod k) → mul-ℤmod k (add-ℤmod k x y) z ≡ add-ℤmod k (mul-ℤmod k x z) (mul-ℤmod k y z)
 right-distrib-ℤmod k x y z =
-  concat (comm-mul-ℤmod k (add-ℤ-mod k x y) z)
+  concat (mul-comm-ℤmod k (add-ℤmod k x y) z)
   (concat (left-distrib-ℤmod k z x y)
-  (concat (ap (λ (w : ℤ-mod k) → add-ℤ-mod k w (mul-ℤ-mod k z y)) (comm-mul-ℤmod k z x))
-          (ap (λ (w : ℤ-mod k) → add-ℤ-mod k (mul-ℤ-mod k x z) w) (comm-mul-ℤmod k z y))))
+  (concat (ap (λ (w : ℤ-mod k) → add-ℤmod k w (mul-ℤmod k z y)) (mul-comm-ℤmod k z x))
+          (ap (λ (w : ℤ-mod k) → add-ℤmod k (mul-ℤmod k x z) w) (mul-comm-ℤmod k z y))))
 
 -- Ex 7.9 (a)
 mod-add-mulℕ : (k q r : ℕ) → (q ·ℕ k +ℕ r) ≡ℕ r mod k

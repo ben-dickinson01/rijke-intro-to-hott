@@ -61,6 +61,10 @@ infix 0 _≃_
 _≃_ : (A B : Set) → Set
 A ≃ B = Σ (A → B) (λ f → is-equiv f)
 
+-- A is a retract of B when some map A → B has a retraction
+is-retract-of : (A B : Set) → Set
+is-retract-of A B = Σ (A → B) retr
+
 is-equiv-id : (A : Set) → is-equiv (id {A})
 is-equiv-id A = (((id , λ x → refl)) , ((id , λ x → refl)))
 
@@ -79,10 +83,6 @@ is-equiv-addℤ k = ((((λ z → z -ℤ k) , λ y → concat (add-assocℤ y (-�
 is-equiv-negℤ : is-equiv (-ℤ_)
 is-equiv-negℤ = (((-ℤ_ , λ x → neg-negℤ x)) , (((-ℤ_ , λ x → neg-negℤ x))))
 
-zero-Fin : (k : ℕ) → Fin (succℕ k)
-zero-Fin 0ℕ       = inr *
-zero-Fin (succℕ k) = inl (zero-Fin k)
-
 succ-Fin-nc : (k : ℕ) → Fin (succℕ k) → Fin (succℕ k) ⊎ 𝟙
 succ-Fin-nc k       (inr *) = inr *
 succ-Fin-nc 0ℕ      (inl ())
@@ -93,7 +93,7 @@ succ-Fin-nc (succℕ k) (inl x) with succ-Fin-nc k x
 succ-Fin : (k : ℕ) → Fin (succℕ k) → Fin (succℕ k)
 succ-Fin k x with succ-Fin-nc k x
 ... | inl y = y
-... | inr * = zero-Fin k
+... | inr * = zeroFin k
 
 succ-Fin-nc-inr : (k : ℕ) → (x : Fin (succℕ k)) → succ-Fin-nc k x ≡ inr * → x ≡ inr *
 succ-Fin-nc-inr k (inr *) _ = refl
@@ -114,13 +114,13 @@ pred-Fin k x with pred-Fin-nc k x
 ... | inl y = y
 ... | inr * = inr *
 
-pred-Fin-nc-zero : (k : ℕ) → pred-Fin-nc k (zero-Fin k) ≡ inr *
+pred-Fin-nc-zero : (k : ℕ) → pred-Fin-nc k (zeroFin k) ≡ inr *
 pred-Fin-nc-zero 0ℕ = refl
-pred-Fin-nc-zero (succℕ k) with pred-Fin-nc k (zero-Fin k) | pred-Fin-nc-zero k
+pred-Fin-nc-zero (succℕ k) with pred-Fin-nc k (zeroFin k) | pred-Fin-nc-zero k
 ... | inr * | _ = refl
 ... | inl _ | ()
 
-pred-Fin-nc-inr : (k : ℕ) → (x : Fin (succℕ k)) → pred-Fin-nc k x ≡ inr * → x ≡ zero-Fin k
+pred-Fin-nc-inr : (k : ℕ) → (x : Fin (succℕ k)) → pred-Fin-nc k x ≡ inr * → x ≡ zeroFin k
 pred-Fin-nc-inr 0ℕ (inr *) _ = refl
 pred-Fin-nc-inr (succℕ k) (inl x) p with pred-Fin-nc k x | pred-Fin-nc-inr k x
 pred-Fin-nc-inr (succℕ k) (inl x) refl | inr * | ih = ap inl (ih refl)
@@ -163,7 +163,7 @@ pred-succ-Fin k x | inl y | ih | _ with pred-Fin-nc k y | ih y refl
 pred-succ-Fin k x | inl y | _ | _ | inl z | p = ap (λ { (inl w) → w ; (inr *) → z }) p
 pred-succ-Fin k x | inl y | _ | _ | inr * | p = ex-falso (tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) (inv p) *)
 pred-succ-Fin k x | inr * | _ | f
-  with pred-Fin-nc k (zero-Fin k) | pred-Fin-nc-zero k
+  with pred-Fin-nc k (zeroFin k) | pred-Fin-nc-zero k
 pred-succ-Fin k x | inr * | _ | f | inr * | _ = inv (f refl)
 pred-succ-Fin k x | inr * | _ | f | inl _ | p =
   ex-falso (tr (λ { (inl _) → 𝟙 ; (inr _) → 𝟘 }) p *)
@@ -208,7 +208,7 @@ sec-equiv-retr f (g , fg) (h , hf) = λ x → concat (inv (hf (g x))) (ap h (fg 
 equiv-to-inverse : {A B : Set} → (f : A → B) → is-equiv f → has-inverse f
 equiv-to-inverse f ((g , fg) , (h , hf)) = (g , ((fg , concat-htpy (right-whisker f g h (sec-equiv-retr f (g , fg) (h , hf))) hf)))
 
-inv-equiv-is-equiv : {A B : Set} → (f : A → B) → is-equiv f → (invf : has-inverse f) → is-equiv (proj₁ invf) 
+inv-equiv-is-equiv : {A B : Set} → (f : A → B) → is-equiv f → (invf : has-inverse f) → is-equiv (proj₁ invf)
 inv-equiv-is-equiv f ((g , fg) , (h , hf)) (k , (fk , kf)) = (((f , kf)) , ((f , fk)))
 
 -- the section component of an equivalence is itself an equivalence
@@ -399,7 +399,7 @@ infix 1 _×'_
 _×'_ : {A B C D : Set} → (f : A → B) → (g : C → D) → A × C → B × D
 (f ×' g) (x , y) = (f x) , (g y)
 
-id×id-equiv-id : {A B : Set} → (id {A} ×' id {B}) ∼ id 
+id×id-equiv-id : {A B : Set} → (id {A} ×' id {B}) ∼ id
 id×id-equiv-id = λ { (x , x₁) → refl}
 
 ∘×∘-equiv-×∘× : {A A' A'' B B' B'' : Set} → (f : A → A') → (f' : A' → A'') → (g : B → B') → (g' : B' → B'') → ((f' ∘ f) ×' (g' ∘ g)) ∼ (f' ×' g') ∘ (f ×' g)
@@ -469,18 +469,70 @@ Fin-mul-equiv-× k (succℕ l) =
   (concat-≃ (inv-≃ (×-distrib-⊎ (Fin k) 𝟙 (Fin l)))
               (×-equiv-right (⊎-symm 𝟙 (Fin l))))))
 
-{-
+-- 9.9
 is-finitely-cyclic : {X : Set} → (f : X → X) → Set
 is-finitely-cyclic {X} f = (x y : X) → Σ ℕ (λ k → iterate f k x ≡ y)
 
--- Proof idea: for each x, fincyc x x produces k with iterate f k x ≡ x — a
--- "period" of x. Define the inverse as g x := iterate f (k - 1) x, so that
---   f (g x) = iterate f k x ≡ x        (section side)
---   g (f x) = iterate f (k - 1) (f x)
---           = iterate f k x ≡ x        (retraction side, using iterate-shift)
--- Caveat: distℕ k 1 only equals k - 1 when k ≥ 1. The k = 0 case means
--- x ≡ x in zero steps; handle it separately, or upgrade fincyc to always
--- return k > 0 (which is always possible since you can add the period).
+-- f commutes with its own iterates
+iterate-succ : {X : Set} → (f : X → X) → (k : ℕ) → (x : X) → iterate f k (f x) ≡ f (iterate f k x)
+iterate-succ f 0ℕ x = refl
+iterate-succ f (succℕ k) x = ap f (iterate-succ f k x)
+
+iterate-comm : {X : Set} → (f : X → X) → (m n : ℕ) → (x : X) → iterate f m (iterate f n x) ≡ iterate f n (iterate f m x)
+iterate-comm f m 0ℕ x = refl
+iterate-comm f m (succℕ n) x = concat (iterate-succ f m (iterate f n x)) (ap f (iterate-comm f m n x))
+
+-- (a)
+-- Proof idea: fincyc (f x) x gives k with iterate f k (f x) ≡ x, so
+-- g x := iterate f k x is a section. f is also injective: if f a ≡ f b and
+-- iterate f j a ≡ b, then a ≡ iterate f k (f b) ≡ iterate f j a ≡ b.
+-- So g is a retraction too, since f (g (f x)) ≡ f x.
 fin-cyc-to-equiv : {X : Set} → (f : X → X) → is-finitely-cyclic f → is-equiv f
-fin-cyc-to-equiv f fincyc = ((λ x → iterate f (distℕ (proj₁ (fincyc x x)) 1ℕ) x) , λ {x → {!!}}) , {!!}
--}
+fin-cyc-to-equiv {X} f fincyc = ((g , fg) , (g , gf))
+  where
+  g : X → X
+  g x = iterate f (proj₁ (fincyc (f x) x)) x
+  fg : f ∘ g ∼ id
+  fg x = concat (inv (iterate-succ f (proj₁ (fincyc (f x) x)) x)) (proj₂ (fincyc (f x) x))
+  f-inj : (a b : X) → f a ≡ f b → a ≡ b
+  f-inj a b p =
+    concat (inv ka)
+    (concat (ap (iterate f k) p)
+    (concat (ap (λ z → iterate f k (f z)) (inv jb))
+    (concat (ap (iterate f k) (inv (iterate-succ f j a)))
+    (concat (iterate-comm f k j (f a))
+    (concat (ap (iterate f j) ka) jb)))))
+    where
+    k = proj₁ (fincyc (f a) a)
+    ka = proj₂ (fincyc (f a) a)
+    j = proj₁ (fincyc a b)
+    jb = proj₂ (fincyc a b)
+  gf : g ∘ f ∼ id
+  gf x = f-inj (g (f x)) x (fg (f x))
+
+-- (b)
+iterate-succFin : (k a n : ℕ) → iterate (succFin (succℕ k)) n ([ a ] (succℕ k)) ≡ [ a +ℕ n ] (succℕ k)
+iterate-succFin k a 0ℕ = refl
+iterate-succFin k a (succℕ n) = ap (succFin (succℕ k)) (iterate-succFin k a n)
+
+-- Proof idea: x ≡ [ ι x ], so n = distℕ (ι x) (k + 1) + ι y steps from x
+-- give [ k + 1 + ι y ] ≡ [ ι y ] ≡ y.
+is-finitely-cyclic-succFin : (k : ℕ) → is-finitely-cyclic (succFin k)
+is-finitely-cyclic-succFin 0ℕ () y
+is-finitely-cyclic-succFin (succℕ k) x y = (n , path)
+  where
+  ιx = ιFin (succℕ k) x
+  ιy = ιFin (succℕ k) y
+  n = distℕ ιx (succℕ k) +ℕ ιy
+  n-eq : ιx +ℕ n ≡ succℕ k +ℕ ιy
+  n-eq = concat (inv (add-assocℕ ιx (distℕ ιx (succℕ k)) ιy))
+    (ap (λ z → z +ℕ ιy) (add-dist-succℕ ιx k (Fin-to-ℕ-bounded (succℕ k) x)))
+  mod-eq : succℕ k +ℕ ιy ≡ℕ ιy mod (succℕ k)
+  mod-eq = tr (λ z → z +ℕ ιy ≡ℕ ιy mod (succℕ k)) (one-mulℕ (succℕ k)) (mod-add-mulℕ (succℕ k) 1ℕ ιy)
+  path : iterate (succFin (succℕ k)) n x ≡ y
+  path =
+    concat (ap (iterate (succFin (succℕ k)) n) (inv (proj₂ (ℕ-to-Fin-split-surj k x))))
+    (concat (iterate-succFin k ιx n)
+    (concat (ap (λ z → [ z ] (succℕ k)) n-eq)
+    (concat (proj₂ (Fin-k-is-ℕmod-k k (succℕ k +ℕ ιy) ιy) mod-eq)
+            (proj₂ (ℕ-to-Fin-split-surj k y)))))

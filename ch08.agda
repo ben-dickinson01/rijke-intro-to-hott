@@ -423,7 +423,7 @@ ex-8-6i A B = (to , from)
 
   from : (has-decidable-eq (A × B)) → ((A → has-decidable-eq B) × (B → has-decidable-eq A))
   from dAB = ((λ a b b' → ⊎functor (ap proj₂) (λ ne eq → ne (ap (a ,_) eq)) (dAB (a , b) (a , b'))) ,
-    (λ b a a' → ⊎functor (ap proj₁) (λ ne eq → ne (ap (_, b) eq)) (dAB (a , b) (a' , b)))) 
+    (λ b a a' → ⊎functor (ap proj₁) (λ ne eq → ne (ap (_, b) eq)) (dAB (a , b) (a' , b))))
 
 ex-8-6ii : {A B : Set} → (has-decidable-eq A) → (has-decidable-eq B) → has-decidable-eq (A × B)
 ex-8-6ii {A} {B} dA dB = proj₁ (ex-8-6i A B) (((λ _ → dB) , λ _ → dA))
@@ -511,7 +511,7 @@ bounded-Σℕ-is-decidable : (P : ℕ → Set) → ((n : ℕ) → is-decidable (
 bounded-Σℕ-is-decidable P ndPn 0ℕ uub with ndPn 0ℕ
 ... | inl p0 = inl (0ℕ , p0)
 ... | inr np0 = inr (λ { (n , pn) → np0 (tr P (≤-antisymℕ n 0ℕ (uub n pn) (0ℕ-leℕ n)) pn) })
-bounded-Σℕ-is-decidable P dP (succℕ u') ub with dP (succℕ u')                                
+bounded-Σℕ-is-decidable P dP (succℕ u') ub with dP (succℕ u')
 ... | inl p = inl (succℕ u' , p)
 ... | inr np = bounded-Σℕ-is-decidable P dP u'
   (λ n pn → ind⊎ {P = λ _ → n ≤ℕ u'} (λ n<su → <-to-succ-≤ℕ n (succℕ u') n<su) (λ su≤n → ex-falso (np (tr P (≤-antisymℕ n (succℕ u') (ub n pn) su≤n) pn))) (<-or-≤ℕ n (succℕ u')))
@@ -708,10 +708,6 @@ Bezout-type-decℕ (succℕ x') (succℕ y') z =
       ind⊎ {P = λ _ → 𝟘} nl nr
         (Bezout-type-to-boundedℕ (succℕ x') (succℕ y') z (λ ()) (λ ()) bez)
 
-dist-add-cancelℕ : (a b c : ℕ) → distℕ (a +ℕ c) (b +ℕ c) ≡ distℕ a b
-dist-add-cancelℕ a b 0ℕ = refl
-dist-add-cancelℕ a b (succℕ c) = dist-add-cancelℕ a b c
-
 Bezout-identity-auxℕ : (n x y : ℕ) → x ≤ℕ n → Σ ℕ (λ d → is-gcdℕ x y d × Bezout-typeℕ x y d)
 Bezout-identity-auxℕ n 0ℕ y _ = (y , ((λ z → (proj₂ , λ zy → (div-zeroℕ z , zy))) , (0ℕ , (1ℕ , concat (ap (distℕ 0ℕ) (one-mulℕ y)) (dist-zero-leftℕ y)))))
 Bezout-identity-auxℕ 0ℕ (succℕ x') y ()
@@ -747,7 +743,7 @@ Bezout-identity-auxℕ (succℕ n) (succℕ x') y x≤n = (d , (gcd-xy , bez))
   bezout-proof =
     concat (ap (λ w → distℕ w (k ·ℕ y)) (concat (right-distribℕ l (k ·ℕ q) (succℕ x')) (ap (l ·ℕ succℕ x' +ℕ_) (mul-assocℕ k q (succℕ x')))))
     (concat (ap (distℕ (l ·ℕ succℕ x' +ℕ c)) (concat (ap (k ·ℕ_) yeq) (concat (left-distribℕ k (q ·ℕ succℕ x') r) (add-commℕ c (k ·ℕ r)))))
-    (concat (dist-add-cancelℕ (l ·ℕ succℕ x') (k ·ℕ r) c)
+    (concat (dist-trans-invarℕ (l ·ℕ succℕ x') (k ·ℕ r) c)
     (concat (dist-symmℕ (l ·ℕ succℕ x') (k ·ℕ r)) dist-eq)))
   k' = l +ℕ k ·ℕ q
   bez : Bezout-typeℕ (succℕ x') y d
@@ -1082,7 +1078,7 @@ odd-mod-4ℕ p p-odd with euclidean-divℕ p 4ℕ (λ ())
   (mod-is-transℕ 4ℕ p (q ·ℕ 4ℕ +ℕ 3ℕ) 3ℕ
     (eqℕ-to-eq-modℕ 4ℕ p (q ·ℕ 4ℕ +ℕ 3ℕ) peq)
     (mod-add-mulℕ 4ℕ q 3ℕ))
-... | (q , (succℕ (succℕ (succℕ (succℕ r'))) , (_ , r<4))) = ex-falso (¬<0ℕ r' r<4)
+... | (q , (succℕ (succℕ (succℕ (succℕ r'))) , (_ , r<4))) = ex-falso (<-zeroℕ r' r<4)
 
 -- If p is prime and p ≠ 2, then p is odd
 prime-ne-2-to-oddℕ : (p : ℕ) → is-primeℕ p → ¬ (p ≡ 2ℕ) → ¬ (2ℕ ∣ p)
@@ -1104,7 +1100,7 @@ prime-factor-of-oddℕ p n pprime p∣n n-odd p≡2 = n-odd (tr (_∣ n) p≡2 p
 
 -- 1 ≤ 4·n! (needed for distℕ reasoning)
 1≤4n!ℕ : (n : ℕ) → 1ℕ ≤ℕ (4ℕ ·ℕ factorialℕ n)
-1≤4n!ℕ n = ≤-transℕ {1ℕ} {4ℕ} {4ℕ ·ℕ factorialℕ n} * (≤-mul-leftℕ 1ℕ (factorialℕ n) 4ℕ (1≤-factorialℕ n)) 
+1≤4n!ℕ n = ≤-transℕ {1ℕ} {4ℕ} {4ℕ ·ℕ factorialℕ n} * (≤-mul-leftℕ 1ℕ (factorialℕ n) 4ℕ (1≤-factorialℕ n))
 
 -- distℕ (4·n!) 1 + 1 ≡ 4·n! (the key identity: M + 1 = 4·n!)
 dist-4n!-1-addℕ : (n : ℕ) → distℕ (4ℕ ·ℕ factorialℕ n) 1ℕ +ℕ 1ℕ ≡ 4ℕ ·ℕ factorialℕ n
@@ -1238,7 +1234,7 @@ infinitely-many-4k+3-primesℕ n = (p , (pprime , (p-is-3-mod-4 , p>n)))
     p∣1 = div-4n!-1-and-n!-to-div-1ℕ p n pdivn p∣fact
     p≤1 : p ≤ℕ 1ℕ
     p≤1 = divℕ-to-≤ℕ p 1ℕ p∣1 (λ ())
-    
+
 -- If x : Fin p is nonzero, then p does not divide ιFin x
 nonzero-Fin-to-ndivℕ : (p : ℕ) → (x : ℤ-mod (succℕ p)) → ¬ (x ≡ zero-ℤmod (succℕ p)) → ¬ (succℕ p ∣ ι-ℤmod p x)
 nonzero-Fin-to-ndivℕ p x xne0 pdivx = xne0 (Fin-to-ℕ-injective (succℕ p) x (zero-ℤmod (succℕ p)) (concat (<-div-to-zeroℕ (succℕ p) (ι-ℤmod p x) (Fin-to-ℕ-bounded (succℕ p) x) pdivx) (inv (zero-ℤmod-to-zeroℕ p))))
@@ -1249,7 +1245,6 @@ nonzero-Fin-to-ndivℕ p x xne0 pdivx = xne0 (Fin-to-ℕ-injective (succℕ p) x
 --               (l·a)² = (l·a − 1)·k·p + 1 ≡ 1 mod p. (For l·a = 0 this
 --               degenerates to k·p = 1, i.e., p = 1, where everything is
 --               trivially congruent mod 1.)
-{-
 bezout-mul-modℕ : (p a : ℕ) → gcdℕ p a ≡ 1ℕ → Σ ℕ (λ k → k ·ℕ a ≡ℕ 1ℕ mod p)
 bezout-mul-modℕ p a g≡1 = result
   where
@@ -1282,7 +1277,7 @@ bezout-mul-modℕ p a g≡1 = result
       where
       kp-1 : k ·ℕ p ≡ 1ℕ
       kp-1 = concat kp-eq (ap (λ z → z +ℕ 1ℕ) (inv la0))
-    aux (succℕ L) suceq = (l ·ℕ l ·ℕ a , (L ·ℕ k , proof))
+    aux (succℕ L) suceq = ((l ·ℕ l ·ℕ a) , ((L ·ℕ k) , proof))
       where
       square-eq : l ·ℕ l ·ℕ a ·ℕ a ≡ (l ·ℕ a) ·ℕ (l ·ℕ a)
       square-eq = concat
@@ -1319,57 +1314,264 @@ bezout-mul-modℕ p a g≡1 = result
       proof = concat (mul-assocℕ L k p)
               (concat (inv (dist-add-rightℕ (L ·ℕ (k ·ℕ p)) 1ℕ))
                       (ap (λ z → distℕ z 1ℕ) (inv final-eq)))
--}
-{-
 
--- Proof idea:
---   p = 0 case: ℤ-mod 0 should have a unique element (zero), so xne0
---     immediately gives ex-falso. If ℤ-mod 0 is defined as 𝟘 instead,
---     pattern-match x.
---   p = succ p' case: feed bezout-mul-modℕ; the inner hole asks for
---     gcd (succ p) (ι x) ≡ 1. Since p is prime and (succ p) ∤ ι x
---     (which is exactly nonzero-Fin-to-ndivℕ above), the only divisor of
---     succ p sharing a factor with ι x is 1 — use prime-iff-trivial-divℕ
---     and that gcd divides both arguments.
+-- 8.14
+-- p = 0 is impossible since 0 is not prime. Otherwise use bezout-mul-modℕ,
+-- with gcd p (ι x) ≡ 1 from gcd-prime-coprimeℕ and nonzero-Fin-to-ndivℕ.
 inv-modℤ : (p : ℕ) → (is-primeℕ p) → (x : ℤ-mod p) → ¬ (x ≡ zero-ℤmod p) → ℤ-mod p
-inv-modℤ 0ℕ pprime x xne0 = {!!}
-inv-modℤ (succℕ p) pprime x xne0 = [ proj₁ (bezout-mul-modℕ p (ι-ℤmod p x) {!!}) ] (succℕ p)
+inv-modℤ 0ℕ pprime x xne0 = ex-falso (proj₁ (proj₁ (prime-iff-trivial-divℕ 0ℕ) pprime))
+inv-modℤ (succℕ p) pprime x xne0 = [ proj₁ (bezout-mul-modℕ (succℕ p) (ι-ℤmod p x) (gcd-prime-coprimeℕ (succℕ p) (ι-ℤmod p x) pprime (nonzero-Fin-to-ndivℕ p x xne0))) ] (succℕ p)
 
--- Proof idea: by definition of inv-modℤ via Bézout, k·(ι x) ≡ 1 mod p,
--- which transports along the projection ℕ → ℤ-mod p to give the result.
--- Need a lemma that ℤ-mod multiplication agrees with ℕ multiplication
--- after reduction (likely already available as part of the ℤ-mod ring).
-inv-mul-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p)) → mul-ℤ-mod p (inv-modℤ p pprime x xne0) x ≡ one-ℤmod p
-inv-mul-modℤ p pprime x xne0 = {!!}
-
--- Proof idea: combine inv-mul-modℤ with commutativity of mul-ℤ-mod.
-mul-inv-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p)) → mul-ℤ-mod p x (inv-modℤ p pprime x xne0) ≡ one-ℤmod p
-mul-inv-modℤ p pprime x xne0 = {!!}
-
--- Proof idea (Pisano period of n): least k > 0 with n ∣ F_k. Hole is the
--- existence witness for ℕ-well-ordered. Strategy: F mod n is eventually
--- periodic by pigeonhole on consecutive pairs (F_i mod n, F_{i+1} mod n)
--- ∈ Fin n × Fin n; once a pair repeats, F is purely periodic from index 0
--- since the recurrence runs backwards too, so some k > 0 has F_k ≡ 0 mod n.
-cofib : ℕ → ℕ
-cofib n = proj₁ (ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (n ∣ fibℕ x)) (λ x → with-decidable-prod (<ℕ-is-decidable 0ℕ x) λ 0<x → divℕ-decidable n (fibℕ x)) {!(!})
-
--- Proof idea: the key arithmetic fact is the addition formula
---   F_{a+b} = F_a · F_{b+1} + F_{a-1} · F_b
--- reduced mod n.
---   to: write m = q · cofib n + r with r < cofib n. The formula gives
---     F_m ≡ F_r · F_{cofib n + 1}^q · ... mod n; more directly, induct on q
---     using F_{a + cofib n} ≡ F_a · F_{cofib n + 1} mod n. Minimality of
---     cofib n then forces r = 0.
---   from: similarly, write m = q · cofib n + r; n ∣ F_m and the addition
---     formula give n ∣ F_r, and minimality forces r = 0, so cofib n ∣ m.
-cofib-prop : (n m : ℕ) → ((cofib n ∣ m) ↔ (n ∣ fibℕ m))
-cofib-prop n m = (to , from)
+-- Bézout gives k·(ι x) ≡ 1 mod p, and ι [k] ≡ k mod p, so ι [k]·(ι x) ≡ 1 mod p.
+inv-mul-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p)) → mul-ℤmod p (inv-modℤ p pprime x xne0) x ≡ one-ℤmod p
+inv-mul-modℤ 0ℕ pprime x xne0 = ex-falso (proj₁ (proj₁ (prime-iff-trivial-divℕ 0ℕ) pprime))
+inv-mul-modℤ (succℕ p) pprime x xne0 =
+  proj₂ (Fin-k-is-ℕmod-k p (ι-ℤmod p y ·ℕ ι-ℤmod p x) 1ℕ)
+    (mod-is-transℕ (succℕ p) (ι-ℤmod p y ·ℕ ι-ℤmod p x) (k ·ℕ ι-ℤmod p x) 1ℕ
+      (mul-≡-right-modℕ (succℕ p) (ι-ℤmod p y) k (ι-ℤmod p x) (Fin-to-modℕ p k))
+      (proj₂ bez))
   where
-  cofib-wo = (ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (n ∣ fibℕ x)) (λ x → with-decidable-prod (<ℕ-is-decidable 0ℕ x) λ 0<x → divℕ-decidable n (fibℕ x)) {!(!})
-  to : (cofib n ∣ m) → (n ∣ fibℕ m)
-  to = λ cofibndivm → {!!}
-  from : (n ∣ fibℕ m) → (cofib n ∣ m)
-  from = λ ndivfibm → {!!}
+  bez = bezout-mul-modℕ (succℕ p) (ι-ℤmod p x) (gcd-prime-coprimeℕ (succℕ p) (ι-ℤmod p x) pprime (nonzero-Fin-to-ndivℕ p x xne0))
+  k = proj₁ bez
+  y = inv-modℤ (succℕ p) pprime x xne0
 
--}
+mul-inv-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p)) → mul-ℤmod p x (inv-modℤ p pprime x xne0) ≡ one-ℤmod p
+mul-inv-modℤ p pprime x xne0 = concat (mul-comm-ℤmod p x (inv-modℤ p pprime x xne0)) (inv-mul-modℤ p pprime x xne0)
+
+-- 8.15
+add-reverseℕ : (x y z : ℕ) → x +ℕ y +ℕ z ≡ z +ℕ y +ℕ x
+add-reverseℕ x y z = concat (add-commℕ (x +ℕ y) z) (concat (ap (z +ℕ_) (add-commℕ x y)) (inv (add-assocℕ z y x)))
+
+div-one-to-eq-oneℕ : (d : ℕ) → d ∣ 1ℕ → d ≡ 1ℕ
+div-one-to-eq-oneℕ d (q , p) = proj₂ (mul-to-oneℕ q d p)
+
+-- If a + c ≡ b + d and c ≡ d mod k, then a ≡ b mod k
+add-cancel-modℕ : (k a b c d : ℕ) → (a +ℕ c) ≡ℕ (b +ℕ d) mod k → c ≡ℕ d mod k → a ≡ℕ b mod k
+add-cancel-modℕ k a b c d acbd cd =
+  tr (k ∣_) (dist-trans-invarℕ a b c)
+    (mod-is-transℕ k (a +ℕ c) (b +ℕ d) (b +ℕ c) acbd
+      (add-≡-left-modℕ k b d c (mod-is-symmℕ k c d cd)))
+
+-- If gcd d c ≡ 1 and d ∣ c·y, then d ∣ y
+coprime-div-mulℕ : (d c y : ℕ) → gcdℕ d c ≡ 1ℕ → d ∣ (c ·ℕ y) → d ∣ y
+coprime-div-mulℕ d c y g≡1 d∣cy = tr (d ∣_) scaled (div-distℕ (y ·ℕ (k ·ℕ d)) (y ·ℕ (l ·ℕ c)) d d∣ykd d∣ylc)
+  where
+  bez = Bezout-identityℕ d c
+  k = proj₁ bez
+  l = proj₁ (proj₂ bez)
+  dist-eq : distℕ (k ·ℕ d) (l ·ℕ c) ≡ 1ℕ
+  dist-eq = concat (proj₂ (proj₂ bez)) g≡1
+  scaled : distℕ (y ·ℕ (k ·ℕ d)) (y ·ℕ (l ·ℕ c)) ≡ y
+  scaled = concat (dist-linearℕ (k ·ℕ d) (l ·ℕ c) y)
+    (concat (ap (y ·ℕ_) dist-eq) (mul-oneℕ y))
+  d∣ykd : d ∣ (y ·ℕ (k ·ℕ d))
+  d∣ykd = ((y ·ℕ k) , mul-assocℕ y k d)
+  d∣ylc : d ∣ (y ·ℕ (l ·ℕ c))
+  d∣ylc = tr (d ∣_) (concat (inv (mul-assocℕ l c y)) (mul-commℕ (l ·ℕ c) y))
+    (div-mulℕ d (c ·ℕ y) l d∣cy)
+
+-- Pigeonhole: if f i < N for all i ≤ N, then f i ≡ f j for some i < j ≤ N.
+-- Proof: induction on N. If f (N + 1) ≡ f i for some i ≤ N we are done. If not,
+-- send the value N to f (N + 1) instead; this g has values < N, so use the IH.
+replace-topℕ : (n v x : ℕ) → is-decidable (x ≡ n) → ℕ
+replace-topℕ n v x (inl _) = v
+replace-topℕ n v x (inr _) = x
+
+replace-top-<ℕ : (n v x : ℕ) → v <ℕ succℕ n → x <ℕ succℕ n → ¬ (x ≡ v) → (dx : is-decidable (x ≡ n)) → replace-topℕ n v x dx <ℕ n
+replace-top-<ℕ n v x v<sn x<sn x≠v (inl x≡n) with <-succ-to-<-or-≡ℕ v n v<sn
+... | inl v<n = v<n
+... | inr v≡n = ex-falso (x≠v (concat x≡n (inv v≡n)))
+replace-top-<ℕ n v x v<sn x<sn x≠v (inr x≠n) with <-succ-to-<-or-≡ℕ x n x<sn
+... | inl x<n = x<n
+... | inr x≡n = ex-falso (x≠n x≡n)
+
+replace-top-injℕ : (n v x y : ℕ) → ¬ (x ≡ v) → ¬ (y ≡ v) → (dx : is-decidable (x ≡ n)) → (dy : is-decidable (y ≡ n)) → replace-topℕ n v x dx ≡ replace-topℕ n v y dy → x ≡ y
+replace-top-injℕ n v x y x≠v y≠v (inl x≡n) (inl y≡n) p = concat x≡n (inv y≡n)
+replace-top-injℕ n v x y x≠v y≠v (inl x≡n) (inr y≠n) p = ex-falso (y≠v (inv p))
+replace-top-injℕ n v x y x≠v y≠v (inr x≠n) (inl y≡n) p = ex-falso (x≠v p)
+replace-top-injℕ n v x y x≠v y≠v (inr x≠n) (inr y≠n) p = p
+
+pigeonholeℕ : (N : ℕ) → (f : ℕ → ℕ) → ((i : ℕ) → i ≤ℕ N → f i <ℕ N) →
+  Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ N) × (f i ≡ f j)))
+pigeonholeℕ 0ℕ f bnd = ex-falso (<-zeroℕ (f 0ℕ) (bnd 0ℕ *))
+pigeonholeℕ (succℕ n) f bnd = result (bounded-Σℕ-is-decidable P dP n (λ i → proj₁))
+  where
+  v = f (succℕ n)
+  P : ℕ → Set
+  P i = (i ≤ℕ n) × (f i ≡ v)
+  dP : (i : ℕ) → is-decidable (P i)
+  dP i = with-decidable-prod (≤ℕ-is-decidable i n) (λ _ → ℕ-decidable-eq (f i) v)
+  result : is-decidable (Σ ℕ P) → Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ succℕ n) × (f i ≡ f j)))
+  result (inl (i , (i≤n , fi≡v))) = (i , (succℕ n , (≤-to-<-succℕ i n i≤n , (≤-rflℕ (succℕ n) , fi≡v))))
+  result (inr no-hit) = lift-collision (pigeonholeℕ n g g-bnd)
+    where
+    g : ℕ → ℕ
+    g i = replace-topℕ n v (f i) (ℕ-decidable-eq (f i) n)
+    g-bnd : (i : ℕ) → i ≤ℕ n → g i <ℕ n
+    g-bnd i i≤n = replace-top-<ℕ n v (f i) (bnd (succℕ n) (≤-rflℕ (succℕ n)))
+      (bnd i (≤-transℕ {i} {n} {succℕ n} i≤n (≤-succℕ n)))
+      (λ fi≡v → no-hit (i , (i≤n , fi≡v))) (ℕ-decidable-eq (f i) n)
+    lift-collision : Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ n) × (g i ≡ g j))) → Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ succℕ n) × (f i ≡ f j)))
+    lift-collision (i , (j , (i<j , (j≤n , gi≡gj)))) =
+      (i , (j , (i<j , (≤-transℕ {j} {n} {succℕ n} j≤n (≤-succℕ n) ,
+        replace-top-injℕ n v (f i) (f j)
+          (λ fi≡v → no-hit (i , (≤-transℕ {i} {j} {n} (<ℕ-to-≤ℕ i j i<j) j≤n , fi≡v)))
+          (λ fj≡v → no-hit (j , (j≤n , fj≡v)))
+          (ℕ-decidable-eq (f i) n) (ℕ-decidable-eq (f j) n) gi≡gj))))
+
+-- fib (a + b + 1) ≡ fib (a + 1)·fib (b + 1) + fib a·fib b
+fib-addℕ : (a b : ℕ) → fibℕ (succℕ (a +ℕ b)) ≡ fibℕ (succℕ a) ·ℕ fibℕ (succℕ b) +ℕ fibℕ a ·ℕ fibℕ b
+fib-addℕ a 0ℕ = refl
+fib-addℕ a (succℕ b) =
+  concat (ap (λ z → fibℕ (succℕ z)) (inv (succ-addℕ a b)))
+  (concat (fib-addℕ (succℕ a) b)
+  (concat (ap (λ z → z +ℕ fibℕ (succℕ a) ·ℕ fibℕ b) (right-distribℕ (fibℕ a) (fibℕ (succℕ a)) (fibℕ (succℕ b))))
+  (concat (add-reverseℕ (fibℕ a ·ℕ fibℕ (succℕ b)) (fibℕ (succℕ a) ·ℕ fibℕ (succℕ b)) (fibℕ (succℕ a) ·ℕ fibℕ b))
+          (ap (λ z → z +ℕ fibℕ a ·ℕ fibℕ (succℕ b)) (inv (left-distribℕ (fibℕ (succℕ a)) (fibℕ b) (fibℕ (succℕ b))))))))
+
+fib-succ-ne-zeroℕ : (n : ℕ) → ¬ (fibℕ (succℕ n) ≡ 0ℕ)
+fib-succ-ne-zeroℕ 0ℕ ()
+fib-succ-ne-zeroℕ (succℕ n) p = fib-succ-ne-zeroℕ n (proj₂ (add-to-zeroℕ (fibℕ n) (fibℕ (succℕ n)) p))
+
+-- Any common divisor of fib n and fib (n + 1) divides 1
+consecutive-fib-coprimeℕ : (n d : ℕ) → d ∣ fibℕ n → d ∣ fibℕ (succℕ n) → d ∣ 1ℕ
+consecutive-fib-coprimeℕ 0ℕ d _ d∣F1 = d∣F1
+consecutive-fib-coprimeℕ (succℕ n) d d∣Fn+1 d∣Fn+2 =
+  consecutive-fib-coprimeℕ n d (div-sum-partℕ (fibℕ n) (fibℕ (succℕ n)) d d∣Fn+2 d∣Fn+1) d∣Fn+1
+
+-- If d ∣ fib G, then d ∣ fib (G + n) iff d ∣ fib (G + 1)·fib n
+fib-shift-divℕ : (d G n : ℕ) → d ∣ fibℕ G → (d ∣ fibℕ (G +ℕ n)) ↔ (d ∣ fibℕ (succℕ G) ·ℕ fibℕ n)
+fib-shift-divℕ d G 0ℕ d∣FG = ((λ _ → div-zeroℕ d) , (λ _ → d∣FG))
+fib-shift-divℕ d G (succℕ n) d∣FG =
+  ((λ h → div-sum-partℕ X Y d (tr (d ∣_) (fib-addℕ G n) h) d∣Y) ,
+   (λ h → tr (d ∣_) (inv (fib-addℕ G n)) (div-sumℕ X Y d h d∣Y)))
+  where
+  X = fibℕ (succℕ G) ·ℕ fibℕ (succℕ n)
+  Y = fibℕ G ·ℕ fibℕ n
+  d∣Y : d ∣ Y
+  d∣Y = tr (d ∣_) (mul-commℕ (fibℕ n) (fibℕ G)) (div-mulℕ d (fibℕ G) (fibℕ n) d∣FG)
+
+-- If fib i ≡ fib (i + e) and fib (i + 1) ≡ fib (i + e + 1) mod d, then d ∣ fib e.
+-- Proof: run the recurrence backwards down to i = 0.
+fib-pair-back-divℕ : (d i e : ℕ) → fibℕ i ≡ℕ fibℕ (i +ℕ e) mod d → fibℕ (succℕ i) ≡ℕ fibℕ (succℕ (i +ℕ e)) mod d → d ∣ fibℕ e
+fib-pair-back-divℕ d 0ℕ e Fi-mod Fsi-mod = tr (λ z → d ∣ fibℕ z) (zero-addℕ e) (tr (d ∣_) (dist-zero-leftℕ (fibℕ (0ℕ +ℕ e))) Fi-mod)
+fib-pair-back-divℕ d (succℕ i) e Fi-mod Fsi-mod =
+  fib-pair-back-divℕ d i e
+    (add-cancel-modℕ d (fibℕ i) (fibℕ (i +ℕ e)) (fibℕ (succℕ i)) (fibℕ (succℕ (i +ℕ e))) Fssi-mod' Fsi-mod')
+    Fsi-mod'
+  where
+  Fsi-mod' : fibℕ (succℕ i) ≡ℕ fibℕ (succℕ (i +ℕ e)) mod d
+  Fsi-mod' = tr (λ z → fibℕ (succℕ i) ≡ℕ fibℕ z mod d) (succ-addℕ i e) Fi-mod
+  Fssi-mod' : fibℕ (succℕ (succℕ i)) ≡ℕ fibℕ (succℕ (succℕ (i +ℕ e))) mod d
+  Fssi-mod' = tr (λ z → fibℕ (succℕ (succℕ i)) ≡ℕ fibℕ (succℕ z) mod d) (succ-addℕ i e) Fsi-mod
+
+ne-zero-to-positiveℕ : (n : ℕ) → ¬ (n ≡ 0ℕ) → 0ℕ <ℕ n
+ne-zero-to-positiveℕ 0ℕ n≠0 = ex-falso (n≠0 refl)
+ne-zero-to-positiveℕ (succℕ n) _ = *
+
+mul-add-bounded-<ℕ : (k a b : ℕ) → a <ℕ succℕ k → b <ℕ succℕ k → a ·ℕ succℕ k +ℕ b <ℕ succℕ k ·ℕ succℕ k
+mul-add-bounded-<ℕ k a b a<m b<m = succ-≤-to-<ℕ (a ·ℕ succℕ k +ℕ b) (succℕ k ·ℕ succℕ k)
+  (≤-transℕ {succℕ (a ·ℕ succℕ k +ℕ b)} {a ·ℕ succℕ k +ℕ succℕ k} {succℕ k ·ℕ succℕ k}
+    (add-≤ℕ (a ·ℕ succℕ k) (succℕ b) (succℕ k) (<-to-succ-≤ℕ b (succℕ k) b<m))
+    (tr (λ z → z ≤ℕ succℕ k ·ℕ succℕ k) (succ-mulℕ a (succℕ k))
+      (proj₁ (≤-mulℕ (succℕ a) (succℕ k) k) (<-to-succ-≤ℕ a (succℕ k) a<m))))
+
+-- Every m > 0 divides fib x for some x > 0.
+-- Proof: pigeonhole on the pairs (fib i mod m, fib (i + 1) mod m), coded as
+-- numbers below m·m. A repeated pair at i < j gives m ∣ fib (j - i).
+has-fib-multipleℕ : (k : ℕ) → Σ ℕ (λ x → (0ℕ <ℕ x) × (succℕ k ∣ fibℕ x))
+has-fib-multipleℕ k = result (pigeonholeℕ (m ·ℕ m) code code-bnd)
+  where
+  m = succℕ k
+  rem : ℕ → ℕ
+  rem x = ιFin m ([ x ] m)
+  rem-< : (x : ℕ) → rem x <ℕ m
+  rem-< x = Fin-to-ℕ-bounded m ([ x ] m)
+  rem-to-modℕ : (x y : ℕ) → rem x ≡ rem y → x ≡ℕ y mod m
+  rem-to-modℕ x y p = proj₁ (Fin-k-is-ℕmod-k k x y) (Fin-to-ℕ-injective m ([ x ] m) ([ y ] m) p)
+  code : ℕ → ℕ
+  code i = rem (fibℕ i) ·ℕ m +ℕ rem (fibℕ (succℕ i))
+  code-bnd : (i : ℕ) → i ≤ℕ m ·ℕ m → code i <ℕ m ·ℕ m
+  code-bnd i _ = mul-add-bounded-<ℕ k (rem (fibℕ i)) (rem (fibℕ (succℕ i))) (rem-< (fibℕ i)) (rem-< (fibℕ (succℕ i)))
+  result : Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ m ·ℕ m) × (code i ≡ code j))) → Σ ℕ (λ x → (0ℕ <ℕ x) × (m ∣ fibℕ x))
+  result (i , (j , (i<j , (_ , code-eq)))) = (e , (0<e , fib-pair-back-divℕ m i e Fi-mod Fsi-mod))
+    where
+    div-eq = euclidean-div-uniqueℕ (code i) m
+      (rem (fibℕ i)) (rem (fibℕ j)) (rem (fibℕ (succℕ i))) (rem (fibℕ (succℕ j)))
+      (λ ()) refl code-eq (rem-< (fibℕ (succℕ i))) (rem-< (fibℕ (succℕ j)))
+    e = distℕ i j
+    i+e≡j : i +ℕ e ≡ j
+    i+e≡j = add-distℕ i j (<ℕ-to-≤ℕ i j i<j)
+    0<e : 0ℕ <ℕ e
+    0<e = ne-zero-to-positiveℕ e (λ e≡0 → <-antirflℕ i (tr (i <ℕ_) (inv (dist0-to-≡ℕ i j e≡0)) i<j))
+    Fi-mod : fibℕ i ≡ℕ fibℕ (i +ℕ e) mod m
+    Fi-mod = tr (λ z → fibℕ i ≡ℕ fibℕ z mod m) (inv i+e≡j) (rem-to-modℕ (fibℕ i) (fibℕ j) (proj₁ div-eq))
+    Fsi-mod : fibℕ (succℕ i) ≡ℕ fibℕ (succℕ (i +ℕ e)) mod m
+    Fsi-mod = tr (λ z → fibℕ (succℕ i) ≡ℕ fibℕ (succℕ z) mod m) (inv i+e≡j) (rem-to-modℕ (fibℕ (succℕ i)) (fibℕ (succℕ j)) (proj₂ div-eq))
+
+-- the least x > 0 with (k + 1) ∣ fib x
+cofib-woℕ : (k : ℕ) → Σ ℕ (λ x → ((0ℕ <ℕ x) × (succℕ k ∣ fibℕ x)) × is-lower-bound (λ y → (0ℕ <ℕ y) × (succℕ k ∣ fibℕ y)) x)
+cofib-woℕ k = ℕ-well-ordered (λ x → (0ℕ <ℕ x) × (succℕ k ∣ fibℕ x)) (λ x → with-decidable-prod (<ℕ-is-decidable 0ℕ x) λ 0<x → divℕ-decidable (succℕ k) (fibℕ x)) (has-fib-multipleℕ k)
+
+cofibℕ : ℕ → ℕ
+cofibℕ 0ℕ = 0ℕ
+cofibℕ (succℕ k) = proj₁ (cofib-woℕ k)
+
+-- Proof sketch: for n = 0 both sides say m ≡ 0. For n > 0 let G = cofibℕ n.
+--   to: n ∣ fib (q·G) by induction on q, using fib-shift-divℕ.
+--   from: write m = q·G + r with r < G. Strip off one G at a time with
+--   fib-shift-divℕ, cancelling fib (G + 1) by coprime-div-mulℕ, to get
+--   n ∣ fib r. Then r ≡ 0, since otherwise G ≤ r.
+cofib-propℕ : (n m : ℕ) → ((cofibℕ n ∣ m) ↔ (n ∣ fibℕ m))
+cofib-propℕ 0ℕ m = (to , from m)
+  where
+  to : (0ℕ ∣ m) → (0ℕ ∣ fibℕ m)
+  to (q , 0≡m) = (0ℕ , ap fibℕ 0≡m)
+  from : (m : ℕ) → (0ℕ ∣ fibℕ m) → (0ℕ ∣ m)
+  from 0ℕ _ = div-zeroℕ 0ℕ
+  from (succℕ m) (q , 0≡F) = ex-falso (fib-succ-ne-zeroℕ m (inv 0≡F))
+cofib-propℕ (succℕ k) m = (to , from)
+  where
+  n = succℕ k
+  wo = cofib-woℕ k
+  G = proj₁ wo
+  0<G : 0ℕ <ℕ G
+  0<G = proj₁ (proj₁ (proj₂ wo))
+  n∣FG : n ∣ fibℕ G
+  n∣FG = proj₂ (proj₁ (proj₂ wo))
+  G-lb = proj₂ (proj₂ wo)
+
+  mult : (q : ℕ) → n ∣ fibℕ (q ·ℕ G)
+  mult 0ℕ = tr (λ z → n ∣ fibℕ z) (inv (zero-mulℕ G)) (div-zeroℕ n)
+  mult (succℕ q) = tr (λ z → n ∣ fibℕ z) (inv (concat (succ-mulℕ q G) (add-commℕ (q ·ℕ G) G)))
+    (proj₂ (fib-shift-divℕ n G (q ·ℕ G) n∣FG) (div-mulℕ n (fibℕ (q ·ℕ G)) (fibℕ (succℕ G)) (mult q)))
+
+  to : (G ∣ m) → (n ∣ fibℕ m)
+  to (q , qG≡m) = tr (λ z → n ∣ fibℕ z) qG≡m (mult q)
+
+  coprime : gcdℕ n (fibℕ (succℕ G)) ≡ 1ℕ
+  coprime = div-one-to-eq-oneℕ g
+    (consecutive-fib-coprimeℕ G g (div-transℕ g n (fibℕ G) (proj₁ g-div) n∣FG) (proj₂ g-div))
+    where
+    g = gcdℕ n (fibℕ (succℕ G))
+    g-div = proj₂ (gcd-is-gcdℕ n (fibℕ (succℕ G)) g) (div-rflℕ g)
+
+  strip : (q r : ℕ) → n ∣ fibℕ (q ·ℕ G +ℕ r) → n ∣ fibℕ r
+  strip 0ℕ r h = tr (λ z → n ∣ fibℕ z) (concat (ap (λ z → z +ℕ r) (zero-mulℕ G)) (zero-addℕ r)) h
+  strip (succℕ q) r h = strip q r (coprime-div-mulℕ n (fibℕ (succℕ G)) (fibℕ (q ·ℕ G +ℕ r)) coprime
+    (proj₁ (fib-shift-divℕ n G (q ·ℕ G +ℕ r) n∣FG) (tr (λ z → n ∣ fibℕ z) index-eq h)))
+    where
+    index-eq : succℕ q ·ℕ G +ℕ r ≡ G +ℕ (q ·ℕ G +ℕ r)
+    index-eq = concat (ap (λ z → z +ℕ r) (concat (succ-mulℕ q G) (add-commℕ (q ·ℕ G) G))) (add-assocℕ G (q ·ℕ G) r)
+
+  G≠0 : ¬ (G ≡ 0ℕ)
+  G≠0 G≡0 = <-antirflℕ 0ℕ (tr (0ℕ <ℕ_) G≡0 0<G)
+
+  from : (n ∣ fibℕ m) → (G ∣ m)
+  from h = result (euclidean-divℕ m G G≠0)
+    where
+    result : Σ ℕ (λ q → Σ ℕ (λ r → (m ≡ q ·ℕ G +ℕ r) × (r <ℕ G))) → G ∣ m
+    result (q , (r , (m-eq , r<G))) with ℕ-decidable-eq r 0ℕ
+    ... | inl r≡0 = (q , inv (concat m-eq (ap (q ·ℕ G +ℕ_) r≡0)))
+    ... | inr r≠0 = ex-falso (<-to-≱ r G r<G
+      (G-lb r (ne-zero-to-positiveℕ r r≠0 , strip q r (tr (λ z → n ∣ fibℕ z) m-eq h))))
