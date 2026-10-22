@@ -1298,19 +1298,63 @@ hom-equiv-fam-fib-map f g = action-on-fibers f g , action-on-fibers-is-equiv f g
 -- 13.15c
 -- (i) is-equiv h   ⇔   (ii) is-equiv-fam (action-on-fibers f g (h , H))
 -- is 11.11b: comm-tri-equiv-h-iff-fam-equiv-fib-tri f g h H.
--- Remaining: (i) ⇔ (iii), precomposition with (h , H) is an equivalence.
+-- (i) ⇔ (iii), precomposition with (h , H) is an equivalence, is below.
 
 hom-precomp : {A B C X : Set} → (f : A → X) → (g : B → X) → (i : C → X)
   → hom f g → hom g i → hom f i
-hom-precomp f g i φ ψ = (proj₁ ψ ∘ proj₁ φ) , concat-htpy (proj₂ φ) (λ a → proj₂ ψ (proj₁ φ a))
+hom-precomp f g i φ ψ =
+  (proj₁ ψ ∘ proj₁ φ) , concat-htpy (proj₂ φ) (λ a → proj₂ ψ (proj₁ φ a))
 
 equiv-h-to-equiv-hom-precomp : {A B X : Set} → (f : A → X) → (g : B → X)
   → (φ : hom f g) → is-equiv (proj₁ φ)
   → {C : Set} → (i : C → X) → is-equiv (hom-precomp f g i φ)
-equiv-h-to-equiv-hom-precomp {A} {B} {X} f g φ hequiv {C} i = {!   !}
+equiv-h-to-equiv-hom-precomp {A} {B} {X} f g φ hequiv {C} i =
+  g-equiv-to-tot-fam-equiv
+    (precomp h C)
+    (λ k K → concat-htpy H λ a → K (h a))
+    (is-equiv-to-precomp-Π-is-equiv h hequiv λ v → C)
+    λ k → equiv-comp
+      (precomp-Π h (λ z → g z ≡ (i ∘ k) z))
+      (concat-htpy H)
+      (is-equiv-to-precomp-Π-is-equiv h hequiv λ z → g z ≡ (i ∘ k) z)
+      (concat-htpy-equiv H)
+  where
+    h : A → B
+    h = proj₁ φ
+    H = proj₂ φ
 
+-- a hom into the trivial projection X × Y → X is just a map into Y
+hom-proj₁-to-fun : {A X : Set} → (f : A → X) → (Y : Set)
+  → hom f (proj₁ {A = X} {B = λ _ → Y}) → (A → Y)
+hom-proj₁-to-fun f Y ψ a = proj₂ (proj₁ ψ a)
+
+hom-proj₁-to-fun-is-equiv : {A X : Set} → (f : A → X) → (Y : Set)
+  → is-equiv (hom-proj₁-to-fun f Y)
+hom-proj₁-to-fun-is-equiv {A} {X} f Y = (bwd , λ y → refl) , (bwd , retr-htpy)
+  where
+  bwd : (A → Y) → hom f (proj₁ {A = X} {B = λ _ → Y})
+  bwd y = (λ a → f a , y a) , λ a → refl
+  -- pointwise, ((x₀ , y) , refl) is the centre of the singleton at x₀
+  pt : (x₀ : X) → (w : X × Y) → (p : x₀ ≡ proj₁ w) → ((x₀ , proj₂ w) , refl) ≡ (w , p)
+  pt x₀ (.x₀ , y) refl = refl
+  retr-htpy : bwd ∘ hom-proj₁-to-fun f Y ∼ id
+  retr-htpy (k , K) = ap choice (eq-htpy _ _ λ a → pt (f a) (k a) (K a))
+
+-- test against i := proj₁ : X × Y → X; the square
+--   hom g proj₁ ──hom-precomp φ──▶ hom f proj₁
+--        │                              │
+--     (B → Y) ────── − ∘ h ───────▶ (A → Y)
+-- commutes definitionally, so − ∘ h is an equivalence for every Y (13.4.1)
 equiv-hom-precomp-to-equiv-h : {A B X : Set} → (f : A → X) → (g : B → X)
   → (φ : hom f g)
   → ({C : Set} → (i : C → X) → is-equiv (hom-precomp f g i φ))
   → is-equiv (proj₁ φ)
-equiv-hom-precomp-to-equiv-h f g φ precomp-equiv = {!   !}
+equiv-hom-precomp-to-equiv-h f g φ precomp-equiv =
+  precomp-is-equiv-to-is-equiv (proj₁ φ) λ Y →
+    3-for-2-f-h-to-g
+      (hom-proj₁-to-fun f Y ∘ hom-precomp f g proj₁ φ)
+      (precomp (proj₁ φ) Y)
+      (hom-proj₁-to-fun g Y)
+      (λ _ → refl)
+      (equiv-comp _ _ (precomp-equiv proj₁) (hom-proj₁-to-fun-is-equiv f Y))
+      (hom-proj₁-to-fun-is-equiv g Y)
