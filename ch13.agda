@@ -1358,3 +1358,151 @@ equiv-hom-precomp-to-equiv-h f g φ precomp-equiv =
       (λ _ → refl)
       (equiv-comp _ _ (precomp-equiv proj₁) (hom-proj₁-to-fun-is-equiv f Y))
       (hom-proj₁-to-fun-is-equiv g Y)
+
+-- 13.16
+-- Defining type of isomorphisms
+infix 0 _≅_
+_≅_ : Set → Set → Set
+A ≅ B = Σ (A → B) (λ f → Σ (B → A) (λ g → (f ∘ g ≡ id) × (g ∘ f ≡ id)))
+
+equiv-≃-iso : {A B : Set} → is-set A → is-set B → (A ≃ B) ≃ (A ≅ B)
+equiv-≃-iso {A} {B} Aset Bset =
+  tot-≃
+    λ f →
+      iff-to-≃
+        (equiv-is-prop f)
+        (λ x y → contr-to-eq-contr (iso-contr f x) x y)
+        ((λ {((g , fg) , (h , hf)) →
+                g , (eq-htpy _ _ fg , eq-htpy _ _ (λ x → concat (sec-equiv-retr f (g , fg) (h , hf) (f x)) (hf x)))})
+        , (λ {(g , (fg , gf)) → (g , htpy-eq _ _ fg) , (g , htpy-eq _ _ gf)}))
+  where
+    -- inhabited ⇒ f is an equivalence ⇒ the type of iso data is contractible
+    iso-contr : (f : A → B) → Σ (B → A) (λ g → (f ∘ g ≡ id) × (g ∘ f ≡ id))
+      → is-contr (Σ (B → A) (λ g → (f ∘ g ≡ id) × (g ∘ f ≡ id)))
+    iso-contr f x =
+      is-contr-codomain-equiv (proj₁ reassoc) (is-prop'-to-inhab-contr (is-prop-to-is-prop' Σ-prop) (proj₁ (proj₁ (proj₂ reassoc)) x)) (proj₂ reassoc)
+      where
+        e : is-equiv f
+        e = (proj₁ x , htpy-eq _ _ (proj₁ (proj₂ x))) , (proj₁ x , htpy-eq _ _ (proj₂ (proj₂ x)))
+        sec-≃ : Σ (B → A) (λ g → f ∘ g ≡ id) ≃ sec f
+        sec-≃ = tot-≃ (λ g → htpy-eq (f ∘ g) id , fun-ext _ _)
+        -- sections are unique, so the base is contractible (no sethood needed)
+        base-contr : is-contr (Σ (B → A) (λ g → f ∘ g ≡ id))
+        base-contr = is-contr-domain-equiv (proj₁ sec-≃) (equiv-to-contr-sec f e) (proj₂ sec-≃)
+        -- A is a set, so A → A is a set and the extra homotopy is a proposition
+        Σ-prop : is-prop (Σ (Σ (B → A) (λ g → f ∘ g ≡ id)) (λ w → proj₁ w ∘ f ≡ id))
+        Σ-prop = fam-trunc-to-Σ-trunc {k = succ𝕋 -2𝕋} (type-is-succ-type base-contr)
+          (λ w → codom-trunc-to-→-trunc {k = succ𝕋 (succ𝕋 -2𝕋)} Aset (proj₁ w ∘ f) id)
+        reassoc = Σ-assoc (λ g → f ∘ g ≡ id) (λ w → proj₁ w ∘ f ≡ id)
+
+-- 13.17
+fam-contr-to-Π-contr : {I : Set} → {A : I → Set} → is-set I → has-decidable-eq I → ((i : I) → is-contr (A i)) → is-contr ((i : I) → A i)
+fam-contr-to-Π-contr Iset Ideceq icontrAi = (λ i → proj₁ (icontrAi i)) , λ iAi → eq-htpy _ _ λ i → proj₂ (icontrAi i) (iAi i)
+
+Π-contr-to-fam-contr : {I : Set} → {A : I → Set} → is-set I → has-decidable-eq I → is-contr ((i : I) → A i) → ((i : I) → is-contr (A i))
+Π-contr-to-fam-contr {I} {A} Iset Ideceq (iAi , eqiAi) i = (iAi i) , (λ ai → concat (ai-ext-eq-ai ai) (htpy-eq _ _ (eqiAi (ext ai)) i))
+  where
+    ext : A i → (j : I) → A j
+    ext ai j with Ideceq i j
+    ... | inl ieqj = tr A ieqj ai
+    ... | inr ineqj = iAi j
+
+    ai-ext-eq-ai : (x : A i) → x ≡ ext x i
+    ai-ext-eq-ai x with Ideceq i i
+    ... | inl p = ap (λ q → tr A q x) (proj₁ (Iset i i refl p))
+    ... | inr np = ex-falso (np refl)
+
+-- 13.18 (Shulman)
+seq-lim : {X : Set} → (f : X → X) → Set
+seq-lim {X} f = Σ (ℕ → X) (λ x → (n : ℕ) → f (x (succℕ n)) ≡ x n)
+
+-- Paths in seq-lim g: a homotopy K : x ∼ y on the sequences, plus a coherence filling
+--   g (x (n+1)) ──p n──▶ x n
+--        │                 │
+--  ap g (K (n+1))         K n
+--        ▼                 ▼
+--   g (y (n+1)) ──q n──▶ y n
+-- First for a path e : x ≡ y (so we can path-induct), then for K via eq-htpy.
+eq-seq-lim-path : {X : Set} → (g : X → X) → (x y : ℕ → X)
+  → (p : (n : ℕ) → g (x (succℕ n)) ≡ x n) → (q : (n : ℕ) → g (y (succℕ n)) ≡ y n)
+  → (e : x ≡ y)
+  → ((n : ℕ) → concat (p n) (htpy-eq x y e n) ≡ concat (ap g (htpy-eq x y e (succℕ n))) (q n))
+  → _≡_ {A = seq-lim g} (x , p) (y , q)
+eq-seq-lim-path g x .x p q refl c = eq-pair _ _ (refl , eq-htpy _ _ λ n → concat (inv (right-unit _)) (concat (c n) (left-unit _)))
+
+eq-seq-lim : {X : Set} → (g : X → X) → (x y : ℕ → X)
+  → (p : (n : ℕ) → g (x (succℕ n)) ≡ x n) → (q : (n : ℕ) → g (y (succℕ n)) ≡ y n)
+  → (K : x ∼ y)
+  → ((n : ℕ) → concat (p n) (K n) ≡ concat (ap g (K (succℕ n))) (q n))
+  → _≡_ {A = seq-lim g} (x , p) (y , q)
+eq-seq-lim g x y p q K c = eq-seq-lim-path g x y p q (eq-htpy x y K) λ n →
+  tr (λ L → concat (p n) (L n) ≡ concat (ap g (L (succℕ n))) (q n)) (inv (htpy-eq-eq-htpy x y K)) (c n)
+
+-- drop the first term of a compatible sequence
+shift : {X : Set} → (g : X → X) → seq-lim g → seq-lim g
+shift g (x , p) = (λ n → x (succℕ n)) , (λ n → p (succℕ n))
+
+-- apply g to every term
+push : {X : Set} → (g : X → X) → seq-lim g → seq-lim g
+push g (x , p) = (λ n → g (x n)) , (λ n → ap g (p n))
+
+push-shift : {X : Set} → (g : X → X) → (s : seq-lim g) → push g (shift g s) ≡ s
+push-shift g (x , p) = eq-seq-lim g _ x _ p p (λ n → refl)
+
+push-is-equiv : {X : Set} → (g : X → X) → is-equiv (push g)
+push-is-equiv g = (shift g , push-shift g) , (shift g , λ {(x , p) → push-shift g (x , p)})
+
+-- the tower A ←id─ A ←id─ A ← … collapses onto its first term
+seq-lim-id-≃ : {A : Set} → seq-lim (id {A}) ≃ A
+seq-lim-id-≃ {A} = ev-zero , ((const-seq , (λ a → refl)) , (const-seq , const-seq-ev-zero))
+  where
+    ev-zero : seq-lim (id {A}) → A
+    ev-zero (x , p) = x 0ℕ
+
+    const-seq : A → seq-lim (id {A})
+    const-seq a = (λ n → a) , (λ n → refl)
+
+    -- path from the first term to the n-th, walking along p
+    K : (x : ℕ → A) → (p : (n : ℕ) → x (succℕ n) ≡ x n) → (n : ℕ) → x 0ℕ ≡ x n
+    K x p 0ℕ = refl
+    K x p (succℕ n) = concat (K x p n) (inv (p n))
+
+    const-seq-ev-zero : (s : seq-lim (id {A})) → const-seq (ev-zero s) ≡ s
+    const-seq-ev-zero (x , p) = eq-seq-lim id _ _ _ _ (K x p) c
+      where
+        c : (n : ℕ) → concat refl (K x p n) ≡ concat (ap id (K x p (succℕ n))) (p n)
+        c n = concat (left-unit _) (inv (concat (ap (λ q → concat q (p n)) (ap-id _))
+                (concat (assoc (K x p n) (inv (p n)) (p n)) (concat (ap (concat (K x p n)) (left-inv (p n))) (right-unit _)))))
+
+retract-≃-seq-lim : {A X : Set} → (i : A → X) → (r : X → A) → (H : r ∘ i ∼ id) → A ≃ seq-lim (i ∘ r)
+retract-≃-seq-lim {A} {X} i r H =
+  inv-≃ (concat-≃ (r* , r*-is-equiv) (concat-≃ seq-lim-ri-≃-id seq-lim-id-≃))
+  where
+    f : X → X
+    f = i ∘ r
+
+    -- the interleaved tower  X ←i─ A ←r─ X ←i─ A ←r─ …
+    -- apply r (resp. i) to every term to pass between the two subtowers
+    r* : seq-lim f → seq-lim (r ∘ i)
+    r* (x , p) = (λ n → r (x n)) , (λ n → ap r (p n))
+
+    i* : seq-lim (r ∘ i) → seq-lim f
+    i* (y , q) = (λ n → i (y n)) , (λ n → ap i (q n))
+
+    i*-r* : (s : seq-lim f) → i* (r* s) ≡ push f s
+    i*-r* (x , p) = eq-seq-lim f _ _ _ _ (λ n → refl)
+      λ n → concat (right-unit _) (concat (ap-comp r i (p n)) (inv (left-unit _)))
+
+    r*-i* : (t : seq-lim (r ∘ i)) → r* (i* t) ≡ push (r ∘ i) t
+    r*-i* (y , q) = eq-seq-lim (r ∘ i) _ _ _ _ (λ n → refl)
+      λ n → concat (right-unit _) (concat (ap-comp i r (q n)) (inv (left-unit _)))
+
+    -- i* is an inverse only up to push, so correct it by a shift on either side
+    r*-is-equiv : is-equiv r*
+    r*-is-equiv =
+      ((i* ∘ shift (r ∘ i)) , λ t → concat (r*-i* (shift (r ∘ i) t)) (push-shift (r ∘ i) t)) ,
+      ((shift f ∘ i*) , λ s → concat (ap (shift f) (i*-r* s)) (proj₂ (proj₂ (push-is-equiv f)) s))
+
+    -- H : r ∘ i ∼ id becomes a path r ∘ i ≡ id; transport seq-lim along it
+    seq-lim-ri-≃-id : seq-lim (r ∘ i) ≃ seq-lim (id {A})
+    seq-lim-ri-≃-id = tr seq-lim (eq-htpy (r ∘ i) id H) , is-equiv-tr (eq-htpy (r ∘ i) id H)
