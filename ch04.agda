@@ -168,7 +168,7 @@ _∨𝟚_ : 𝟚 → 𝟚 → 𝟚
 b ∨𝟚 true = true
 b ∨𝟚 false = b
 
-infix 3 _↔_
+infix 0 _↔_
 _↔_ : Set → Set → Set
 P ↔ Q = (P → Q) × (Q → P)
 

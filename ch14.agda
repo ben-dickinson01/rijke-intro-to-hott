@@ -123,3 +123,57 @@ map-prop-trunc-comp : {A B C : Set} → (f : A → B) → (g : B → C)
   → map-prop-trunc (g ∘ f) ∼ (map-prop-trunc g ∘ map-prop-trunc f)
 map-prop-trunc-comp f g x = α _ _
 
+infixr 1 _∨_
+_∨_ : (P Q : Set) → Set
+P ∨ Q = ∥ P ⊎ Q ∥
+
+inl∨ : {P Q : Set} → P → P ∨ Q
+inl∨ = η ∘ inl
+
+inr∨ : {P Q : Set} → Q → P ∨ Q
+inr∨ = η ∘ inr
+
+∨-prop : (P Q : Set) → is-prop (P ∨ Q)
+∨-prop P Q = prop-trunc-is-prop (P ⊎ Q)
+
+-- case split on a disjunction, when the goal is a proposition
+elim∨ : {P Q R : Set} → is-prop R → (P → R) → (Q → R) → P ∨ Q → R
+elim∨ {P} {Q} {R} Rprop pr qr = rec-prop-trunc R Rprop (λ { (inl x) → pr x ; (inr x) → qr x })
+
+∨-up : {P Q R : Set} → is-prop R → (P ∨ Q → R) ↔ ((P → R) × (Q → R))
+∨-up {P} {Q} {R} Rprop = (λ pvq→r → (λ p → pvq→r (inl∨ p)) , λ q → pvq→r (inr∨ q)) , λ { (pr , qr) → elim∨ Rprop pr qr }
+
+∃ : (A : Set) → (P : A → Set) → Set
+∃ A P = ∥ Σ A P ∥
+
+-- Proposition 14.3.4
+∃-intro : {A : Set} → (P : A → Set) → (a : A) → P a → ∃ A P
+∃-intro P a p = η (a , p)
+
+∃-prop : {A : Set} → (P : A → Set) → is-prop (∃ A P)
+∃-prop {A} P = prop-trunc-is-prop (Σ A P)
+
+-- take a witness out of an existential, when the goal is a proposition
+elim∃ : {A Q : Set} → (P : A → Set) → is-prop Q → ((x : A) → P x → Q) → ∃ A P → Q
+elim∃ {A} {Q} P Qprop xPxQ = rec-prop-trunc Q Qprop (λ { (x , x₁) → xPxQ x x₁ })
+
+∃-up : {A Q : Set} → (P : A → Set) → is-prop Q → (∃ A P → Q) ↔ ((x : A) → P x → Q)
+∃-up {A} {Q} P Qprop = (λ exQ x Px → exQ (η (x , Px))) , elim∃ P Qprop
+
+-- Table on p. 181: propositions are closed under every logical connective
+--
+--   connective       interpretation      closure lemma
+--   ⊤                𝟙                   unit-prop   (ch12)
+--   ⊥                𝟘                   empty-prop  (ch12)
+--   P ⇒ Q            P → Q               →-prop
+--   P ∧ Q            P × Q               prop-×      (ch12)
+--   P ∨ Q            ∥ P ⊎ Q ∥           ∨-prop
+--   P ⇔ Q            P ↔ Q               ↔-prop
+--   ∃ (x : A) P x    ∥ Σ A P ∥           ∃-prop
+--   ∀ (x : A) P x    (x : A) → P x       Π-prop
+
+↔-prop : {P Q : Set} → is-prop P → is-prop Q → is-prop (P ↔ Q)
+↔-prop {P} {Q} Pprop Qprop = prop-× (→-prop P Q Qprop) (→-prop Q P Pprop)
+
+Π-prop : {A : Set} → (B : A → Set) → ((x : A) → is-prop (B x)) → is-prop ((x : A) → B x)
+Π-prop {A} B Bprop = fam-trunc-to-Π-trunc Bprop
