@@ -56,7 +56,7 @@ equiv-to-prop-trunc-to-prop-trunc Pprop Pprop' f f' (e , eq) fproptrunc Q Qprop 
 
 -- Remark 14.1.5: A → ¬¬A has the universal property, but only against doubly negated propositions
 precomp-dni-¬¬-is-equiv : (A Q : Set) → is-equiv (precomp (dni {A}) (¬¬ Q))
-precomp-dni-¬¬-is-equiv A Q = ext-to-precomp-is-equiv (λ a na → na a) (¬¬ Q) (¬-prop (¬ Q)) λ z z₁ z₂ → z₁ (λ z₃ → z z₃ z₂)
+precomp-dni-¬¬-is-equiv A Q = ext-to-precomp-is-equiv dni (¬¬ Q) (¬-prop (¬ Q)) dn-bind
 
 -- 14.2 Propositional truncations as higher inductive types
 
@@ -275,3 +275,68 @@ prop-trunc-set-up A {B} Bset = (ψ , φψ) , (ψ , ψφ)
         ψφ : ψ ∘ prop-trunc-to-weakly-constant ∼ id
         ψφ g = eq-htpy _ _ (set-ext-along-η-unique Bset (g ∘ η) (ψ (prop-trunc-to-weakly-constant g)) g (λ a → inv (weakly-constant-ext-η Bset (g ∘ η) _ a)) (λ a → refl))
 
+-- Exercises
+-- 14.1
+-- a
+double-prop-trunc-to-prop-trunc : {A : Set} → ∥ ∥ A ∥ ∥ → ∥ A ∥
+double-prop-trunc-to-prop-trunc {A} = rec-prop-trunc ∥ A ∥ (prop-trunc-is-prop A) id
+
+prop-trunc-to-double-prop-trunc : {A : Set} → ∥ A ∥ → ∥ ∥ A ∥ ∥
+prop-trunc-to-double-prop-trunc ta = η ta
+
+-- b
+prop-trunc-dec-to-dec-prop-trunc : {A : Set} → ∥ is-decidable A ∥ → is-decidable ∥ A ∥
+prop-trunc-dec-to-dec-prop-trunc {A} = rec-prop-trunc (is-decidable ∥ A ∥) (to-neg-to-prop-⊎ (prop-trunc-is-prop A) (¬-prop ∥ A ∥) dni) λ {(inl a) → inl (η a)
+                                                                                    ; (inr na) → inr (rec-prop-trunc 𝟘 empty-prop na)}
+
+dec-prop-trunc-to-prop-trunc-dec : {A : Set} → is-decidable ∥ A ∥ → ∥ is-decidable A ∥
+dec-prop-trunc-to-prop-trunc-dec {A} (inl t) = map-prop-trunc inl t
+dec-prop-trunc-to-prop-trunc-dec {A} (inr nt) = η (inr λ a → nt (η a))
+
+-- c
+prop-has-global-choice : {P : Set} → is-prop P → ∥ P ∥ → P
+prop-has-global-choice {P} Pprop = rec-prop-trunc P Pprop id
+
+is-dec-to-global-choice : {A : Set} → is-decidable A → has-global-choice A 
+is-dec-to-global-choice (inl a) t = a
+is-dec-to-global-choice (inr na) t = ex-falso (prop-has-global-choice empty-prop (map-prop-trunc na t))
+
+-- d
+¬¬-prop-trunc-to-¬¬ : {A : Set} → ¬¬ ∥ A ∥ → ¬¬ A
+¬¬-prop-trunc-to-¬¬ {A} = dn-bind (rec-prop-trunc (¬¬ A) (¬-prop (¬ A)) dni)
+
+¬¬-to-¬¬-prop-trunc : {A : Set} → ¬¬ A → ¬¬ ∥ A ∥
+¬¬-to-¬¬-prop-trunc = dn-functor η
+
+-- e
+∨-prop-trunc-to-∨ : {A B : Set} → ∥ A ∥ ∨ ∥ B ∥ → A ∨ B
+∨-prop-trunc-to-∨ {A} {B} = rec-prop-trunc (A ∨ B) (prop-trunc-is-prop _) λ {(inl ta) → map-prop-trunc inl ta
+                                                                           ; (inr tb) → map-prop-trunc inr tb}
+
+∨-to-∨-prop-trunc : {A B : Set} → ∥ A ⊎ B ∥ → ∥ A ∥ ∨ ∥ B ∥
+∨-to-∨-prop-trunc {A} {B} t = rec-prop-trunc (∥ A ∥ ∨ ∥ B ∥) (prop-trunc-is-prop _) (λ {(inl a) → η (inl (η a))
+                                                                                      ; (inr b) → η (inr (η b))}) t
+
+-- f
+∃-prop-trunc-to-∃ : {A : Set} → (B : A → Set) → ∃ A (λ x → ∥ B x ∥) → ∥ Σ A B ∥
+∃-prop-trunc-to-∃ {A} B = rec-prop-trunc ∥ Σ A B ∥ (prop-trunc-is-prop _) λ {(a , tb) → map-prop-trunc ((_,_ a)) tb}
+
+∃-to-∃-prop-trunc : {A : Set} → (B : A → Set) → ∥ Σ A B ∥ → ∃ A (λ x → ∥ B x ∥)
+∃-to-∃-prop-trunc {A} B = rec-prop-trunc (∃ A (λ x → ∥ B x ∥)) (prop-trunc-is-prop _) λ {(a , b) → η (a , η b)}
+
+-- g
+¬¬-global-choice : {A : Set} → ¬¬ (has-global-choice A)
+¬¬-global-choice {A} = dn-functor is-dec-to-global-choice dn-lem
+
+-- 14.2
+mere-eq : {A : Set} → A → A → Set
+mere-eq x y = ∥ x ≡ y ∥
+
+mere-eq-is-rfl : (A : Set) → is-reflexive (mere-eq {A})
+mere-eq-is-rfl A x = η refl
+
+mere-eq-is-symm : (A : Set) → is-symmetric (mere-eq {A})
+mere-eq-is-symm A x y tp = map-prop-trunc inv tp
+
+mere-eq-is-trans : (A : Set) → is-transitive (mere-eq {A})
+mere-eq-is-trans A x y z tp tq = rec-prop-trunc ∥ x ≡ z ∥ (prop-trunc-is-prop _) (λ p → map-prop-trunc (concat p) tq) tp

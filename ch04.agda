@@ -175,6 +175,8 @@ P ↔ Q = (P → Q) × (Q → P)
 ex-4-3-a : {P : Set} → ¬ (P × ¬ P)
 ex-4-3-a (p , np) = ex-falso (np p)
 
+non-contradiction = ex-4-3-a
+
 ex-4-3-b : {P : Set} → ¬ (P ↔ ¬ P)
 ex-4-3-b {P} (x , y) = f p
   where
@@ -203,6 +205,8 @@ dn-functor = ex-4-3-b-ii
 ex-4-3-b-iii : {P Q : Set} → (P → ¬¬ Q) → (¬¬ P → ¬¬ Q)
 ex-4-3-b-iii f nnp nq = nnp λ p → f p nq
 
+dn-bind = ex-4-3-b-iii
+
 ex-4-3-c-i : {P : Set} → ¬¬ (¬¬ P → P)
 ex-4-3-c-i {P} f = f (λ nnp → ex-falso (nnp (λ p → f (λ _ → p))))
 
@@ -215,9 +219,13 @@ ex-4-3-c-iii f = f (inr λ q → ex-falso (f (inl λ p → q)))
 ex-4-3-c-iv : {P : Set} → ¬¬ (P ⊎ ¬ P)
 ex-4-3-c-iv f = f (inr λ p → f (inl p))
 
+dn-lem = ex-4-3-c-iv
+
 ex-4-3-d-i : {P : Set} → (P ⊎ ¬ P) → (¬¬ P → P)
 ex-4-3-d-i (inl p) nnp = p
 ex-4-3-d-i (inr np) nnp = ex-falso (nnp np)
+
+dec-to-dne = ex-4-3-d-i
 
 ex-4-3-d-ii : {P Q : Set} → ¬¬ (Q → P) ↔ ((P ⊎ ¬ P) → (Q → P))
 ex-4-3-d-ii {P} {Q} = (to , from)
@@ -231,6 +239,8 @@ ex-4-3-d-ii {P} {Q} = (to , from)
 
 ex-4-3-e-i : {P : Set} → ¬¬¬ P → ¬ P
 ex-4-3-e-i nnnp p = nnnp λ np → np p
+
+¬¬¬-to-¬ = ex-4-3-e-i
 
 ex-4-3-e-ii : {P Q : Set} → ¬¬ (P → ¬¬ Q) → (P → ¬¬ Q)
 ex-4-3-e-ii f p nq = f λ pnnq → pnnq p nq
@@ -247,6 +257,8 @@ ex-4-3-f-i = (to , from)
   from : {P Q : Set} → ((¬¬ P) × (¬¬ Q)) → ¬¬ (P × Q)
   from (nnp , nnq) f = nnp λ p → nnq λ q → f ((p , q))
 
+dn-×-iff = ex-4-3-f-i
+
 ex-4-3-f-ii : {P Q : Set} → ¬¬ (P ⊎ Q) ↔ ¬ (¬ P × ¬ Q)
 ex-4-3-f-ii = (to , from) where
   to : {P Q : Set} → ¬¬ (P ⊎ Q) → ¬ (¬ P × ¬ Q)
@@ -257,6 +269,8 @@ ex-4-3-f-ii = (to , from) where
   from : {P Q : Set} → ¬ (¬ P × ¬ Q) → ¬¬ (P ⊎ Q)
   from f npuq = f ((λ p → npuq (inl p)) , λ q → npuq (inr q))
 
+dn-⊎-iff = ex-4-3-f-ii
+
 ex-4-3-f-iii : {P Q : Set} → ¬¬ (P → Q) ↔ (¬¬ P → ¬¬ Q)
 ex-4-3-f-iii = (to , from) where
   to : {P Q : Set} → ¬¬ (P → Q) → (¬¬ P → ¬¬ Q)
@@ -264,6 +278,8 @@ ex-4-3-f-iii = (to , from) where
 
   from : {P Q : Set} → (¬¬ P → ¬¬ Q) → ¬¬ (P → Q)
   from f npq = npq (λ p → ex-falso (f (λ np → np p) λ q → npq λ _ → q))
+
+dn-→-iff = ex-4-3-f-iii
 
 infixr 7 _∷_
 
