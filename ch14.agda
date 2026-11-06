@@ -340,3 +340,82 @@ mere-eq-is-symm A x y tp = map-prop-trunc inv tp
 
 mere-eq-is-trans : (A : Set) → is-transitive (mere-eq {A})
 mere-eq-is-trans A x y z tp tq = rec-prop-trunc ∥ x ≡ z ∥ (prop-trunc-is-prop _) (λ p → map-prop-trunc (concat p) tq) tp
+
+-- 14.3
+prop-truncs-to-×'-is-prop-trunc : {A B P Q : Set} → (Pprop : is-prop P) → (Qprop : is-prop Q) → (f : A → P) → (g : B → Q)
+  → is-prop-trunc Pprop f → is-prop-trunc Qprop g → is-prop-trunc (prop-× Pprop Qprop) (f ×' g)
+prop-truncs-to-×'-is-prop-trunc {A} {B} {P} {Q} Pprop Qprop f g fproptrunc gproptrunc =
+  ext-to-is-prop-trunc (prop-× Pprop Qprop) (f ×' g) λ { R Rprop h (p , q) →
+    is-prop-trunc-to-ext Pprop f fproptrunc (Q → R) (→-prop Q R Rprop)
+      (λ a → is-prop-trunc-to-ext Qprop g gproptrunc R Rprop (λ b → h (a , b))) p q }
+
+-- the conclusion of 14.3: ∥ A × B ∥ ≃ ∥ A ∥ × ∥ B ∥
+prop-trunc-×-≃-×-prop-trunc : {A B : Set} → ∥ A × B ∥ ≃ ∥ A ∥ × ∥ B ∥
+prop-trunc-×-≃-×-prop-trunc {A} {B} =
+  prop-truncs-to-equiv (prop-trunc-is-prop (A × B)) (prop-× (prop-trunc-is-prop A) (prop-trunc-is-prop B))
+    η (η ×' η) η-is-prop-trunc
+    (prop-truncs-to-×'-is-prop-trunc (prop-trunc-is-prop A) (prop-trunc-is-prop B) η η η-is-prop-trunc η-is-prop-trunc)
+
+-- 14.4
+is-dep-prop-trunc : {A P : Set} → is-prop P → (f : A → P) → Set₁
+is-dep-prop-trunc {A} {P} Pprop f = (Q : P → Set) → ((p : P) → is-prop (Q p)) → is-equiv (precomp-Π f Q)
+
+-- (i) implies (ii)
+prop-trunc-to-dep-prop-trunc : {A P : Set} → (Pprop : is-prop P) → (f : A → P)
+  → is-prop-trunc Pprop f → is-dep-prop-trunc Pprop f
+prop-trunc-to-dep-prop-trunc {A} {P} Pprop f fproptrunc Q Qprop =
+  proj₂ (iff-to-≃ (Π-prop Q Qprop) (Π-prop (λ x → Q (f x)) (λ x → Qprop (f x)))
+    (precomp-Π f Q ,
+     λ h p → is-prop-trunc-to-ext Pprop f fproptrunc (Q p) (Qprop p) (λ a → tr Q (proj₁ (Pprop (f a) p)) (h a)) p))
+
+-- (ii) implies (i)
+dep-prop-trunc-to-prop-trunc : {A P : Set} → (Pprop : is-prop P) → (f : A → P) → is-dep-prop-trunc Pprop f → is-prop-trunc Pprop f
+dep-prop-trunc-to-prop-trunc {A} {P} Pprop f fdepproptrunc Q Qprop = fdepproptrunc (λ _ → Q) λ _ → Qprop
+
+-- 14.5
+-- (a)
+iff-prop-to-prop-trunc : {A P : Set} → (Pprop : is-prop P) → (f : A → P) → (P → A) → is-prop-trunc Pprop f
+iff-prop-to-prop-trunc Pprop f g = ext-to-is-prop-trunc Pprop f (λ Q Qprop h → h ∘ g)
+
+const𝟙-is-prop-trunc : {A : Set} → (a : A) → is-prop-trunc unit-prop (const {A} {𝟙} {*})
+const𝟙-is-prop-trunc a = iff-prop-to-prop-trunc unit-prop const (λ _ → a)
+
+-- (b)
+equiv-to-prop-trunc : {A P : Set} → (Pprop : is-prop P) → (f : A → P) → is-equiv f → is-prop-trunc Pprop f
+equiv-to-prop-trunc {A} {P} Pprop f fequiv = iff-prop-to-prop-trunc Pprop f (proj₁ (proj₁ fequiv))
+
+prop-to-prop-trunc-to-equiv : {A P : Set} → (Pprop : is-prop P) → (f : A → P) → (Aprop : is-prop A) → is-prop-trunc Pprop f → is-equiv f
+prop-to-prop-trunc-to-equiv {A} Pprop f Aprop fproptrunc = proj₂ (iff-to-≃ Aprop Pprop (f , is-prop-trunc-to-ext Pprop f fproptrunc A Aprop id))
+
+prop-id-is-prop-trunc : {A : Set} → (Aprop : is-prop A) → is-prop-trunc Aprop id
+prop-id-is-prop-trunc {A} Aprop = equiv-to-prop-trunc Aprop id (is-equiv-id A)
+-- 14.6
+-- (a)
+dec-to-inl-fib : {A : Set} → (d : is-decidable A) → A → Σ A (λ x → inl x ≡ d)
+dec-to-inl-fib (inl x) a = x , refl
+dec-to-inl-fib (inr x) a = ex-falso (x a)
+
+inl-fib-prop : {A : Set} → (d : is-decidable A) → is-prop (Σ A (λ x → inl x ≡ d))
+inl-fib-prop {A} d = emb-to-fib-prop inl (inl-emb A (¬ A)) d
+
+dec-to-inl-fib-is-prop-trunc : {A : Set} → (d : is-decidable A) → is-prop-trunc (inl-fib-prop d) (dec-to-inl-fib d)
+dec-to-inl-fib-is-prop-trunc d = iff-prop-to-prop-trunc (inl-fib-prop d) (dec-to-inl-fib d) proj₁
+
+-- (b)
+π-dec : {A : Set} → is-decidable A → 𝟚
+π-dec (inl x) = true
+π-dec (inr x) = false
+
+dec-to-π-true : {A : Set} → (d : is-decidable A) → A → π-dec d ≡ true
+dec-to-π-true (inl x) a = refl
+dec-to-π-true (inr x) a = ex-falso (x a)
+
+π-true-prop : {A : Set} → (d : is-decidable A) → is-prop (π-dec d ≡ true)
+π-true-prop d = 𝟚-set (π-dec d) true
+
+π-true-to-A : {A : Set} → (d : is-decidable A) → π-dec d ≡ true → A
+π-true-to-A (inl x) p = x
+π-true-to-A (inr x) ()
+
+dec-to-π-true-is-prop-trunc : {A : Set} → (d : is-decidable A) → is-prop-trunc (π-true-prop d) (dec-to-π-true d)
+dec-to-π-true-is-prop-trunc d = iff-prop-to-prop-trunc (π-true-prop d) (dec-to-π-true d) (π-true-to-A d)
