@@ -34,7 +34,8 @@ ext-to-is-prop-trunc Pprop f ext Q Qprop = ext-to-precomp-is-equiv f Q Qprop (ex
 
 -- Proposition 14.1.4
 -- (i) and (ii) imply (iii)
-prop-truncs-to-equiv : {A P P' : Set ℓ} → (Pprop : is-prop P) → (Pprop' : is-prop P') → (f : A → P) → (f' : A → P') → is-prop-trunc Pprop f → is-prop-trunc Pprop' f' → P ≃ P'
+prop-truncs-to-equiv : {A P P' : Set ℓ} → (Pprop : is-prop P) → (Pprop' : is-prop P') → (f : A → P) → (f' : A → P')
+  → is-prop-trunc Pprop f → is-prop-trunc Pprop' f' → P ≃ P'
 prop-truncs-to-equiv {A = A} {P = P} {P' = P'} Pprop Pprop' f f' fproptrunc f'proptrunc =
   iff-to-≃ Pprop Pprop' (is-prop-trunc-to-ext Pprop f fproptrunc P' Pprop' f' , is-prop-trunc-to-ext Pprop' f' f'proptrunc P Pprop f)
 
@@ -46,7 +47,8 @@ precomp-equiv-to-equiv : {P : Set ℓ} {P' : Set ℓ₁} → (e : P ≃ P') → 
 precomp-equiv-to-equiv (e , eq) X = precomp-Π-is-equiv-to-precomp-is-equiv e (is-equiv-to-precomp-Π-is-equiv e eq) X
 
 -- (iii) and (i) imply (ii); (iii) and (ii) imply (i) by swapping roles and using inv-≃
-equiv-to-prop-trunc-to-prop-trunc : {A P P' : Set ℓ} → (Pprop : is-prop P) → (Pprop' : is-prop P') → (f : A → P) → (f' : A → P') → P ≃ P' → is-prop-trunc Pprop f → is-prop-trunc Pprop' f'
+equiv-to-prop-trunc-to-prop-trunc : {A P P' : Set ℓ} → (Pprop : is-prop P) → (Pprop' : is-prop P') → (f : A → P) → (f' : A → P')
+  → P ≃ P' → is-prop-trunc Pprop f → is-prop-trunc Pprop' f'
 equiv-to-prop-trunc-to-prop-trunc Pprop Pprop' f f' (e , eq) fproptrunc Q Qprop =
     htpy-of-equiv-is-equiv
         (λ z z₁ → z (e (f z₁)))
@@ -103,7 +105,7 @@ ind-prop-trunc-prop Q Qprop f = ind-prop-trunc {Q = Q} f (prop-fam-to-prop-trunc
 
 -- recursion: induction into a constant family of propositions
 rec-prop-trunc : {A : Set ℓ} → (Q : Set ℓ₁) → is-prop Q → (A → Q) → ∥ A ∥ → Q
-rec-prop-trunc Q Qprop = ind-prop-trunc-prop (λ _ → Q) λ _ → Qprop 
+rec-prop-trunc Q Qprop = ind-prop-trunc-prop (λ _ → Q) λ _ → Qprop
 
 -- Theorem 14.2.4
 η-is-prop-trunc : {A : Set ℓ} → is-prop-trunc (prop-trunc-is-prop A) η
@@ -191,7 +193,8 @@ is-lower-bound-propℕ : (P : ℕ → Set ℓ) → (n : ℕ) → is-prop (is-low
 is-lower-bound-propℕ P n = Π-prop _ λ x → →-prop (P x) (n ≤ℕ x) (≤-propℕ n x)
 
 least-element-propℕ : (P : ℕ → Set ℓ) → is-subtype ℕ P → is-prop (Σ ℕ (λ m → P m × is-lower-bound P m))
-least-element-propℕ P Psubtype = is-prop'-to-is-prop λ {(n , (pn , ln)) (m , (pm , lm)) → eq-pair _ _ (≤-antisymℕ n m (ln m pm) (lm n pn) , proj₁ (prop-× (Psubtype m) (is-lower-bound-propℕ P m) _ _))}
+least-element-propℕ P Psubtype = is-prop'-to-is-prop λ {(n , (pn , ln)) (m , (pm , lm)) →
+  eq-pair _ _ (≤-antisymℕ n m (ln m pm) (lm n pn) , proj₁ (prop-× (Psubtype m) (is-lower-bound-propℕ P m) _ _))}
 
 ∃-to-Σ-decidableℕ : (P : ℕ → Set ℓ) → is-subtype ℕ P → ((n : ℕ) → is-decidable (P n)) → ∃ ℕ P → Σ ℕ P
 ∃-to-Σ-decidableℕ P Psubtype Pdec t = proj₁ lbP , proj₁ (proj₂ (lbP))
@@ -246,12 +249,14 @@ prop-trunc-to-weakly-constant g = (g ∘ η) , λ x y → ap g (α (η x) (η y)
 -- proof, step 1: f extends in at most one way
 set-ext-along-η-unique : {A : Set ℓ} {B : Set ℓ₁} → is-set B → (f : A → B) → (g h : ∥ A ∥ → B)
   → triangle-commutes f η g → triangle-commutes f η h → g ∼ h
-set-ext-along-η-unique {A = A} {B = B} Bset f g h G H = ind-prop-trunc-prop (λ t → g t ≡ h t) (λ t → Bset (g t) (h t)) (λ a → concat (inv (G a)) (H a)) 
+set-ext-along-η-unique {A = A} {B = B} Bset f g h G H = ind-prop-trunc-prop (λ t → g t ≡ h t) (λ t → Bset (g t) (h t)) (λ a → concat (inv (G a)) (H a))
 
 -- proof, step 2: Σ (b : B) ∥ fib f b ∥ is a proposition
 weakly-constant-image-prop : {A : Set ℓ} {B : Set ℓ₁} → is-set B → (f : A → B) → is-weakly-constant f
   → is-prop (Σ B (λ b → ∥ fib f b ∥))
-weakly-constant-image-prop Bset f H = is-prop'-to-is-prop λ {(b , s) (b' , s') → eq-pair _ _ (elim∃ (λ x → f x ≡ b) (Bset b b') (λ x p → elim∃ (λ x → f x ≡ b') (Bset b b') (λ x' p' → concat (inv p) (concat (H x x') p')) s') s , α _ _)}
+weakly-constant-image-prop Bset f H = is-prop'-to-is-prop λ {(b , s) (b' , s') →
+  eq-pair _ _ (elim∃ (λ x → f x ≡ b) (Bset b b')
+    (λ x p → elim∃ (λ x → f x ≡ b') (Bset b b') (λ x' p' → concat (inv p) (concat (H x x') p')) s') s , α _ _)}
 
 -- is-weakly-constant f is a proposition when the codomain is a set
 weakly-constant-prop : {A : Set ℓ} {B : Set ℓ₁} → is-set B → (f : A → B) → is-prop (is-weakly-constant f)
@@ -263,7 +268,9 @@ weakly-constant-ext {A = A} {B = B} Bset f H = proj₁ ∘ rec-prop-trunc (Σ B 
 
 weakly-constant-ext-η : {A : Set ℓ} {B : Set ℓ₁} → (Bset : is-set B) → (f : A → B) → (H : is-weakly-constant f)
   → (a : A) → weakly-constant-ext Bset f H (η a) ≡ f a
-weakly-constant-ext-η Bset f H a = ap proj₁ (proj₁ (weakly-constant-image-prop Bset f H (rec-prop-trunc _ (weakly-constant-image-prop Bset f H) (λ x → f x , η (x , refl)) (η a)) (f a , η (a , refl))))
+weakly-constant-ext-η Bset f H a =
+  ap proj₁ (proj₁ (weakly-constant-image-prop Bset f H
+    (rec-prop-trunc _ (weakly-constant-image-prop Bset f H) (λ x → f x , η (x , refl)) (η a)) (f a , η (a , refl))))
 
 prop-trunc-set-up : (A : Set ℓ) → {B : Set ℓ₁} → is-set B → is-equiv (prop-trunc-to-weakly-constant {A = A} {B = B})
 prop-trunc-set-up A {B} Bset = (ψ , φψ) , (ψ , ψφ)
@@ -273,7 +280,8 @@ prop-trunc-set-up A {B} Bset = (ψ , φψ) , (ψ , ψφ)
         φψ : prop-trunc-to-weakly-constant ∘ ψ ∼ id
         φψ (f , H) = eq-pair _ _ (eq-htpy _ _ (weakly-constant-ext-η Bset f H) , proj₁ (weakly-constant-prop Bset f _ _))
         ψφ : ψ ∘ prop-trunc-to-weakly-constant ∼ id
-        ψφ g = eq-htpy _ _ (set-ext-along-η-unique Bset (g ∘ η) (ψ (prop-trunc-to-weakly-constant g)) g (λ a → inv (weakly-constant-ext-η Bset (g ∘ η) _ a)) (λ a → refl))
+        ψφ g = eq-htpy _ _ (set-ext-along-η-unique Bset (g ∘ η) (ψ (prop-trunc-to-weakly-constant g)) g
+          (λ a → inv (weakly-constant-ext-η Bset (g ∘ η) _ a)) (λ a → refl))
 
 -- Exercises
 -- 14.1
@@ -297,7 +305,7 @@ dec-prop-trunc-to-prop-trunc-dec {A = A} (inr nt) = η (inr λ a → nt (η a))
 prop-has-global-choice : {P : Set ℓ} → is-prop P → ∥ P ∥ → P
 prop-has-global-choice {P = P} Pprop = rec-prop-trunc P Pprop id
 
-is-dec-to-global-choice : {A : Set ℓ} → is-decidable A → has-global-choice A 
+is-dec-to-global-choice : {A : Set ℓ} → is-decidable A → has-global-choice A
 is-dec-to-global-choice (inl a) t = a
 is-dec-to-global-choice (inr na) t = ex-falso (prop-has-global-choice empty-prop (map-prop-trunc na t))
 
@@ -449,3 +457,189 @@ succ-trunc-fam-to-precomp-η-is-trunc-map (succ𝕋 k) B Btrunc = ap-k-trunc-to-
       (λ { refl → refl })
       (succ-trunc-fam-to-precomp-η-is-trunc-map k (λ x → s x ≡ t x) (λ x → Btrunc x (s x) (t x)))
       (equiv-to-k-trunc-map k (htpy-eq s t) (fun-ext s t)))
+
+-- 14.8
+-- impredicative encodings: each connective is equivalent to quantifying over all propositions Q
+-- the encodings quantify over Set ℓ, so they live one universe up, in Set (lsuc ℓ)
+imp-𝟙 : (ℓ : Level) → Set (lsuc ℓ)
+imp-𝟙 ℓ = (Q : Set ℓ) → (Qprop : is-prop Q) → (q : Q) → Q
+
+𝟙-≃-imp-𝟙 : (ℓ : Level) → 𝟙 ≃ imp-𝟙 ℓ
+𝟙-≃-imp-𝟙 ℓ =
+  iff-to-≃ unit-prop
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ _ → Qprop)
+    ((λ _ Q Qprop q → q) , λ _ → *)
+
+imp-𝟘 : (ℓ : Level) → Set (lsuc ℓ)
+imp-𝟘 ℓ = (Q : Set ℓ) → (Qprop : is-prop Q) → Q
+
+𝟘-≃-imp-𝟘 : (ℓ : Level) → 𝟘 ≃ imp-𝟘 ℓ
+𝟘-≃-imp-𝟘 ℓ =
+  iff-to-≃ empty-prop
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Qprop)
+    ((λ ()) , λ x → map-inv-raise (x (raise ℓ 𝟘) λ { (map-raise ()) }))
+
+imp-prop-trunc : (A : Set ℓ) → Set (lsuc ℓ)
+imp-prop-trunc {ℓ} A = (Q : Set ℓ) → (Qprop : is-prop Q) → (f : A → Q) → Q
+
+prop-trunc-≃-imp-prop-trunc : (A : Set ℓ) → ∥ A ∥ ≃ imp-prop-trunc A
+prop-trunc-≃-imp-prop-trunc A =
+  iff-to-≃ (prop-trunc-is-prop A)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ f → Qprop)
+    ((λ t Q Qprop f → rec-prop-trunc Q Qprop f t) , λ h → h ∥ A ∥ (prop-trunc-is-prop A) η)
+
+imp-∨ : (P₁ : Set ℓ) → (P₂ : Set ℓ₁) → Set (lsuc (ℓ ⊔ ℓ₁))
+imp-∨ {ℓ} {ℓ₁} P₁ P₂ = (Q : Set (ℓ ⊔ ℓ₁)) → (Qprop : is-prop Q) → (f : P₁ → Q) → (g : P₂ → Q) → Q
+
+∨-≃-imp-∨ : (P₁ : Set ℓ) → (P₂ : Set ℓ₁) → P₁ ∨ P₂ ≃ imp-∨ P₁ P₂
+∨-≃-imp-∨ P₁ P₂ =
+  iff-to-≃ (∨-prop P₁ P₂)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ f → Π-prop _ λ g → Qprop)
+    ((λ t Q Qprop f g → elim∨ Qprop f g t) , λ h → h (P₁ ∨ P₂) (∨-prop P₁ P₂) inl∨ inr∨)
+
+imp-× : (P₁ : Set ℓ) → (P₂ : Set ℓ₁) → (P₁prop : is-prop P₁) → (P₂prop : is-prop P₂) → Set (lsuc (ℓ ⊔ ℓ₁))
+imp-× {ℓ} {ℓ₁} P₁ P₂ P₁prop P₂prop = (Q : Set (ℓ ⊔ ℓ₁)) → (Qprop : is-prop Q) → (f : P₁ → P₂ → Q) → Q
+
+×-≃-imp-× : (P₁ : Set ℓ) → (P₂ : Set ℓ₁) → (P₁prop : is-prop P₁) → (P₂prop : is-prop P₂) → P₁ × P₂ ≃ imp-× P₁ P₂ P₁prop P₂prop
+×-≃-imp-× P₁ P₂ P₁prop P₂prop =
+  iff-to-≃ (prop-× P₁prop P₂prop)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ f → Qprop)
+    ((λ { (p₁ , p₂) Q Qprop f → f p₁ p₂ }) , λ h → h (P₁ × P₂) (prop-× P₁prop P₂prop) _,_)
+
+-- Q only needs to reach P₂'s level: the backward map instantiates Q := P₂
+imp-→ : (P₁ : Set ℓ) → (P₂ : Set ℓ₁) → Set (ℓ ⊔ lsuc ℓ₁)
+imp-→ {ℓ₁ = ℓ₁} P₁ P₂ = (Q : Set ℓ₁) → (Qprop : is-prop Q) → (p : P₁) → (k : P₂ → Q) → Q
+
+→-≃-imp-→ : (P₁ : Set ℓ) → (P₂ : Set ℓ₁) → (P₂prop : is-prop P₂) → (P₁ → P₂) ≃ imp-→ P₁ P₂
+→-≃-imp-→ P₁ P₂ P₂prop =
+  iff-to-≃ (→-prop P₁ P₂ P₂prop)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ p → Π-prop _ λ k → Qprop)
+    ((λ f Q Qprop p k → k (f p)) , λ h p → h P₂ P₂prop p id)
+
+-- the backward map instantiates Q at the empty type, raised to A's level
+imp-¬ : (A : Set ℓ) → Set (lsuc ℓ)
+imp-¬ {ℓ} A = (Q : Set ℓ) → (Qprop : is-prop Q) → (a : A) → Q
+
+¬-≃-imp-¬ : (A : Set ℓ) → ¬ A ≃ imp-¬ A
+¬-≃-imp-¬ {ℓ} A =
+  iff-to-≃ (¬-prop A)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ a → Qprop)
+    ((λ na Q Qprop a → ex-falso (na a)) , λ h a → map-inv-raise (h (raise ℓ 𝟘) (λ { (map-raise ()) }) a))
+
+imp-∃ : (A : Set ℓ) → (P : A → Set ℓ₁) → Set (lsuc (ℓ ⊔ ℓ₁))
+imp-∃ {ℓ} {ℓ₁} A P = (Q : Set (ℓ ⊔ ℓ₁)) → (Qprop : is-prop Q) → (f : (x : A) → P x → Q) → Q
+
+∃-≃-imp-∃ : (A : Set ℓ) → (P : A → Set ℓ₁) → ∃ A P ≃ imp-∃ A P
+∃-≃-imp-∃ A P =
+  iff-to-≃ (∃-prop P)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ f → Qprop)
+    ((λ t Q Qprop f → elim∃ P Qprop f t) , λ h → h (∃ A P) (∃-prop P) (∃-intro P))
+
+-- Q only needs to reach the level of the fibres: the backward map instantiates Q := P x
+imp-∀ : (A : Set ℓ) → (P : A → Set ℓ₁) → Set (ℓ ⊔ lsuc ℓ₁)
+imp-∀ {ℓ₁ = ℓ₁} A P = (Q : Set ℓ₁) → (Qprop : is-prop Q) → (x : A) → (k : P x → Q) → Q
+
+∀-≃-imp-∀ : (A : Set ℓ) → (P : A → Set ℓ₁) → (Pprop : (x : A) → is-prop (P x)) → ((x : A) → P x) ≃ imp-∀ A P
+∀-≃-imp-∀ A P Pprop =
+  iff-to-≃ (Π-prop _ Pprop)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ x → Π-prop _ λ k → Qprop)
+    ((λ g Q Qprop x k → k (g x)) , λ h x → h (P x) (Pprop x) x id)
+-- Q is a family over A at A's level: the backward map instantiates Q := λ y → mere-eq a y
+imp-mere-eq : {A : Set ℓ} → (a x : A) → Set (lsuc ℓ)
+imp-mere-eq {ℓ} {A} a x = (Q : A → Set ℓ) → (Qprop : (y : A) → is-prop (Q y)) → (qa : Q a) → Q x
+
+mere-eq-≃-imp-mere-eq : {A : Set ℓ} → (a x : A) → mere-eq a x ≃ imp-mere-eq a x
+mere-eq-≃-imp-mere-eq {A = A} a x =
+  iff-to-≃ (prop-trunc-is-prop _)
+    (Π-prop _ λ Q → Π-prop _ λ Qprop → Π-prop _ λ qa → Qprop x)
+    ((λ t Q Qprop qa → rec-prop-trunc (Q x) (Qprop x) (λ p → tr Q p qa) t) ,
+     λ h → h (mere-eq a) (λ y → prop-trunc-is-prop _) (mere-eq-is-rfl A a))
+
+-- 14.9
+postulate
+  𝕀 : Set
+  source target : 𝕀
+  path : source ≡ target
+
+  -- induction gives a section f with α, β, and a coherence γ filling the square
+  --   tr P path (f source) ──ap (tr P path) α──▶ tr P path u
+  --          │ apd f path                             │ p
+  --          ▼                                        ▼
+  --      f target ──────────────── β ─────────────▶   v
+  ind-𝕀 : (P : 𝕀 → Set ℓ) → (u : P source) → (v : P target) → (p : tr P path u ≡ v)
+    → Σ ((x : 𝕀) → P x) (λ f →
+      Σ (f source ≡ u) (λ α →
+      Σ (f target ≡ v) (λ β →
+        concat (ap (tr P path) α) p ≡ concat (apd f path) β)))
+
+ε : (P : 𝕀 → Set ℓ) → ((x : 𝕀) → P x) → Σ (P source) (λ u → Σ (P target) (λ v → tr P path u ≡ v))
+ε P f = f source , (f target , apd f path)
+
+-- the codomain of ε: values at the two endpoints, related over path
+𝕀-data : (P : 𝕀 → Set ℓ) → Set ℓ
+𝕀-data P = Σ (P source) (λ u → Σ (P target) (λ v → tr P path u ≡ v))
+
+-- (a) identity types of 𝕀-data
+Eq-𝕀-data : (P : 𝕀 → Set ℓ) → 𝕀-data P → 𝕀-data P → Set ℓ
+Eq-𝕀-data P (u , (v , q)) (u' , (v' , q')) =
+  Σ (u ≡ u') (λ α → Σ (v ≡ v') (λ β → concat q β ≡ concat (ap (tr P path) α) q'))
+
+𝕀-data-eq : (P : 𝕀 → Set ℓ) → (s t : 𝕀-data P) → s ≡ t → Eq-𝕀-data P s t
+𝕀-data-eq P (u , (v , q)) t refl = refl , (refl , concat (right-unit _) (inv (left-unit q)))
+
+𝕀-data-eq-is-equiv : (P : 𝕀 → Set ℓ) → (s t : 𝕀-data P) → is-equiv (𝕀-data-eq P s t)
+𝕀-data-eq-is-equiv P (u , (v , q)) t =
+  total-contr-to-fam-equiv (refl , (refl , concat (right-unit _) (inv (left-unit q))))
+    (𝕀-data-eq P (u , (v , q))) refl total-contr t
+  where
+    -- the fibre once the endpoints are paired with their paths
+    D : Σ (P source) (λ u' → u ≡ u') → Σ (P target) (λ v' → v ≡ v') → Set _
+    D (u' , α) (v' , β) = Σ (tr P path u' ≡ v') (λ q' → concat q β ≡ concat (ap (tr P path) α) q')
+
+    -- regroup each endpoint next to its path
+    e1 : Σ (𝕀-data P) (Eq-𝕀-data P (u , (v , q)))
+       ≃ Σ (Σ (P source) (λ u' → u ≡ u')) (λ ua → Σ (Σ (P target) (λ v' → v ≡ v')) (λ vb → D ua vb))
+    e1 = (λ { ((u' , (v' , q')) , (α , (β , γ))) → (u' , α) , ((v' , β) , (q' , γ)) }) ,
+         (((λ { ((u' , α) , ((v' , β) , (q' , γ))) → (u' , (v' , q')) , (α , (β , γ)) }) ,
+            λ { ((u' , α) , ((v' , β) , (q' , γ))) → refl }) ,
+          ((λ { ((u' , α) , ((v' , β) , (q' , γ))) → (u' , (v' , q')) , (α , (β , γ)) }) ,
+            λ { ((u' , (v' , q')) , (α , (β , γ))) → refl }))
+
+    -- contract (u' , α) to (u , refl)
+    e2 : Σ (Σ (P source) (λ u' → u ≡ u')) (λ ua → Σ (Σ (P target) (λ v' → v ≡ v')) (λ vb → D ua vb))
+       ≃ Σ (Σ (P target) (λ v' → v ≡ v')) (λ vb → D (u , refl) vb)
+    e2 = inv-≃ (_ , (is-equiv-pair-contr-base (Σ-≡-contractible u) _))
+
+    -- contract (v' , β) to (v , refl)
+    e3 : Σ (Σ (P target) (λ v' → v ≡ v')) (λ vb → D (u , refl) vb) ≃ D (u , refl) (v , refl)
+    e3 = inv-≃ (_ , (is-equiv-pair-contr-base (Σ-≡-contractible v) _))
+
+    -- remove the unit laws from the coherence
+    e4 : D (u , refl) (v , refl) ≃ Σ (tr P path u ≡ v) (λ q' → q ≡ q')
+    e4 = tot-≃ λ q' → _ ,
+      equiv-comp (concat (inv (right-unit q))) (λ δ → concat δ (left-unit q'))
+        (is-equiv-concat (inv (right-unit q))) (is-equiv-concat' (left-unit q'))
+
+    total-contr : is-contr (Σ (𝕀-data P) (Eq-𝕀-data P (u , (v , q))))
+    total-contr = is-contr-domain-equiv (proj₁ e) (Σ-≡-contractible q) (proj₂ e)
+      where
+        e = concat-≃ e1 (concat-≃ e2 (concat-≃ e3 e4))
+
+𝕀-data-≡-equiv : (P : 𝕀 → Set ℓ) → (u u' : P source) → (v v' : P target)
+  → (q : tr P path u ≡ v) → (q' : tr P path u' ≡ v')
+  → ((u , (v , q)) ≡ (u' , (v' , q')))
+  ≃ Σ (u ≡ u') (λ α → Σ (v ≡ v') (λ β → concat q β ≡ concat (ap (tr P path) α) q'))
+𝕀-data-≡-equiv P u u' v v' q q' = 𝕀-data-eq P _ _ , 𝕀-data-eq-is-equiv P _ _
+
+-- (c)
+𝕀-contractible : is-contr 𝕀
+𝕀-contractible =
+  source , proj₁ (ind-𝕀 (λ z → z ≡ source) refl (inv path)
+    (concat (tr-fib id path refl) (concat (right-unit _) (ap inv (ap-id path)))))
+
+-- (b) the dependent universal property of 𝕀
+𝕀-dep-up : (P : 𝕀 → Set ℓ) → is-equiv (ε P)
+𝕀-dep-up P =
+  3-for-2-f-g-to-h (λ f → f source) proj₁ (ε P) (λ f → refl)
+    (proj₂ (contr-to-dep-up 𝕀-contractible) P)
+    (fib-contr-to-proj₁-equiv λ u → Σ-≡-contractible (tr P path u))

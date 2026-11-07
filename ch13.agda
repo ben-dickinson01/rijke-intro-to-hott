@@ -652,8 +652,9 @@ up-to-empty upA a = map-inv-raise (proj₁ (upA (raise _ 𝟘)) a)
 -- (i) is just is-contr A
 
 -- (ii) dependent universal property: ev at a is an equivalence Π P → P a
-contr-dep-up : (A : Set ℓ) → Set (lsuc ℓ)
-contr-dep-up {ℓ} A = Σ A (λ a → (P : A → Set ℓ) → is-equiv (λ (f : (x : A) → P x) → f a))
+-- the families P live at their own level ℓ₁: the proof below never mixes P with A
+contr-dep-up : (A : Set ℓ) → Set (ℓ ⊔ lsuc ℓ₁)
+contr-dep-up {ℓ₁ = ℓ₁} A = Σ A (λ a → (P : A → Set ℓ₁) → is-equiv (λ (f : (x : A) → P x) → f a))
 
 -- (iii) universal property: ev at a is an equivalence (A → X) → X
 contr-up : (A : Set ℓ) → Set (lsuc ℓ)
@@ -672,12 +673,12 @@ const-up-endo : (A : Set ℓ) → Set ℓ
 const-up-endo A = is-equiv (λ (x : A) → λ (y : A) → x)
 
 -- (i) → (ii)
-contr-to-dep-up : {A : Set ℓ} → is-contr A → contr-dep-up A
+contr-to-dep-up : {A : Set ℓ} → is-contr A → contr-dep-up {ℓ₁ = ℓ₁} A
 contr-to-dep-up (a , xeqa) = a , λ P → ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → ap (λ p → tr P p pa) (right-inv (xeqa a))) ,
   ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → eq-htpy _ _ λ x → apd pa (concat (xeqa a) (inv (xeqa x))))
 
 -- (ii) → (iii)
-contr-dep-up-to-up : {A : Set ℓ} → contr-dep-up A → contr-up A
+contr-dep-up-to-up : {A : Set ℓ} → contr-dep-up {ℓ₁ = ℓ} A → contr-up A
 contr-dep-up-to-up dupA = proj₁ dupA , λ X → proj₂ dupA (λ _ → X)
 
 -- (iii) → (v)
