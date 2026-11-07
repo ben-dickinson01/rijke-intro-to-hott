@@ -419,3 +419,33 @@ dec-to-π-true (inr x) a = ex-falso (x a)
 
 dec-to-π-true-is-prop-trunc : {A : Set} → (d : is-decidable A) → is-prop-trunc (π-true-prop d) (dec-to-π-true d)
 dec-to-π-true-is-prop-trunc d = iff-prop-to-prop-trunc (π-true-prop d) (dec-to-π-true d) (π-true-to-A d)
+
+-- 14.7
+-- helpers: contractible types are k-truncated for every k, so equivalences are k-truncated maps
+contr-to-k-trunc : {A : Set ℓ} → (k : 𝕋) → is-contr A → is-trunc k A
+contr-to-k-trunc -2𝕋 Acontr = Acontr
+contr-to-k-trunc (succ𝕋 k) Acontr = type-is-succ-type (contr-to-k-trunc k Acontr)
+
+equiv-to-k-trunc-map : {A : Set ℓ} {B : Set ℓ₁} → (k : 𝕋) → (f : A → B) → is-equiv f → is-trunc-map k f
+equiv-to-k-trunc-map k f fequiv b = contr-to-k-trunc k (equiv-to-contr-map f fequiv b)
+
+succ-trunc-fam-to-precomp-η-is-trunc-map : {A : Set ℓ} → (k : 𝕋) → (B : ∥ A ∥ → Set ℓ)
+  → ((t : ∥ A ∥) → is-trunc (succ𝕋 k) (B t)) → is-trunc-map k (precomp-Π η B)
+succ-trunc-fam-to-precomp-η-is-trunc-map {A = A} -2𝕋 B Btrunc =
+  equiv-to-contr-map (precomp-Π η B) (prop-trunc-to-dep-prop-trunc (prop-trunc-is-prop A) η η-is-prop-trunc B Btrunc)
+succ-trunc-fam-to-precomp-η-is-trunc-map (succ𝕋 k) B Btrunc = ap-k-trunc-to-k+1-trunc-map (precomp-Π η B) λ s t →
+  -- top: ap (precomp-Π η B), right: htpy-eq over A, diagonal: right ∘ top
+  comm-tri-k-trunc-g-to-k-trunc-f-to-k-trunc-h
+    (htpy-eq (precomp-Π η B s) (precomp-Π η B t) ∘ ap (precomp-Π η B))
+    (htpy-eq (precomp-Π η B s) (precomp-Π η B t))
+    (ap (precomp-Π η B))
+    (λ p → refl)
+    (equiv-to-k-trunc-map k (htpy-eq (precomp-Π η B s) (precomp-Π η B t)) (fun-ext (precomp-Π η B s) (precomp-Π η B t)))
+    -- left: htpy-eq over ∥ A ∥, bottom: precomp-Π η on the family of identity types
+    (comm-tri-k-trunc-g-to-k-trunc-h-to-k-trunc-f
+      (htpy-eq (precomp-Π η B s) (precomp-Π η B t) ∘ ap (precomp-Π η B))
+      (precomp-Π η (λ x → s x ≡ t x))
+      (htpy-eq s t)
+      (λ { refl → refl })
+      (succ-trunc-fam-to-precomp-η-is-trunc-map k (λ x → s x ≡ t x) (λ x → Btrunc x (s x) (t x)))
+      (equiv-to-k-trunc-map k (htpy-eq s t) (fun-ext s t)))
