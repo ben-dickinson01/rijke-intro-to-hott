@@ -1188,8 +1188,10 @@ comm-tri-retr-g-to-retr-h-retr-of-retr-f {A = A} {B = B} {X = X} f g h commfhg (
               (cancel k kh x))))
 
 -- 13.15
-hom : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → Set (ℓ ⊔ ℓ₁ ⊔ ℓ₂)
-hom f g = comm-tri-post f g
+-- X is explicit to match the book's hom_X(f, g), so goals read hom X f g
+hom : (X : Set ℓ₂) {A : Set ℓ} {B : Set ℓ₁} → (f : A → X) → (g : B → X) → Set (ℓ ⊔ ℓ₁ ⊔ ℓ₂)
+hom X f g = comm-tri-post f g
+{-# DISPLAY comm-tri-post {X = X} f g = hom X f g #-}
 
 -- 13.15a
 -- The chain:
@@ -1253,17 +1255,17 @@ ev-fib-refl-is-equiv {A = A} {X = X} f P = equiv-comp
 Π-fib-map-equiv-Π-precomp f P = ev-fib-refl f P , ev-fib-refl-is-equiv f P
 
 -- 13.15b
--- α = action-on-fibers          : hom f g → (x : X) → fib f x → fib g x
--- β = hom-to-Π-fib              : hom f g → (a : A) → fib g (f a)
+-- α = action-on-fibers          : hom X f g → (x : X) → fib f x → fib g x
+-- β = hom-to-Π-fib              : hom X f g → (a : A) → fib g (f a)
 -- γ = fam-fib-map-equiv-Π-fib   : ((x : X) → fib f x → fib g x) ≃ ((a : A) → fib g (f a))
 --     (13.15a at P := fib g)
 -- and the triangle β ∼ γ ∘ α commutes.
 
 action-on-fibers : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
-  → hom f g → (x : X) → fib f x → fib g x
+  → hom X f g → (x : X) → fib f x → fib g x
 action-on-fibers f g (h , H) = fib-triangle f g h H
 
-hom-to-Π-fib : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → hom f g → ((a : A) → fib g (f a))
+hom-to-Π-fib : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → hom X f g → ((a : A) → fib g (f a))
 hom-to-Π-fib f g φ a = proj₁ φ a , inv (proj₂ φ a)
 
 fam-fib-map-equiv-Π-fib : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
@@ -1284,7 +1286,7 @@ hom-to-Π-fib-is-equiv f g = equiv-comp
   (sec-map-is-equiv (λ x → choice x) choice-equiv)
 
 hom-equiv-Π-fib : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
-  → hom f g ≃ ((a : A) → fib g (f a))
+  → hom X f g ≃ ((a : A) → fib g (f a))
 hom-equiv-Π-fib f g = hom-to-Π-fib f g , hom-to-Π-fib-is-equiv f g
 
 action-on-fibers-is-equiv : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
@@ -1294,7 +1296,7 @@ action-on-fibers-is-equiv f g =
     (comm-tri-hom-fib f g) (hom-to-Π-fib-is-equiv f g) (ev-fib-refl-is-equiv f (fib g))
 
 hom-equiv-fam-fib-map : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
-  → hom f g ≃ ((x : X) → fib f x → fib g x)
+  → hom X f g ≃ ((x : X) → fib f x → fib g x)
 hom-equiv-fam-fib-map f g = action-on-fibers f g , action-on-fibers-is-equiv f g
 
 -- 13.15c
@@ -1302,14 +1304,15 @@ hom-equiv-fam-fib-map f g = action-on-fibers f g , action-on-fibers-is-equiv f g
 -- is 11.11b: comm-tri-equiv-h-iff-fam-equiv-fib-tri f g h H.
 -- (i) ⇔ (iii), precomposition with (h , H) is an equivalence, is below.
 
-hom-precomp : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {X : Set ℓ₃} → (f : A → X) → (g : B → X) → (i : C → X)
-  → hom f g → hom g i → hom f i
-hom-precomp f g i φ ψ =
+-- composition of morphisms over X (pasting the two triangles along g)
+hom-comp : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {X : Set ℓ₃} → (f : A → X) → (g : B → X) → (i : C → X)
+  → hom X f g → hom X g i → hom X f i
+hom-comp f g i φ ψ =
   (proj₁ ψ ∘ proj₁ φ) , concat-htpy (proj₂ φ) (λ a → proj₂ ψ (proj₁ φ a))
 
 equiv-h-to-equiv-hom-precomp : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
-  → (φ : hom f g) → is-equiv (proj₁ φ)
-  → {C : Set ℓ₃} → (i : C → X) → is-equiv (hom-precomp f g i φ)
+  → (φ : hom X f g) → is-equiv (proj₁ φ)
+  → {C : Set ℓ₃} → (i : C → X) → is-equiv (hom-comp f g i φ)
 equiv-h-to-equiv-hom-precomp {A = A} {B = B} {X = X} f g φ hequiv {C} i =
   g-equiv-to-tot-fam-equiv
     (precomp h C)
@@ -1327,14 +1330,14 @@ equiv-h-to-equiv-hom-precomp {A = A} {B = B} {X = X} f g φ hequiv {C} i =
 
 -- a hom into the trivial projection X × Y → X is just a map into Y
 hom-proj₁-to-fun : {A : Set ℓ} {X : Set ℓ₁} → (f : A → X) → (Y : Set ℓ₂)
-  → hom f (proj₁ {A = X} {B = λ _ → Y}) → (A → Y)
+  → hom X f (proj₁ {A = X} {B = λ _ → Y}) → (A → Y)
 hom-proj₁-to-fun f Y ψ a = proj₂ (proj₁ ψ a)
 
 hom-proj₁-to-fun-is-equiv : {A : Set ℓ} {X : Set ℓ₁} → (f : A → X) → (Y : Set ℓ₂)
   → is-equiv (hom-proj₁-to-fun f Y)
 hom-proj₁-to-fun-is-equiv {A = A} {X = X} f Y = (bwd , λ y → refl) , (bwd , retr-htpy)
   where
-  bwd : (A → Y) → hom f (proj₁ {A = X} {B = λ _ → Y})
+  bwd : (A → Y) → hom X f (proj₁ {A = X} {B = λ _ → Y})
   bwd y = (λ a → f a , y a) , λ a → refl
   -- pointwise, ((x₀ , y) , refl) is the centre of the singleton at x₀
   pt : (x₀ : X) → (w : X × Y) → (p : x₀ ≡ proj₁ w) → ((x₀ , proj₂ w) , refl) ≡ (w , p)
@@ -1343,18 +1346,18 @@ hom-proj₁-to-fun-is-equiv {A = A} {X = X} f Y = (bwd , λ y → refl) , (bwd ,
   retr-htpy (k , K) = ap choice (eq-htpy _ _ λ a → pt (f a) (k a) (K a))
 
 -- test against i := proj₁ : X × Y → X; the square
---   hom g proj₁ ──hom-precomp φ──▶ hom f proj₁
---        │                              │
---     (B → Y) ────── − ∘ h ───────▶ (A → Y)
+--   hom X g proj₁ ──hom-comp φ──▶ hom X f proj₁
+--        │                             │
+--     (B → Y) ────── − ∘ h ──────▶ (A → Y)
 -- commutes definitionally, so − ∘ h is an equivalence for every Y (13.4.1)
 equiv-hom-precomp-to-equiv-h : {A B : Set ℓ} {X : Set ℓ₁} → (f : A → X) → (g : B → X)
-  → (φ : hom f g)
-  → ({C : Set (ℓ ⊔ ℓ₁)} → (i : C → X) → is-equiv (hom-precomp f g i φ))
+  → (φ : hom X f g)
+  → ({C : Set (ℓ ⊔ ℓ₁)} → (i : C → X) → is-equiv (hom-comp f g i φ))
   → is-equiv (proj₁ φ)
 equiv-hom-precomp-to-equiv-h f g φ precomp-equiv =
   precomp-is-equiv-to-is-equiv (proj₁ φ) λ Y →
     3-for-2-f-h-to-g
-      (hom-proj₁-to-fun f Y ∘ hom-precomp f g proj₁ φ)
+      (hom-proj₁-to-fun f Y ∘ hom-comp f g proj₁ φ)
       (precomp (proj₁ φ) Y)
       (hom-proj₁-to-fun g Y)
       (λ _ → refl)
