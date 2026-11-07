@@ -4,58 +4,58 @@ module ch05 where
 open import ch04 public
 
 infix 4 _≡_
-data _≡_ {A : Set} (a : A) : A → Set where
+data _≡_ {A : Set ℓ} (a : A) : A → Set ℓ where
   refl : a ≡ a
 
-ind≡ : {A : Set} → {a : A} → {P : (x : A) →  a ≡ x → Set} → P a refl → (x : A) → (p : a ≡ x) → P x p
+ind≡ : {A : Set ℓ} → {a : A} → {P : (x : A) →  a ≡ x → Set ℓ₁} → P a refl → (x : A) → (p : a ≡ x) → P x p
 ind≡ pa x refl = pa
 
-concat : {A : Set} → {x y z : A} → x ≡ y → y ≡ z → x ≡ z
+concat : {A : Set ℓ} → {x y z : A} → x ≡ y → y ≡ z → x ≡ z
 concat refl refl = refl
 
-inv : {A : Set} → {x y : A} → x ≡ y → y ≡ x
+inv : {A : Set ℓ} → {x y : A} → x ≡ y → y ≡ x
 inv refl = refl
 
-assoc : {A : Set} → {x y z w : A} → (p : x ≡ y) → (q : y ≡ z) → (r : z ≡ w) → concat (concat p q) r ≡ concat p (concat q r)
+assoc : {A : Set ℓ} → {x y z w : A} → (p : x ≡ y) → (q : y ≡ z) → (r : z ≡ w) → concat (concat p q) r ≡ concat p (concat q r)
 assoc refl refl refl = refl
 
-left-unit : {A : Set} → {x y : A} → (p : x ≡ y) → ((concat refl p) ≡ p)
+left-unit : {A : Set ℓ} → {x y : A} → (p : x ≡ y) → ((concat refl p) ≡ p)
 left-unit refl = refl
 
-right-unit : {A : Set} → {x y : A} → (p : x ≡ y) → ((concat p refl) ≡ p)
+right-unit : {A : Set ℓ} → {x y : A} → (p : x ≡ y) → ((concat p refl) ≡ p)
 right-unit refl = refl
 
-left-inv : {A : Set} → {x y : A} → (p : x ≡ y) → concat (inv p) p ≡ refl
+left-inv : {A : Set ℓ} → {x y : A} → (p : x ≡ y) → concat (inv p) p ≡ refl
 left-inv refl = refl
 
-right-inv : {A : Set} → {x y : A} → (p : x ≡ y) → concat p (inv p) ≡ refl
+right-inv : {A : Set ℓ} → {x y : A} → (p : x ≡ y) → concat p (inv p) ≡ refl
 right-inv refl = refl
 
-ap : {A B : Set} → (f : A → B) → {x y : A} → (x ≡ y) → (f x ≡ f y)
+ap : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → {x y : A} → (x ≡ y) → (f x ≡ f y)
 ap f refl = refl
 
-ap-id : {A : Set} → {a x : A} → (p : a ≡ x) → ap id p ≡ p
-ap-id {A} {a} {x} refl = refl
+ap-id : {A : Set ℓ} → {a x : A} → (p : a ≡ x) → ap id p ≡ p
+ap-id {A = A} {a = a} {x = x} refl = refl
 
-ap-comp : {A B C : Set} → {x y : A} → (f : A → B) → (g : B → C) → (p : x ≡ y) → ap g (ap f p) ≡ ap (g ∘ f) p
+ap-comp : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} → {x y : A} → (f : A → B) → (g : B → C) → (p : x ≡ y) → ap g (ap f p) ≡ ap (g ∘ f) p
 ap-comp f g refl = refl
 
-ap-refl : {A B : Set} → (f : A → B) → (x : A) → ap f {x} refl ≡ refl
+ap-refl : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → (x : A) → ap f {x} refl ≡ refl
 ap-refl f x = refl
 
-ap-inv : {A B : Set} → {x y : A} → (f : A → B) → (p : x ≡ y) → ap f (inv p) ≡ inv (ap f p)
+ap-inv : {A : Set ℓ} {B : Set ℓ₁} → {x y : A} → (f : A → B) → (p : x ≡ y) → ap f (inv p) ≡ inv (ap f p)
 ap-inv f refl = refl
 
-ap-concat : {A B : Set} → {x y z : A} → (f : A → B) → (p : x ≡ y) → (q : y ≡ z) → ap f (concat p q) ≡ concat (ap f p) (ap f q)
+ap-concat : {A : Set ℓ} {B : Set ℓ₁} → {x y z : A} → (f : A → B) → (p : x ≡ y) → (q : y ≡ z) → ap f (concat p q) ≡ concat (ap f p) (ap f q)
 ap-concat f refl refl = refl
 
-tr : {A : Set} → {x y : A} → (B : A → Set) → (p : x ≡ y) → B x → B y
+tr : {A : Set ℓ} → {x y : A} → (B : A → Set ℓ₁) → (p : x ≡ y) → B x → B y
 tr B refl bx = bx
 
-apd : {A : Set} → {x y : A} → {B : A → Set} → (f : (a : A) → B a) → (p : x ≡ y) → tr B p (f x) ≡ f y
+apd : {A : Set ℓ} → {x y : A} → {B : A → Set ℓ₁} → (f : (a : A) → B a) → (p : x ≡ y) → tr B p (f x) ≡ f y
 apd f refl = refl
 
-refl-unique : {A : Set} → (a x : A) → (p : a ≡ x) → _≡_ {Σ A (λ z → a ≡ z)} (a , refl) (x , p)
+refl-unique : {A : Set ℓ} → (a x : A) → (p : a ≡ x) → _≡_ {A = Σ A (λ z → a ≡ z)} (a , refl) (x , p)
 refl-unique a .a refl = refl
 
 -- Laws of +ℕ
@@ -82,16 +82,16 @@ add-commℕ m 0ℕ = inv (zero-addℕ m)
 add-commℕ m (succℕ n) = inv (concat (succ-addℕ n m) (ap succℕ (add-commℕ n m)))
 
 -- Exercises
-distrib-inv-concat : {A : Set} → {x y z : A} → (p : x ≡ y) → (q : y ≡ z) → inv (concat p q) ≡ concat (inv q) (inv p)
+distrib-inv-concat : {A : Set ℓ} → {x y z : A} → (p : x ≡ y) → (q : y ≡ z) → inv (concat p q) ≡ concat (inv q) (inv p)
 distrib-inv-concat refl refl = refl
 
-inv-con : {A : Set} → {x y z : A} → (p : x ≡ y) → (q : y ≡ z) → (r : x ≡ z) → concat p q ≡ r → q ≡ concat (inv p) r
+inv-con : {A : Set ℓ} → {x y z : A} → (p : x ≡ y) → (q : y ≡ z) → (r : x ≡ z) → concat p q ≡ r → q ≡ concat (inv p) r
 inv-con refl refl refl refl = refl
 
-con-inv : {A : Set} → {x y z : A} → (p : x ≡ y) → (q : y ≡ z) → (r : x ≡ z) → concat p q ≡ r → p ≡ concat r (inv q)
+con-inv : {A : Set ℓ} → {x y z : A} → (p : x ≡ y) → (q : y ≡ z) → (r : x ≡ z) → concat p q ≡ r → p ≡ concat r (inv q)
 con-inv refl refl refl refl = refl
 
-lift : {A : Set} → {a x : A} → (B : A → Set) → (p : a ≡ x) → (b : B a) → (a , b) ≡ (x , tr B p b)
+lift : {A : Set ℓ} → {a x : A} → (B : A → Set ℓ₁) → (p : a ≡ x) → (b : B a) → (a , b) ≡ (x , tr B p b)
 lift B refl b = refl
 
 -- Mac Lane Pentagon

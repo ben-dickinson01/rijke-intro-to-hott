@@ -29,9 +29,9 @@ data ℕ : Set where
 19ℕ = succℕ 18ℕ
 20ℕ = succℕ 19ℕ
 
-indℕ : {P : ℕ → Set} → (P 0ℕ) → ((n : ℕ) → (P n → P (succℕ n))) → (m : ℕ) → P m
-indℕ {P} x f 0ℕ = x
-indℕ {P} x f (succℕ m) = f m (indℕ x f m)
+indℕ : {P : ℕ → Set ℓ} → (P 0ℕ) → ((n : ℕ) → (P n → P (succℕ n))) → (m : ℕ) → P m
+indℕ {P = P} x f 0ℕ = x
+indℕ {P = P} x f (succℕ m) = f m (indℕ x f m)
 
 -- 3.2 Addition
 infixl 6 _+ℕ_

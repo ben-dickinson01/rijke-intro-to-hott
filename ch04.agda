@@ -2,55 +2,61 @@
 module ch04 where
 
 open import ch03 public
-open import Agda.Primitive using (Level; lzero; lsuc; _⊔_) public
 
 data Unit : Set where
   * : Unit
 
 𝟙 = Unit
 
-indUnit : {P : Unit → Set} → (P *) → (x : Unit) → P x
+indUnit : {P : Unit → Set ℓ} → (P *) → (x : Unit) → P x
 indUnit Pstar * = Pstar
 
 data Empty : Set where
 
 𝟘 = Empty
 
-indEmpty : {P : Empty → Set} → (x : Empty) → P x
+indEmpty : {P : Empty → Set ℓ} → (x : Empty) → P x
 indEmpty ()
 
-ex-falso : {A : Set} → Empty → A
+ex-falso : {A : Set ℓ} → Empty → A
 ex-falso ()
 
-¬ : Set → Set
+-- a type moved up to a larger universe (used to put 𝟘 at any level)
+data raise (ℓ₁ : Level) (A : Set ℓ) : Set (ℓ ⊔ ℓ₁) where
+  map-raise : A → raise ℓ₁ A
+
+map-inv-raise : {A : Set ℓ} → raise ℓ₁ A → A
+map-inv-raise (map-raise a) = a
+
+¬ : Set ℓ → Set ℓ
 ¬ A = A → Empty
 
-is-empty : Set → Set
+is-empty : Set ℓ → Set ℓ
 is-empty A = A → Empty
 
-contrapositive : {P Q : Set} → (P → Q) → (¬ Q → ¬ P)
-contrapositive {P} {Q} f nQ p = nQ (f p)
+contrapositive : {P : Set ℓ} {Q : Set ℓ₁} → (P → Q) → (¬ Q → ¬ P)
+contrapositive {P = P} {Q = Q} f nQ p = nQ (f p)
 
 infixr 1 _⊎_
-data _⊎_ (A B : Set) : Set where
+data _⊎_ (A : Set ℓ) (B : Set ℓ₁) : Set (ℓ ⊔ ℓ₁) where
  inl : A → A ⊎ B
  inr : B → A ⊎ B
 
-ind⊎ : {A B : Set} → {P : A ⊎ B → Set} →
+ind⊎ : {A : Set ℓ} {B : Set ℓ₁} → {P : A ⊎ B → Set ℓ₂} →
   ((x : A) → P (inl x)) → ((y : B) → P (inr y)) → (z : A ⊎ B) → P z
-ind⊎ {A} {B} {P} fA fB (inl x) = fA x
-ind⊎ {A} {B} {P} fA fB (inr y) = fB y
+ind⊎ {A = A} {B = B} {P = P} fA fB (inl x) = fA x
+ind⊎ {A = A} {B = B} {P = P} fA fB (inr y) = fB y
 
-⊎functor : {A B A' B' : Set} → (f : A → A') → (g : B → B') →
+⊎functor : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A') → (g : B → B') →
   (A ⊎ B → A' ⊎ B')
 ⊎functor f g (inl x) = inl (f x)
 ⊎functor f g (inr y) = inr (g y)
 
-⊎-elim-right : {A B : Set} → ¬ A → (A ⊎ B) → B
+⊎-elim-right : {A : Set ℓ} {B : Set ℓ₁} → ¬ A → (A ⊎ B) → B
 ⊎-elim-right na (inl x) = ex-falso (na x)
 ⊎-elim-right na (inr y) = y
 
-⊎-elim-left : {A B : Set} → ¬ B → (A ⊎ B) → A
+⊎-elim-left : {A : Set ℓ} {B : Set ℓ₁} → ¬ B → (A ⊎ B) → A
 ⊎-elim-left nb (inl a) = a
 ⊎-elim-left nb (inr b) = ex-falso (nb b)
 
@@ -106,10 +112,10 @@ proj₂ : {ℓ₁ ℓ₂ : Level} → {A : Set ℓ₁} → {B : A → Set ℓ₂
 proj₂ (x , y) = y
 
 infixr 2 _×_
-_×_ : (A B : Set) → Set
+_×_ : (A : Set ℓ) (B : Set ℓ₁) → Set (ℓ ⊔ ℓ₁)
 A × B = Σ A (λ _ → B)
 
-ind× : {A B : Set} → {P : A × B → Set} →
+ind× : {A : Set ℓ} {B : Set ℓ₁} → {P : A × B → Set ℓ₂} →
   ((x : A) → (y : B) → P (x , y)) → ((z : A × B) → P z)
 ind× f (a , b) = f a b
 
@@ -150,7 +156,7 @@ data Bool : Set where
 
 𝟚 = Bool
 
-ind𝟚 : {P : 𝟚 → Set} → P false → P true → (b : 𝟚) → P b
+ind𝟚 : {P : 𝟚 → Set ℓ} → P false → P true → (b : 𝟚) → P b
 ind𝟚 pf pt true = pt
 ind𝟚 pf pt false = pf
 
@@ -169,16 +175,16 @@ b ∨𝟚 true = true
 b ∨𝟚 false = b
 
 infix 0 _↔_
-_↔_ : Set → Set → Set
+_↔_ : Set ℓ → Set ℓ₁ → Set (ℓ ⊔ ℓ₁)
 P ↔ Q = (P → Q) × (Q → P)
 
-ex-4-3-a : {P : Set} → ¬ (P × ¬ P)
+ex-4-3-a : {P : Set ℓ} → ¬ (P × ¬ P)
 ex-4-3-a (p , np) = ex-falso (np p)
 
 non-contradiction = ex-4-3-a
 
-ex-4-3-b : {P : Set} → ¬ (P ↔ ¬ P)
-ex-4-3-b {P} (x , y) = f p
+ex-4-3-b : {P : Set ℓ} → ¬ (P ↔ ¬ P)
+ex-4-3-b {P = P} (x , y) = f p
   where
   f : ¬ P
   f p = x p p
@@ -186,122 +192,122 @@ ex-4-3-b {P} (x , y) = f p
   p : P
   p = y f
 
-ex-4-3-b-i : {P : Set} → P → ¬ (¬ P)
+ex-4-3-b-i : {P : Set ℓ} → P → ¬ (¬ P)
 ex-4-3-b-i p np = np p
 
 dni = ex-4-3-b-i
 
-¬¬ : Set → Set
+¬¬ : Set ℓ → Set ℓ
 ¬¬ P = ¬ (¬ P)
 
-¬¬¬ : Set → Set
+¬¬¬ : Set ℓ → Set ℓ
 ¬¬¬ P = ¬ (¬¬ P)
 
-ex-4-3-b-ii : {P Q : Set} → (P → Q) → (¬¬ P → ¬¬ Q)
+ex-4-3-b-ii : {P : Set ℓ} {Q : Set ℓ₁} → (P → Q) → (¬¬ P → ¬¬ Q)
 ex-4-3-b-ii f = contrapositive (contrapositive f)
 
 dn-functor = ex-4-3-b-ii
 
-ex-4-3-b-iii : {P Q : Set} → (P → ¬¬ Q) → (¬¬ P → ¬¬ Q)
+ex-4-3-b-iii : {P : Set ℓ} {Q : Set ℓ₁} → (P → ¬¬ Q) → (¬¬ P → ¬¬ Q)
 ex-4-3-b-iii f nnp nq = nnp λ p → f p nq
 
 dn-bind = ex-4-3-b-iii
 
-ex-4-3-c-i : {P : Set} → ¬¬ (¬¬ P → P)
-ex-4-3-c-i {P} f = f (λ nnp → ex-falso (nnp (λ p → f (λ _ → p))))
+ex-4-3-c-i : {P : Set ℓ} → ¬¬ (¬¬ P → P)
+ex-4-3-c-i {P = P} f = f (λ nnp → ex-falso (nnp (λ p → f (λ _ → p))))
 
-ex-4-3-c-ii : {P Q : Set} → ¬¬ (((P → Q) → P) → P)
+ex-4-3-c-ii : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (((P → Q) → P) → P)
 ex-4-3-c-ii f = f (λ pqp → pqp λ p → ex-falso (f λ _ → p))
 
-ex-4-3-c-iii : {P Q : Set} → ¬¬ ((P → Q) ⊎ (Q → P))
+ex-4-3-c-iii : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ ((P → Q) ⊎ (Q → P))
 ex-4-3-c-iii f = f (inr λ q → ex-falso (f (inl λ p → q)))
 
-ex-4-3-c-iv : {P : Set} → ¬¬ (P ⊎ ¬ P)
+ex-4-3-c-iv : {P : Set ℓ} → ¬¬ (P ⊎ ¬ P)
 ex-4-3-c-iv f = f (inr λ p → f (inl p))
 
 dn-lem = ex-4-3-c-iv
 
-ex-4-3-d-i : {P : Set} → (P ⊎ ¬ P) → (¬¬ P → P)
+ex-4-3-d-i : {P : Set ℓ} → (P ⊎ ¬ P) → (¬¬ P → P)
 ex-4-3-d-i (inl p) nnp = p
 ex-4-3-d-i (inr np) nnp = ex-falso (nnp np)
 
 dec-to-dne = ex-4-3-d-i
 
-ex-4-3-d-ii : {P Q : Set} → ¬¬ (Q → P) ↔ ((P ⊎ ¬ P) → (Q → P))
-ex-4-3-d-ii {P} {Q} = (to , from)
+ex-4-3-d-ii : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (Q → P) ↔ ((P ⊎ ¬ P) → (Q → P))
+ex-4-3-d-ii {P = P} {Q = Q} = (to , from)
   where
-  to : {P Q : Set} → ¬¬ (Q → P) → ((P ⊎ ¬ P) → Q → P)
+  to : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (Q → P) → ((P ⊎ ¬ P) → Q → P)
   to nnqp (inl p) q = p
   to nnqp (inr np) q = ex-falso (nnqp λ f → np (f q))
 
-  from : {P Q : Set} → ((P ⊎ ¬ P) → Q → P) → ¬¬ (Q → P)
+  from : {P : Set ℓ} {Q : Set ℓ₁} → ((P ⊎ ¬ P) → Q → P) → ¬¬ (Q → P)
   from f nqp = nqp (f (inr λ p → nqp (f (inl p))))
 
-ex-4-3-e-i : {P : Set} → ¬¬¬ P → ¬ P
+ex-4-3-e-i : {P : Set ℓ} → ¬¬¬ P → ¬ P
 ex-4-3-e-i nnnp p = nnnp λ np → np p
 
 ¬¬¬-to-¬ = ex-4-3-e-i
 
-ex-4-3-e-ii : {P Q : Set} → ¬¬ (P → ¬¬ Q) → (P → ¬¬ Q)
+ex-4-3-e-ii : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (P → ¬¬ Q) → (P → ¬¬ Q)
 ex-4-3-e-ii f p nq = f λ pnnq → pnnq p nq
 
-ex-4-3-e-iii : {P Q : Set} → ¬¬ ((¬¬ P) × (¬¬ Q)) → (¬¬ P) × (¬¬ Q)
+ex-4-3-e-iii : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ ((¬¬ P) × (¬¬ Q)) → (¬¬ P) × (¬¬ Q)
 ex-4-3-e-iii x = ((λ np → x λ y → proj₁ y np) , λ nq → x λ y → proj₂ y nq)
 
-ex-4-3-f-i : {P Q : Set} → ¬¬ (P × Q) ↔ ((¬¬ P) × (¬¬ Q))
+ex-4-3-f-i : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (P × Q) ↔ ((¬¬ P) × (¬¬ Q))
 ex-4-3-f-i = (to , from)
   where
-  to : {P Q : Set} → ¬¬ (P × Q) → (¬¬ P) × (¬¬ Q)
+  to : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (P × Q) → (¬¬ P) × (¬¬ Q)
   to f = ((λ np → f λ pq → np (proj₁ pq)) , λ nq → f λ pq → nq (proj₂ pq))
 
-  from : {P Q : Set} → ((¬¬ P) × (¬¬ Q)) → ¬¬ (P × Q)
+  from : {P : Set ℓ} {Q : Set ℓ₁} → ((¬¬ P) × (¬¬ Q)) → ¬¬ (P × Q)
   from (nnp , nnq) f = nnp λ p → nnq λ q → f ((p , q))
 
 dn-×-iff = ex-4-3-f-i
 
-ex-4-3-f-ii : {P Q : Set} → ¬¬ (P ⊎ Q) ↔ ¬ (¬ P × ¬ Q)
+ex-4-3-f-ii : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (P ⊎ Q) ↔ ¬ (¬ P × ¬ Q)
 ex-4-3-f-ii = (to , from) where
-  to : {P Q : Set} → ¬¬ (P ⊎ Q) → ¬ (¬ P × ¬ Q)
+  to : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (P ⊎ Q) → ¬ (¬ P × ¬ Q)
   to f npnq = f λ where
     (inl p) → proj₁ npnq p
     (inr q) → proj₂ npnq q
 
-  from : {P Q : Set} → ¬ (¬ P × ¬ Q) → ¬¬ (P ⊎ Q)
+  from : {P : Set ℓ} {Q : Set ℓ₁} → ¬ (¬ P × ¬ Q) → ¬¬ (P ⊎ Q)
   from f npuq = f ((λ p → npuq (inl p)) , λ q → npuq (inr q))
 
 dn-⊎-iff = ex-4-3-f-ii
 
-ex-4-3-f-iii : {P Q : Set} → ¬¬ (P → Q) ↔ (¬¬ P → ¬¬ Q)
+ex-4-3-f-iii : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (P → Q) ↔ (¬¬ P → ¬¬ Q)
 ex-4-3-f-iii = (to , from) where
-  to : {P Q : Set} → ¬¬ (P → Q) → (¬¬ P → ¬¬ Q)
+  to : {P : Set ℓ} {Q : Set ℓ₁} → ¬¬ (P → Q) → (¬¬ P → ¬¬ Q)
   to nnpq nnp nq = nnp λ p → nnpq λ f → nq (f p)
 
-  from : {P Q : Set} → (¬¬ P → ¬¬ Q) → ¬¬ (P → Q)
+  from : {P : Set ℓ} {Q : Set ℓ₁} → (¬¬ P → ¬¬ Q) → ¬¬ (P → Q)
   from f npq = npq (λ p → ex-falso (f (λ np → np p) λ q → npq λ _ → q))
 
 dn-→-iff = ex-4-3-f-iii
 
 infixr 7 _∷_
 
-data List (A : Set) : Set where
+data List (A : Set ℓ) : Set ℓ where
   [] : List A
   _∷_ : A → List A → List A
 
-indList : {A : Set} → {P : List A → Set} →
+indList : {A : Set ℓ} → {P : List A → Set ℓ₁} →
   P [] → ((lst : List A) → (a : A) → P lst → P (a ∷ lst)) →
   (lst : List A) → P lst
 indList P0 f [] = P0
 indList P0 f (a ∷ lst) = f lst a (indList P0 f lst)
 
-fold-List : {A B : Set} → {b : B} → (μ : A → B → B) → List A → B
+fold-List : {A : Set ℓ} {B : Set ℓ₁} → {b : B} → (μ : A → B → B) → List A → B
 fold-List {b = b} μ [] = b
 fold-List {b = b} μ (x ∷ lst) = μ x (fold-List {b = b} μ lst)
 
-map-List : {A B : Set} → (A → B) → List A → List B
+map-List : {A : Set ℓ} {B : Set ℓ₁} → (A → B) → List A → List B
 map-List f [] = []
 map-List f (x ∷ lst) = (f x) ∷ (map-List f lst)
 
-length-List : {A : Set} → List A → ℕ
+length-List : {A : Set ℓ} → List A → ℕ
 length-List [] = 0ℕ
 length-List (x ∷ lst) = succℕ (length-List lst)
 
@@ -313,14 +319,14 @@ prod-List : List ℕ → ℕ
 prod-List [] = 1ℕ
 prod-List (x ∷ lst) = x ·ℕ prod-List lst
 
-concat-List : {A : Set} → List A → List A → List A
+concat-List : {A : Set ℓ} → List A → List A → List A
 concat-List [] lst2 = lst2
 concat-List (x ∷ lst1) lst2 = x ∷ concat-List lst1 lst2
 
-flatten-List : {A : Set} → List (List A) → List A
+flatten-List : {A : Set ℓ} → List (List A) → List A
 flatten-List [] = []
 flatten-List (lst ∷ lst₁) = concat-List lst (flatten-List lst₁)
 
-reverse-List : {A : Set} → List A → List A
+reverse-List : {A : Set ℓ} → List A → List A
 reverse-List [] = []
 reverse-List (x ∷ lst) = concat-List (reverse-List lst) (x ∷ [])

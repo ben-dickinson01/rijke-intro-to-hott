@@ -2,7 +2,6 @@
 module ch06 where
 
 open import ch05 public
-open import Agda.Primitive using (Level; lzero; lsuc; _⊔_) public
 
 Eq-ℕ : ℕ → ℕ → Set (lzero)
 Eq-ℕ 0ℕ 0ℕ = Unit

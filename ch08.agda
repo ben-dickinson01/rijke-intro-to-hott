@@ -4,7 +4,7 @@ module ch08 where
 
 open import ch07 public
 
-is-decidable : Set lzero → Set lzero
+is-decidable : Set ℓ → Set ℓ
 is-decidable A = A ⊎ ¬ A
 
 𝟘-is-decidable : is-decidable 𝟘
@@ -16,24 +16,24 @@ is-decidable A = A ⊎ ¬ A
 𝟚-is-decidable : is-decidable 𝟚
 𝟚-is-decidable = inl true
 
-⊎-is-decidable : {A B : Set} → is-decidable A → is-decidable B → is-decidable (A ⊎ B)
+⊎-is-decidable : {A : Set ℓ} {B : Set ℓ₁} → is-decidable A → is-decidable B → is-decidable (A ⊎ B)
 ⊎-is-decidable (inl a) db = inl (inl a)
 ⊎-is-decidable (inr na) (inl b) = inl (inr b)
 ⊎-is-decidable (inr na) (inr nb) = inr (ind⊎ (λ a → na a) (λ b → nb b))
 
-×-is-decidable : {A B : Set} → is-decidable A → is-decidable B → is-decidable (A × B)
+×-is-decidable : {A : Set ℓ} {B : Set ℓ₁} → is-decidable A → is-decidable B → is-decidable (A × B)
 ×-is-decidable (inl a) (inl b) = inl (a , b)
 ×-is-decidable (inl a) (inr nb) = inr (λ ab → nb (proj₂ ab))
 ×-is-decidable (inr na) (inl b) = inr (λ ab → na (proj₁ ab))
 ×-is-decidable (inr na) (inr nb) = inr (λ ab → na (proj₁ ab))
 
-→-is-decidable : {A B : Set} → is-decidable A → is-decidable B → is-decidable (A → B)
+→-is-decidable : {A : Set ℓ} {B : Set ℓ₁} → is-decidable A → is-decidable B → is-decidable (A → B)
 →-is-decidable (inl a) (inl b) = inl (λ _ → b)
 →-is-decidable (inl a) (inr nb) = inr (λ f → nb (f a))
 →-is-decidable (inr na) (inl b) = inl (λ _ → b)
 →-is-decidable (inr na) (inr nb) = inl (λ a → ex-falso (na a))
 
-¬-is-decidable : {A : Set} → is-decidable A → is-decidable (¬ A)
+¬-is-decidable : {A : Set ℓ} → is-decidable A → is-decidable (¬ A)
 ¬-is-decidable (inl a) = inr (λ na → na a)
 ¬-is-decidable (inr na) = inl na
 
@@ -55,10 +55,10 @@ Eq-ℕ-is-decidable (succℕ m) (succℕ n) = Eq-ℕ-is-decidable m n
 <ℕ-is-decidable (succℕ m) 0ℕ = 𝟘-is-decidable
 <ℕ-is-decidable (succℕ m) (succℕ n) = <ℕ-is-decidable m n
 
-has-decidable-eq : (A : Set) → Set
+has-decidable-eq : (A : Set ℓ) → Set ℓ
 has-decidable-eq A = (x y : A) → is-decidable (x ≡ y)
 
-iff-to-iff-decidable : {A B : Set} → (A ↔ B) → is-decidable A ↔ is-decidable B
+iff-to-iff-decidable : {A : Set ℓ} {B : Set ℓ₁} → (A ↔ B) → is-decidable A ↔ is-decidable B
 iff-to-iff-decidable (A→B , B→A) = (⊎functor (A→B) (contrapositive B→A) , ⊎functor (B→A) (contrapositive A→B))
 
 ℕ-decidable-eq : has-decidable-eq ℕ
@@ -105,19 +105,19 @@ collatz-helper n (inr d) = 3ℕ ·ℕ n +ℕ 1ℕ
 collatz : ℕ → ℕ
 collatz n = collatz-helper n (is-evenℕ n)
 
-with-decidable-prod : {A B : Set} → is-decidable A → (A → is-decidable B) → is-decidable (A × B)
+with-decidable-prod : {A : Set ℓ} {B : Set ℓ₁} → is-decidable A → (A → is-decidable B) → is-decidable (A × B)
 with-decidable-prod (inl x) f with f x
 ... | inl b = inl (x , b)
 ... | inr nb = inr λ ab → nb (proj₂ ab)
 with-decidable-prod (inr x) f = inr λ p → x (proj₁ p)
 
-with-decidable-arrow : {A B : Set} → is-decidable A → (A → is-decidable B) → is-decidable (A → B)
+with-decidable-arrow : {A : Set ℓ} {B : Set ℓ₁} → is-decidable A → (A → is-decidable B) → is-decidable (A → B)
 with-decidable-arrow (inl x) f with f x
 ... | inl b = inl λ a → b
 ... | inr nb = inr λ ab → nb (ab x)
 with-decidable-arrow (inr x) f = inl λ a → ex-falso (x a)
 
-pi-type-decidable : (P : ℕ → Set) → ((x : ℕ) → is-decidable (P x)) → (m : ℕ) → is-decidable ((x : ℕ) → (m ≤ℕ x) → P x) → is-decidable ((x : ℕ) → P x)
+pi-type-decidable : (P : ℕ → Set ℓ) → ((x : ℕ) → is-decidable (P x)) → (m : ℕ) → is-decidable ((x : ℕ) → (m ≤ℕ x) → P x) → is-decidable ((x : ℕ) → P x)
 pi-type-decidable P dP 0ℕ (inl f) = inl (λ n → f n (0ℕ-leℕ n))
 pi-type-decidable P dP 0ℕ (inr nf) = inr (λ g → nf (λ n _ → g n))
 pi-type-decidable P dP (succℕ m) dxmP with dP 0ℕ
@@ -128,17 +128,17 @@ pi-type-decidable P dP (succℕ m) dxmP with dP 0ℕ
   (pi-type-decidable (λ x → P (succℕ x)) (λ x → dP (succℕ x)) m
     (⊎functor (λ f x h → f (succℕ x) h) (λ nf g → nf (λ { 0ℕ () ; (succℕ x) h → g x h })) dxmP))
 
-pi-arrow-decidable : (P Q : ℕ → Set) → ((x : ℕ) → is-decidable (P x)) → ((x : ℕ) → is-decidable (Q x)) →
+pi-arrow-decidable : (P : ℕ → Set ℓ) (Q : ℕ → Set ℓ₁) → ((x : ℕ) → is-decidable (P x)) → ((x : ℕ) → is-decidable (Q x)) →
   (m : ℕ) → ((x : ℕ) → P x → x <ℕ m) →
   is-decidable ((n : ℕ) → P n → Q n)
 pi-arrow-decidable P Q dP dQ m ub =
   pi-type-decidable (λ n → P n → Q n) (λ n → with-decidable-arrow (dP n) (λ _ → dQ n)) m
     (inl (λ x h px → ex-falso (<-to-≱ x m (ub x px) h)))
 
-is-lower-bound : (P : ℕ → Set) → (n : ℕ) → Set
+is-lower-bound : (P : ℕ → Set ℓ) → (n : ℕ) → Set ℓ
 is-lower-bound P n = (x : ℕ) → P x → n ≤ℕ x
 
-is-upper-bound : (P : ℕ → Set) → (n : ℕ) → Set
+is-upper-bound : (P : ℕ → Set ℓ) → (n : ℕ) → Set ℓ
 is-upper-bound P n = (x : ℕ) → P x → x ≤ℕ n
 
 -- Theorem 8.3.2: Well-ordering principle of ℕ.
@@ -149,7 +149,7 @@ is-upper-bound P n = (x : ℕ) → P x → x ≤ℕ n
 --     If ¬P 0: shift the family to Q(x) = P(succ x). Then Q is decidable
 --       and Q(n') = P(succ n') holds. By IH on n', get minimal m' for Q.
 --       Then succ m' is minimal for P.
-ℕ-well-order-aux : (n : ℕ) → (P : ℕ → Set) → ((x : ℕ) → is-decidable (P x)) →
+ℕ-well-order-aux : (n : ℕ) → (P : ℕ → Set ℓ) → ((x : ℕ) → is-decidable (P x)) →
   P n → Σ ℕ (λ m → P m × is-lower-bound P m)
 ℕ-well-order-aux 0ℕ P dP P0 = (0ℕ , (P0 , (λ x _ → 0ℕ-leℕ x)))
 ℕ-well-order-aux (succℕ n) P dP Psn with dP 0ℕ
@@ -161,7 +161,7 @@ is-upper-bound P n = (x : ℕ) → P x → x ≤ℕ n
   shifted-lb 0ℕ P0 = ex-falso (¬P0 P0)
   shifted-lb (succℕ x) Psx = lb x Psx
 
-ℕ-well-ordered : (P : ℕ → Set) → ((x : ℕ) → is-decidable (P x)) →
+ℕ-well-ordered : (P : ℕ → Set ℓ) → ((x : ℕ) → is-decidable (P x)) →
   Σ ℕ (λ n → P n) →
   Σ ℕ (λ m → P m × is-lower-bound P m)
 ℕ-well-ordered P dP (n , Pn) = ℕ-well-order-aux n P dP Pn
@@ -342,11 +342,11 @@ n-≤-prime (succℕ n) = (m , (m-is-prime , n<m))
   m-is-prime : is-primeℕ m
   m-is-prime = is-prime'-to-is-primeℕ m (m≠1 , prime-forward)
 
-booleanisation : {A : Set} → is-decidable A → 𝟚
+booleanisation : {A : Set ℓ} → is-decidable A → 𝟚
 booleanisation (inl a) = true
 booleanisation (inr f) = false
 
-reflect : {A : Set} → (d : is-decidable A) → booleanisation d ≡ true → A
+reflect : {A : Set ℓ} → (d : is-decidable A) → booleanisation d ≡ true → A
 reflect (inl a) refl = a
 
 -- Exercises
@@ -358,19 +358,19 @@ Goldbach n = (2ℕ <ℕ n) → (2ℕ ∣ n) → Σ ℕ (λ p → Σ ℕ (λ q �
 Twin-Prime : Set
 Twin-Prime = Σ ℕ (λ p → (Σ ℕ (λ q → ((is-primeℕ p) × (is-primeℕ q) × (p +ℕ 2ℕ ≡ q)))))
 
-iterate : {A : Set} → (A → A) → ℕ → A → A
+iterate : {A : Set ℓ} → (A → A) → ℕ → A → A
 iterate f 0ℕ x = x
 iterate f (succℕ n) x = f (iterate f n x)
 
 --8.2
 
-is-decidable-idempotent : {P : Set} → is-decidable (is-decidable P) → is-decidable P
+is-decidable-idempotent : {P : Set ℓ} → is-decidable (is-decidable P) → is-decidable P
 is-decidable-idempotent (inl (inl x)) = inl x
 is-decidable-idempotent (inl (inr x)) = inr x
 is-decidable-idempotent (inr ndp) = inr (λ p → ndp (inl p))
 
 --8.3
-ex-8-3 : (k : ℕ) → (P : Fin k → Set)→ ((x : Fin k) → is-decidable (P x)) → ¬ ((x : Fin k) → P x) → Σ (Fin k) (λ x → ¬ (P x))
+ex-8-3 : (k : ℕ) → (P : Fin k → Set ℓ)→ ((x : Fin k) → is-decidable (P x)) → ¬ ((x : Fin k) → P x) → Σ (Fin k) (λ x → ¬ (P x))
 ex-8-3 0ℕ P f nxPx = ex-falso (nxPx (λ x → indEmpty {P = λ _ → P x} x))
 ex-8-3 (succℕ k) P f nxPx with f (inr *)
 ... | inl p = (inl (proj₁ ih) , proj₂ ih)
@@ -411,7 +411,7 @@ prime-iff-trivial-divℕ  n = (to n , from n)
     backward : x ≡ 1ℕ → is-proper-divisorℕ n x
     backward x≡1 = (tr (λ z → ¬ (z ≡ n)) (inv x≡1) (λ p → n≠1 (inv p)) , tr (_∣ n) (inv x≡1) (one-divℕ n))
 
-ex-8-6i : (A B : Set) → ((A → has-decidable-eq B) × (B → has-decidable-eq A)) ↔ (has-decidable-eq (A × B))
+ex-8-6i : (A : Set ℓ) (B : Set ℓ₁) → ((A → has-decidable-eq B) × (B → has-decidable-eq A)) ↔ (has-decidable-eq (A × B))
 ex-8-6i A B = (to , from)
   where
   to : (A → has-decidable-eq B) × (B → has-decidable-eq A) → (has-decidable-eq (A × B))
@@ -425,31 +425,31 @@ ex-8-6i A B = (to , from)
   from dAB = ((λ a b b' → ⊎functor (ap proj₂) (λ ne eq → ne (ap (a ,_) eq)) (dAB (a , b) (a , b'))) ,
     (λ b a a' → ⊎functor (ap proj₁) (λ ne eq → ne (ap (_, b) eq)) (dAB (a , b) (a' , b))))
 
-ex-8-6ii : {A B : Set} → (has-decidable-eq A) → (has-decidable-eq B) → has-decidable-eq (A × B)
-ex-8-6ii {A} {B} dA dB = proj₁ (ex-8-6i A B) (((λ _ → dB) , λ _ → dA))
+ex-8-6ii : {A : Set ℓ} {B : Set ℓ₁} → (has-decidable-eq A) → (has-decidable-eq B) → has-decidable-eq (A × B)
+ex-8-6ii {A = A} {B = B} dA dB = proj₁ (ex-8-6i A B) (((λ _ → dB) , λ _ → dA))
 
 --8.7
-Eq⊎ : {A B : Set} → A ⊎ B → A ⊎ B → Set
+Eq⊎ : {A B : Set ℓ} → A ⊎ B → A ⊎ B → Set ℓ
 Eq⊎ (inl x) (inl y) = x ≡ y
-Eq⊎ (inl x) (inr y) = 𝟘
-Eq⊎ (inr x) (inl y) = 𝟘
+Eq⊎ {ℓ = ℓ} (inl x) (inr y) = raise ℓ 𝟘
+Eq⊎ {ℓ = ℓ} (inr x) (inl y) = raise ℓ 𝟘
 Eq⊎ (inr x) (inr y) = x ≡ y
 
-≡-to-Eq⊎ : {A B : Set} → (x y : A ⊎ B) → x ≡ y → Eq⊎ x y
+≡-to-Eq⊎ : {A B : Set ℓ} → (x y : A ⊎ B) → x ≡ y → Eq⊎ x y
 ≡-to-Eq⊎ (inl x) y refl = refl
 ≡-to-Eq⊎ (inr x) y refl = refl
 
-Eq⊎-to-≡ : {A B : Set} → (x y : A ⊎ B) → Eq⊎ x y → x ≡ y
+Eq⊎-to-≡ : {A B : Set ℓ} → (x y : A ⊎ B) → Eq⊎ x y → x ≡ y
 Eq⊎-to-≡ (inl x) (inl _) refl = refl
-Eq⊎-to-≡ (inl x) (inr x₁) ()
-Eq⊎-to-≡ (inr x) (inl x₁) ()
+Eq⊎-to-≡ (inl x) (inr x₁) (map-raise ())
+Eq⊎-to-≡ (inr x) (inl x₁) (map-raise ())
 Eq⊎-to-≡ (inr x) (inr _) refl = refl
 
-ex-8-7-b : {A B : Set} → (has-decidable-eq A) → (has-decidable-eq B) → (has-decidable-eq (A ⊎ B))
-ex-8-7-b {A} {B} dA dB (inl a) (inl aa) = ⊎functor (ap inl) (λ ne eq → ne (≡-to-Eq⊎ (inl a) (inl aa) eq)) (dA a aa)
-ex-8-7-b {A} {B} dA dB (inl a) (inr b) = inr (λ eq → ≡-to-Eq⊎ (inl a) (inr b) eq)
-ex-8-7-b {A} {B} dA dB (inr b) (inl a) = inr λ eq → ≡-to-Eq⊎ (inr b) (inl a) eq
-ex-8-7-b {A} {B} dA dB (inr b) (inr bb) = ⊎functor (ap inr) (λ ne eq → ne (≡-to-Eq⊎ (inr b) (inr bb) eq )) (dB b bb)
+ex-8-7-b : {A B : Set ℓ} → (has-decidable-eq A) → (has-decidable-eq B) → (has-decidable-eq (A ⊎ B))
+ex-8-7-b {A = A} {B = B} dA dB (inl a) (inl aa) = ⊎functor (ap inl) (λ ne eq → ne (≡-to-Eq⊎ (inl a) (inl aa) eq)) (dA a aa)
+ex-8-7-b {A = A} {B = B} dA dB (inl a) (inr b) = inr (λ eq → map-inv-raise (≡-to-Eq⊎ (inl a) (inr b) eq))
+ex-8-7-b {A = A} {B = B} dA dB (inr b) (inl a) = inr λ eq → map-inv-raise (≡-to-Eq⊎ (inr b) (inl a) eq)
+ex-8-7-b {A = A} {B = B} dA dB (inr b) (inr bb) = ⊎functor (ap inr) (λ ne eq → ne (≡-to-Eq⊎ (inr b) (inr bb) eq )) (dB b bb)
 
 
 -- Our definition of ℤ is different to Rijke's so we take a different approach to the book, following a similar style to ℕ
@@ -496,7 +496,7 @@ Eq-ℤ-to-≡ (in-pos n) (in-pos m) p = ap in-pos p
 -- ex-8-8-c : section + (∀ x → has-decidable-eq (B x)) + has-decidable-eq (Σ A B) → has-decidable-eq A
 
 -- 8.9
-ex-8-9a : (k : ℕ) → (B : Fin k → Set) → ((x : Fin k) → is-decidable (B x)) → is-decidable ((x : Fin k) → B x)
+ex-8-9a : (k : ℕ) → (B : Fin k → Set ℓ) → ((x : Fin k) → is-decidable (B x)) → is-decidable ((x : Fin k) → B x)
 ex-8-9a 0ℕ B xdBx = inl λ ()
 ex-8-9a (succℕ k) B xdBx with xdBx (inr *)
 ... | inr x = inr λ y → x (y (inr *))
@@ -507,7 +507,7 @@ ex-8-9a (succℕ k) B xdBx with xdBx (inr *)
 -- ex-8-9b is skipped
 
 -- 8.10
-bounded-Σℕ-is-decidable : (P : ℕ → Set) → ((n : ℕ) → is-decidable (P n)) → (u : ℕ) → is-upper-bound P u → is-decidable (Σ ℕ (λ n → P n))
+bounded-Σℕ-is-decidable : (P : ℕ → Set ℓ) → ((n : ℕ) → is-decidable (P n)) → (u : ℕ) → is-upper-bound P u → is-decidable (Σ ℕ (λ n → P n))
 bounded-Σℕ-is-decidable P ndPn 0ℕ uub with ndPn 0ℕ
 ... | inl p0 = inl (0ℕ , p0)
 ... | inr np0 = inr (λ { (n , pn) → np0 (tr P (≤-antisymℕ n 0ℕ (uub n pn) (0ℕ-leℕ n)) pn) })
@@ -516,7 +516,7 @@ bounded-Σℕ-is-decidable P dP (succℕ u') ub with dP (succℕ u')
 ... | inr np = bounded-Σℕ-is-decidable P dP u'
   (λ n pn → ind⊎ {P = λ _ → n ≤ℕ u'} (λ n<su → <-to-succ-≤ℕ n (succℕ u') n<su) (λ su≤n → ex-falso (np (tr P (≤-antisymℕ n (succℕ u') (ub n pn) su≤n) pn))) (<-or-≤ℕ n (succℕ u')))
 
-upper-bound-to-maxℕ : (P : ℕ → Set) → ((n : ℕ) → is-decidable (P n)) → (u : ℕ) → is-upper-bound P u → (Σ ℕ (λ n → P n)) → (Σ ℕ (λ n → (P n × is-upper-bound P n)))
+upper-bound-to-maxℕ : (P : ℕ → Set ℓ) → ((n : ℕ) → is-decidable (P n)) → (u : ℕ) → is-upper-bound P u → (Σ ℕ (λ n → P n)) → (Σ ℕ (λ n → (P n × is-upper-bound P n)))
 upper-bound-to-maxℕ P ndPn 0ℕ uub ΣℕPn with ndPn 0ℕ
 ... | inl p0 = (0ℕ , (p0 , uub))
 ... | inr np0 = (ex-falso (np0 ((tr P (≤-antisymℕ (proj₁ ΣℕPn) 0ℕ (uub (proj₁ ΣℕPn) (proj₂ ΣℕPn)) (0ℕ-leℕ (proj₁ ΣℕPn))) (proj₂ ΣℕPn)))))

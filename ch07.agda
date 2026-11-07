@@ -16,14 +16,14 @@ div-zeroℕ x = (0ℕ , zero-mulℕ x)
 div-sumℕ : (x y d : ℕ) → (d ∣ x) → (d ∣ y) → (d ∣ (x +ℕ y))
 div-sumℕ x y d (kx , refl) (ky , refl) = ((kx +ℕ ky) , right-distribℕ kx ky d)
 
-is-reflexive : {A : Set} → (A → A → Set) → Set
-is-reflexive {A} R = (x : A) → R x x
+is-reflexive : {A : Set ℓ} → (A → A → Set ℓ₁) → Set (ℓ ⊔ ℓ₁)
+is-reflexive {A = A} R = (x : A) → R x x
 
-is-symmetric : {A : Set} → (A → A → Set) → Set
-is-symmetric {A} R = (x y : A) → R x y → R y x
+is-symmetric : {A : Set ℓ} → (A → A → Set ℓ₁) → Set (ℓ ⊔ ℓ₁)
+is-symmetric {A = A} R = (x y : A) → R x y → R y x
 
-is-transitive : {A : Set} → (A → A → Set) → Set
-is-transitive {A} R = (x y z : A) → R x y → R y z → R x z
+is-transitive : {A : Set ℓ} → (A → A → Set ℓ₁) → Set (ℓ ⊔ ℓ₁)
+is-transitive {A = A} R = (x y z : A) → R x y → R y z → R x z
 
 infix 4 _≡ℕ_mod_
 _≡ℕ_mod_ : ℕ → ℕ → ℕ → Set lzero
@@ -135,8 +135,8 @@ Fin-to-ℕ-injective (succℕ k) (inr x) (inl y) p =
   indEmpty (<-antirflℕ k (tr (λ m → m <ℕ k) (inv p) (Fin-to-ℕ-bounded k y)))
 Fin-to-ℕ-injective (succℕ k) (inr *) (inr *) p = ap inr refl
 
-is-split-surjective : {A B : Set} → (f : A → B) → (b : B) → Set lzero
-is-split-surjective {A} f = λ b → Σ A (λ a → f a ≡ b)
+is-split-surjective : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → (b : B) → Set (ℓ ⊔ ℓ₁)
+is-split-surjective {A = A} f = λ b → Σ A (λ a → f a ≡ b)
 
 ℕ-mod : (k : ℕ) → Set lzero
 ℕ-mod 0ℕ = ℕ
@@ -405,10 +405,10 @@ neg-add-ℤmod : (k : ℕ) → (x : ℤ-mod k) → add-ℤmod k (neg-ℤmod k x)
 neg-add-ℤmod 0ℕ x = neg-addℤ x
 neg-add-ℤmod (succℕ k) x =
   concat
-    {Fin (succℕ k)}
-    {add-ℤmod (succℕ k) (neg-ℤmod (succℕ k) x) x}
-    {add-ℤmod (succℕ k) x (neg-ℤmod (succℕ k) x)}
-    {zero-ℤmod (succℕ k)}
+    {A = Fin (succℕ k)}
+    {x = add-ℤmod (succℕ k) (neg-ℤmod (succℕ k) x) x}
+    {y = add-ℤmod (succℕ k) x (neg-ℤmod (succℕ k) x)}
+    {z = zero-ℤmod (succℕ k)}
     (add-comm-ℤmod (succℕ k) (neg-ℤmod (succℕ k) x) x)
     (add-neg-ℤmod (succℕ k) x)
 
@@ -417,8 +417,8 @@ div-sum-rightℕ : (x y d : ℕ) → (d ∣ x) → (d ∣ (x +ℕ y)) → (d ∣
 div-sum-rightℕ x y d dx dxy = div-sum-partℕ y x d (tr (d ∣_) (add-commℕ x y) dxy) dx
 
 -- Ex 7.2
-is-antisymmetric : {A : Set} → (A → A → Set) → Set
-is-antisymmetric {A} R = (x y : A) → R x y → R y x → x ≡ y
+is-antisymmetric : {A : Set ℓ} → (A → A → Set ℓ₁) → Set (ℓ ⊔ ℓ₁)
+is-antisymmetric {A = A} R = (x y : A) → R x y → R y x → x ≡ y
 
 div-rflℕ : (d : ℕ) → d ∣ d
 div-rflℕ d = (1ℕ , one-mulℕ d)
