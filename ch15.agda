@@ -21,11 +21,15 @@ is-image {ℓ₃ = ℓ₃} {X = X} f i φ =
 hom-emb-is-prop : {A : Set ℓ₁} {X : Set ℓ₂} {B : Set ℓ₃} → (f : A → X) → (m : B → X) → is-emb m → is-prop (hom X f m)
 hom-emb-is-prop f m memb = equiv-to-same-k-type (hom-equiv-Π-fib f m) (Π-prop (λ z → fib m (f z)) λ a → emb-to-fib-prop m memb (f a))
 
+-- every morphism from an embedding to itself is the identity, since hom X m m is a proposition
+hom-emb-endo-htpy-id : {B : Set ℓ} {X : Set ℓ₁} → (m : B → X) → is-emb m → (φ : hom X m m) → proj₁ φ ∼ id
+hom-emb-endo-htpy-id m memb φ = htpy-eq _ _ (ap proj₁ (is-prop-to-is-prop' (hom-emb-is-prop m m memb) φ (id , λ x → refl)))
+
 -- Proposition 15.1.4
 -- (ii): every morphism from f into an embedding m extends to one from i
 has-image-ext : {A : Set ℓ} {I : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (i : I → X)
   → Set (ℓ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ lsuc ℓ₃)
-has-image-ext {ℓ₃ = ℓ₃} {X = X} f i = (B : Set ℓ₃) → (m : B → X) → is-emb m → hom X f m → hom X i m
+has-image-ext {ℓ₃ = ℓ₃} {X = X} f i = (B : Set ℓ₃) → (m : B → X) → (memb : is-emb m) → (χ : hom X f m) → hom X i m
 
 -- (i) implies (ii)
 is-image-to-has-image-ext : {A : Set ℓ} {I : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (i : I → X) → (φ : hom X f i)
@@ -103,8 +107,8 @@ image-uniq-i-i'-to-e {B = B} {B' = B'} {X = X} f i i' iemb i'emb φ φ' iimage i
     -- both composites are the identity, since hom X i i and hom X i' i' are propositions
     ψequiv : is-equiv (proj₁ ψ)
     ψequiv = inverse-to-equiv (proj₁ ψ) (proj₁ ψ' ,
-      (htpy-eq _ _ (ap proj₁ (is-prop-to-is-prop' (hom-emb-is-prop i' i' i'emb) (hom-comp i' i i' ψ' ψ) (id , λ x → refl))) ,
-       htpy-eq _ _ (ap proj₁ (is-prop-to-is-prop' (hom-emb-is-prop i i iemb) (hom-comp i i' i ψ ψ') (id , λ x → refl)))))
+      (hom-emb-endo-htpy-id i' i'emb (hom-comp i' i i' ψ' ψ) ,
+       hom-emb-endo-htpy-id i iemb (hom-comp i i' i ψ ψ')))
 
 -- (i) and (iii) give (ii)
 image-uniq-i-e-to-i' : {A : Set ℓ} {B B' : Set ℓ₁} {X : Set ℓ₂} → (f : A → X)
@@ -216,10 +220,8 @@ is-image-to-surj {B = B} {X = X} f q m memb H mimage = proj₁ sec-proj₁-equiv
     hK : hom X m incl
     hK = is-image-to-has-image-ext f m (q , H) mimage S incl incl-emb φ
 
-    -- uniqueness: hom X m m is a proposition
     sec-htpy : proj₁ ∘ proj₁ hK ∼ id
-    sec-htpy = htpy-eq _ _ (ap proj₁
-      (is-prop-to-is-prop' (hom-emb-is-prop m m memb) ((proj₁ ∘ proj₁ hK) , proj₂ hK) (id , λ x → refl)))
+    sec-htpy = hom-emb-endo-htpy-id m memb ((proj₁ ∘ proj₁ hK) , proj₂ hK)
 
 -- (ii) implies (i)
 surj-to-is-image : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (q : A → B) → (m : B → X)
@@ -251,3 +253,84 @@ surj-emb-fact-uniq f q i I qsurj iemb q' i' I' q'surj i'emb =
   image-uniq-i-i'-to-e f i i' iemb i'emb (q , I) (q' , I')
     (surj-to-is-image f q i iemb I qsurj)
     (surj-to-is-image f q' i' i'emb I' q'surj)
+
+-- 15.3 Cantor's diagonal argument
+
+-- Definition 15.3.1
+pow-set : (ℓ₁ : Level) → (X : Set ℓ) → Set _
+pow-set ℓ₁ X = X → hProp ℓ₁
+
+-- Theorem 15.3.2
+no-surj-to-pow-set : (X : Set ℓ) → (f : X → pow-set ℓ₁ X) → ¬ (is-surj f)
+no-surj-to-pow-set X f fsurj = rec-prop-trunc 𝟘 empty-prop aim (fsurj P)
+  where
+    P : pow-set _ X
+    P x = ¬ (proj₁ (f x x)) , ¬-prop _
+
+    -- 𝟘 is a proposition, so it suffices to refute an untruncated preimage of P
+    aim : fib f P → 𝟘
+    aim (x , p) = no-self-iff-neg {P = proj₁ (f x x)} ((λ fx → tr id r fx) , λ nfx → tr id (inv r) nfx)
+      where
+        -- p at the point x, as a path of underlying types
+        r : proj₁ (f x x) ≡ ¬ (proj₁ (f x x))
+        r = ap proj₁ (htpy-eq _ _ p x)
+
+-- Exercises
+-- 15.1
+-- (a): a morphism back from g to f makes g an image of f
+hom-g-f-to-is-image : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (h : A → B) → (g : B → X)
+  → is-emb g → (H : triangle-commutes f h g) → hom X g f → is-image {ℓ₃ = ℓ₃} f g (h , H)
+hom-g-f-to-is-image f h g gemb H k = has-image-ext-to-is-image f g (h , H) λ C m memb χ → hom-comp g f m k χ
+
+-- (b): when f is also an embedding, g is an image of f iff h is an equivalence
+-- (i) implies (ii); the universal property is tested against f itself, so it is assumed at level ℓ
+emb-f-is-image-to-equiv-h : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (h : A → B) → (g : B → X)
+  → is-emb f → is-emb g → (H : triangle-commutes f h g) → is-image {ℓ₃ = ℓ} f g (h , H) → is-equiv h
+emb-f-is-image-to-equiv-h {A = A} {X = X} f h g femb gemb H gimage = inverse-to-equiv h (proj₁ k , (hk , kh))
+  where
+    k : hom X g f
+    k = is-image-to-has-image-ext f g (h , H) gimage A f femb (id , λ x → refl)
+
+    hk : h ∘ proj₁ k ∼ id
+    hk = hom-emb-endo-htpy-id g gemb (hom-comp g f g k (h , H))
+
+    kh : proj₁ k ∘ h ∼ id
+    kh = hom-emb-endo-htpy-id f femb (hom-comp f g f (h , H) k)
+
+-- (ii) implies (i)
+emb-f-equiv-h-to-is-image : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (h : A → B) → (g : B → X)
+  → is-emb f → is-emb g → (H : triangle-commutes f h g) → is-equiv h → is-image {ℓ₃ = ℓ₃} f g (h , H)
+emb-f-equiv-h-to-is-image {X = X} f h g femb gemb H ((s , hs) , _) = hom-g-f-to-is-image f h g gemb H k
+  where
+    k : hom X g f
+    k = s , λ x → concat (ap g (inv (hs x))) (inv (H (s x)))
+
+-- 15.2
+-- (a): a proposition embeds into 𝟙, and propositions are exactly the types embedding into 𝟙
+is-prop-to-emb-𝟙 : {P : Set ℓ} → is-prop P → is-emb (const {A = P} {B = 𝟙} {b = *})
+is-prop-to-emb-𝟙 Pprop = inhab-contr-to-emb-𝟙 (λ p → p , (λ q → proj₁ (Pprop q p)))
+
+Σ-emb-𝟙-≃-hProp : Σ (Set ℓ) (λ A → A ↪ 𝟙) ≃ hProp ℓ
+Σ-emb-𝟙-≃-hProp = tot (λ A → proj₁ (e A)) , fam-equiv-to-tot-equiv (λ A → proj₁ (e A)) λ A → proj₂ (e A)
+  where
+    e : (A : Set ℓ) → A ↪ 𝟙 ≃ is-prop A
+    e A = iff-to-≃
+      (fam-trunc-to-Σ-trunc (Π-prop _ λ _ → unit-prop) λ f → Π-prop _ λ x → Π-prop _ λ y → equiv-is-prop _)
+      (trunc-is-prop A)
+      ((λ { (f , femb) → emb-𝟙-to-is-prop (htpy-of-emb-is-emb f const (λ x → proj₂ 𝟙-contractible (f x)) femb) }) ,
+       λ Aprop → const , is-prop-to-emb-𝟙 Aprop)
+
+-- (b): for f : A → P into a proposition, f is a propositional truncation iff
+-- the constant map P → 𝟙 is an image of the constant map A → 𝟙
+-- (i) implies (ii)
+prop-trunc-to-const𝟙-is-image : {A P : Set ℓ} → (Pprop : is-prop P) → (f : A → P) → is-prop-trunc Pprop f
+  → is-image {ℓ₃ = ℓ} (const {A = A} {B = 𝟙} {b = *}) (const {A = P} {B = 𝟙} {b = *}) (f , λ a → refl)
+prop-trunc-to-const𝟙-is-image Pprop f fproptrunc =
+  surj-to-is-image const f const (is-prop-to-emb-𝟙 Pprop) (λ x → refl) (prop-trunc-to-surj Pprop f fproptrunc)
+
+-- (ii) implies (i)
+const𝟙-is-image-to-prop-trunc : {A P : Set ℓ} → (Pprop : is-prop P) → (f : A → P)
+  → is-image {ℓ₃ = ℓ} (const {A = A} {B = 𝟙} {b = *}) (const {A = P} {B = 𝟙} {b = *}) (f , λ a → refl)
+  → is-prop-trunc Pprop f
+const𝟙-is-image-to-prop-trunc Pprop f constimage =
+  surj-to-prop-trunc Pprop f (is-image-to-surj const f const (is-prop-to-emb-𝟙 Pprop) (λ x → refl) constimage)

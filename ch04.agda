@@ -183,8 +183,8 @@ ex-4-3-a (p , np) = ex-falso (np p)
 
 non-contradiction = ex-4-3-a
 
-ex-4-3-b : {P : Set ℓ} → ¬ (P ↔ ¬ P)
-ex-4-3-b {P = P} (x , y) = f p
+no-self-iff-neg : {P : Set ℓ} → ¬ (P ↔ ¬ P)
+no-self-iff-neg {P = P} (x , y) = f p
   where
   f : ¬ P
   f p = x p p
