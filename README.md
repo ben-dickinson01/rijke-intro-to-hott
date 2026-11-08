@@ -2,7 +2,7 @@
 
 # Rijke's *Introduction to Homotopy Type Theory* in Agda
 
-This code follows this version [arXiv:2212.11082](https://arxiv.org/abs/2212.11082) of Rijke's Introduction to Homotopy Type Theory book. This project serves as an introduction to both HoTT and Agda for me. I will be adding to this repository as I work my way through the book.  
+A formalisation in Agda of Egbert Rijke's *Introduction to Homotopy Type Theory*, following the version on arXiv ([arXiv:2212.11082](https://arxiv.org/abs/2212.11082)). I started it to learn homotopy type theory and Agda together, and I am adding to it as I work through the book.  
 Generative AI (Claude) has been used for clarifying parts of the book and asking related questions to help understanding. Claude Code has been used for organisational and setup tasks only (project setup, renaming and reorganising definitions, removing duplicates, formatting). All of the mathematics was written by me.    
 
 ## Progress
@@ -40,7 +40,7 @@ Chapter 1 sets out the rules of dependent type theory, which Agda provides, so i
 ## Setup
 
 - Every file uses `--without-K`, and definitions are universe-polymorphic (`Set ℓ`) throughout.
-- Chapter 1's rules are taken from Agda itself. Each chapter imports the previous one, so `ch15.agda` checks the whole development.
+- Each chapter imports the previous one, so `ch15.agda` checks the whole development.
 - Comments label each definition with the book's numbering (e.g. `-- Theorem 15.2.5`), so the code can be read alongside the book.
 
 ### Postulates
