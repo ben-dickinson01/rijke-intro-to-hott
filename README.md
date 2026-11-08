@@ -34,7 +34,7 @@ Chapter 1 sets out the rules of dependent type theory, which Agda provides, so i
 - **Hedberg's theorem**: types with decidable equality are sets — [ch12.agda](ch12.agda), `Hedberg`
 - **Equivalent forms of function extensionality** (Theorem 13.1.2) — [ch13.agda](ch13.agda)
 - **Kraus's theorem** (Theorem 14.4.6): weakly constant maps into a set factor through the propositional truncation — [ch14.agda](ch14.agda)
-- **The surjection–embedding factorization** (Theorem 15.2.5, Corollary 15.2.6): every map factors uniquely as a surjection followed by an embedding — [ch15.agda](ch15.agda), `surj-emb-fact-uniq`
+- **The surjection–embedding factorisation** (Theorem 15.2.5, Corollary 15.2.6): every map factors uniquely as a surjection followed by an embedding — [ch15.agda](ch15.agda), `surj-emb-fact-uniq`
 - **Cantor's theorem** (Theorem 15.3.2): there is no surjection from a type onto its power set — [ch15.agda](ch15.agda), `no-surj-to-pow-set`
 
 ## Setup
