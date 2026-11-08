@@ -117,7 +117,8 @@ with-decidable-arrow (inl x) f with f x
 ... | inr nb = inr λ ab → nb (ab x)
 with-decidable-arrow (inr x) f = inl λ a → ex-falso (x a)
 
-pi-type-decidable : (P : ℕ → Set ℓ) → ((x : ℕ) → is-decidable (P x)) → (m : ℕ) → is-decidable ((x : ℕ) → (m ≤ℕ x) → P x) → is-decidable ((x : ℕ) → P x)
+pi-type-decidable : (P : ℕ → Set ℓ) → ((x : ℕ) → is-decidable (P x)) → (m : ℕ)
+  → is-decidable ((x : ℕ) → (m ≤ℕ x) → P x) → is-decidable ((x : ℕ) → P x)
 pi-type-decidable P dP 0ℕ (inl f) = inl (λ n → f n (0ℕ-leℕ n))
 pi-type-decidable P dP 0ℕ (inr nf) = inr (λ g → nf (λ n _ → g n))
 pi-type-decidable P dP (succℕ m) dxmP with dP 0ℕ
@@ -170,7 +171,9 @@ is-gcdℕ : (a b d : ℕ) → Set
 is-gcdℕ a b d = (x : ℕ) → ((x ∣ a) × (x ∣ b)) ↔ (x ∣ d)
 
 gcd-uniqueℕ : (a b : ℕ) → (d d' : ℕ) → (is-gcdℕ a b d) → (is-gcdℕ a b d') → d ≡ d'
-gcd-uniqueℕ a b d e dgcd egcd = div-antisymℕ d e (proj₁ (egcd d) (proj₂ (dgcd d) (div-rflℕ d))) (proj₁ (dgcd e) (proj₂ (egcd e) (div-rflℕ e)))
+gcd-uniqueℕ a b d e dgcd egcd =
+  div-antisymℕ d e (proj₁ (egcd d) (proj₂ (dgcd d) (div-rflℕ d)))
+    (proj₁ (dgcd e) (proj₂ (egcd e) (div-rflℕ e)))
 
 gcd-helper-type : (a b n : ℕ) → Set
 gcd-helper-type a b n = ¬ (a +ℕ b ≡ 0ℕ) → ¬ (n ≡ 0ℕ) × ((x : ℕ) → ((x ∣ a) × (x ∣ b)) → (x ∣ n))
@@ -283,7 +286,9 @@ not-0ℕ-div-x x xne0 0divx = xne0 (0ℕdiv x 0divx)
 
 1≤-factorialℕ : (x : ℕ) → 1ℕ ≤ℕ factorialℕ x
 1≤-factorialℕ 0ℕ = *
-1≤-factorialℕ (succℕ n) = ≤-transℕ {succℕ 0ℕ} {succℕ n} {succℕ n ·ℕ factorialℕ n} (0ℕ-leℕ n) (≤-mul-leftℕ 1ℕ (factorialℕ n) (succℕ n) (1≤-factorialℕ n))
+1≤-factorialℕ (succℕ n) =
+  ≤-transℕ {succℕ 0ℕ} {succℕ n} {succℕ n ·ℕ factorialℕ n} (0ℕ-leℕ n)
+    (≤-mul-leftℕ 1ℕ (factorialℕ n) (succℕ n) (1≤-factorialℕ n))
 
 ≤-factorialℕ : (x : ℕ) → x ≤ℕ factorialℕ x
 ≤-factorialℕ 0ℕ = *
@@ -296,12 +301,16 @@ relatively-prime-factorialℕ (succℕ n) = (n<fact1 , relprime)
   fact≠0 : ¬ (factorialℕ (succℕ n) ≡ 0ℕ)
   fact≠0 factsneq0 = tr (succℕ n ≤ℕ_) factsneq0 (≤-factorialℕ (succℕ n))
   n<fact1 : succℕ n <ℕ factorialℕ (succℕ n) +ℕ 1ℕ
-  n<fact1 = ≤-to-<-succℕ (succℕ n) (factorialℕ (succℕ n)) (divℕ-to-≤ℕ (succℕ n) (factorialℕ (succℕ n)) (factorialℕ n , mul-commℕ (factorialℕ n) (succℕ n)) fact≠0)
+  n<fact1 =
+    ≤-to-<-succℕ (succℕ n) (factorialℕ (succℕ n))
+      (divℕ-to-≤ℕ (succℕ n) (factorialℕ (succℕ n)) (factorialℕ n , mul-commℕ (factorialℕ n) (succℕ n)) fact≠0)
   relprime : (x : ℕ) → x ≤ℕ succℕ n → x ∣ (factorialℕ (succℕ n) +ℕ 1ℕ) → x ≡ 1ℕ
   relprime x x≤sn xdivfactsn1 = div-antisymℕ x 1ℕ (div-sum-partℕ 1ℕ (factorialℕ (succℕ n)) x (tr (x ∣_) (add-commℕ (factorialℕ (succℕ n)) 1ℕ) xdivfactsn1) (le-to-div-fact (succℕ n) x xne0 x≤sn)) (one-divℕ x)
     where
     xne0 : ¬ (x ≡ 0ℕ)
-    xne0 x≡0 = zero-ne-succℕ (factorialℕ (succℕ n)) (inv (0ℕdiv (factorialℕ (succℕ n) +ℕ 1ℕ) (tr (_∣ (factorialℕ (succℕ n) +ℕ 1ℕ)) x≡0 xdivfactsn1)))
+    xne0 x≡0 =
+      zero-ne-succℕ (factorialℕ (succℕ n))
+        (inv (0ℕdiv (factorialℕ (succℕ n) +ℕ 1ℕ) (tr (_∣ (factorialℕ (succℕ n) +ℕ 1ℕ)) x≡0 xdivfactsn1)))
 
 n-≤-prime : (n : ℕ) → Σ ℕ (λ p → (is-primeℕ p) × (n <ℕ p))
 n-≤-prime 0ℕ = (2ℕ , (2-is-primeℕ , *))
@@ -312,12 +321,15 @@ n-≤-prime 0ℕ = (2ℕ , (2-is-primeℕ , *))
   2-proper-divℕ 0ℕ (_ , div) = ex-falso (zero-ne-succℕ 1ℕ (inv (0ℕdiv 2ℕ div)))
   2-proper-divℕ (succℕ 0ℕ) _ = refl
   2-proper-divℕ (succℕ (succℕ 0ℕ)) (ne , _) = ex-falso (ne refl)
-  2-proper-divℕ (succℕ (succℕ (succℕ x))) (_ , div) = ex-falso (divℕ-to-≤ℕ (succℕ (succℕ (succℕ x))) 2ℕ div (λ p → zero-ne-succℕ 1ℕ (inv p)))
+  2-proper-divℕ (succℕ (succℕ (succℕ x))) (_ , div) =
+    ex-falso (divℕ-to-≤ℕ (succℕ (succℕ (succℕ x))) 2ℕ div (λ p → zero-ne-succℕ 1ℕ (inv p)))
   2-is-primeℕ : is-primeℕ 2ℕ
   2-is-primeℕ = is-prime'-to-is-primeℕ 2ℕ (2≠1 , 2-proper-divℕ)
 n-≤-prime (succℕ n) = (m , (m-is-prime , n<m))
   where
-  well-ord = ℕ-well-ordered (infinitude-helperℕ (succℕ n)) (infinitude-helper-decidable (succℕ n)) ((factorialℕ (succℕ n) +ℕ 1ℕ) , relatively-prime-factorialℕ (succℕ n))
+  well-ord =
+    ℕ-well-ordered (infinitude-helperℕ (succℕ n)) (infinitude-helper-decidable (succℕ n))
+      ((factorialℕ (succℕ n) +ℕ 1ℕ) , relatively-prime-factorialℕ (succℕ n))
   m = proj₁ well-ord
   m-R = proj₁ (proj₂ well-ord)
   m-lb = proj₂ (proj₂ well-ord)
@@ -393,7 +405,9 @@ prime-iff-trivial-divℕ  : (n : ℕ) → (is-primeℕ n) ↔ ((2ℕ ≤ℕ n) �
 prime-iff-trivial-divℕ  n = (to n , from n)
   where
   to : (n : ℕ) → (is-primeℕ n) → ((2ℕ ≤ℕ n) × ((x : ℕ) → ((x ∣ n) → (x ≡ 1ℕ) ⊎ (x ≡ n))))
-  to 0ℕ nprime = ex-falso (zero-ne-succℕ 0ℕ (inv (proj₂ (succ-injℕ 1ℕ 0ℕ) (proj₁ (nprime 2ℕ) ((λ p → zero-ne-succℕ 1ℕ (inv p)) , div-zeroℕ 2ℕ)))))
+  to 0ℕ nprime =
+    ex-falso
+      (zero-ne-succℕ 0ℕ (inv (proj₂ (succ-injℕ 1ℕ 0ℕ) (proj₁ (nprime 2ℕ) ((λ p → zero-ne-succℕ 1ℕ (inv p)) , div-zeroℕ 2ℕ)))))
   to (succℕ 0ℕ) nprime = ex-falso (proj₁ (proj₂ (nprime 1ℕ) refl) refl)
   to (succℕ (succℕ k)) nprime = (0ℕ-leℕ k , divisors)
     where
@@ -516,7 +530,8 @@ bounded-Σℕ-is-decidable P dP (succℕ u') ub with dP (succℕ u')
 ... | inr np = bounded-Σℕ-is-decidable P dP u'
   (λ n pn → ind⊎ {P = λ _ → n ≤ℕ u'} (λ n<su → <-to-succ-≤ℕ n (succℕ u') n<su) (λ su≤n → ex-falso (np (tr P (≤-antisymℕ n (succℕ u') (ub n pn) su≤n) pn))) (<-or-≤ℕ n (succℕ u')))
 
-upper-bound-to-maxℕ : (P : ℕ → Set ℓ) → ((n : ℕ) → is-decidable (P n)) → (u : ℕ) → is-upper-bound P u → (Σ ℕ (λ n → P n)) → (Σ ℕ (λ n → (P n × is-upper-bound P n)))
+upper-bound-to-maxℕ : (P : ℕ → Set ℓ) → ((n : ℕ) → is-decidable (P n)) → (u : ℕ) → is-upper-bound P u
+  → (Σ ℕ (λ n → P n)) → (Σ ℕ (λ n → (P n × is-upper-bound P n)))
 upper-bound-to-maxℕ P ndPn 0ℕ uub ΣℕPn with ndPn 0ℕ
 ... | inl p0 = (0ℕ , (p0 , uub))
 ... | inr np0 = (ex-falso (np0 ((tr P (≤-antisymℕ (proj₁ ΣℕPn) 0ℕ (uub (proj₁ ΣℕPn) (proj₂ ΣℕPn)) (0ℕ-leℕ (proj₁ ΣℕPn))) (proj₂ ΣℕPn)))))
@@ -709,7 +724,8 @@ Bezout-type-decℕ (succℕ x') (succℕ y') z =
         (Bezout-type-to-boundedℕ (succℕ x') (succℕ y') z (λ ()) (λ ()) bez)
 
 Bezout-identity-auxℕ : (n x y : ℕ) → x ≤ℕ n → Σ ℕ (λ d → is-gcdℕ x y d × Bezout-typeℕ x y d)
-Bezout-identity-auxℕ n 0ℕ y _ = (y , ((λ z → (proj₂ , λ zy → (div-zeroℕ z , zy))) , (0ℕ , (1ℕ , concat (ap (distℕ 0ℕ) (one-mulℕ y)) (dist-zero-leftℕ y)))))
+Bezout-identity-auxℕ n 0ℕ y _ =
+  (y , ((λ z → (proj₂ , λ zy → (div-zeroℕ z , zy))) , (0ℕ , (1ℕ , concat (ap (distℕ 0ℕ) (one-mulℕ y)) (dist-zero-leftℕ y)))))
 Bezout-identity-auxℕ 0ℕ (succℕ x') y ()
 Bezout-identity-auxℕ (succℕ n) (succℕ x') y x≤n = (d , (gcd-xy , bez))
   where
@@ -750,7 +766,8 @@ Bezout-identity-auxℕ (succℕ n) (succℕ x') y x≤n = (d , (gcd-xy , bez))
   bez = (k' , (k , bezout-proof))
 
 Bezout-identityℕ : (x y : ℕ) → Σ ℕ (λ k → Σ ℕ (λ l → distℕ (k ·ℕ x) (l ·ℕ y) ≡ gcdℕ x y))
-Bezout-identityℕ x y = (proj₁ bez , (proj₁ (proj₂ bez) , concat (proj₂ (proj₂ bez)) (gcd-uniqueℕ x y d (gcdℕ x y) gcd-xy (gcd-is-gcdℕ x y))))
+Bezout-identityℕ x y =
+  (proj₁ bez , (proj₁ (proj₂ bez) , concat (proj₂ (proj₂ bez)) (gcd-uniqueℕ x y d (gcdℕ x y) gcd-xy (gcd-is-gcdℕ x y))))
   where
   aux = Bezout-identity-auxℕ x x y (≤-rflℕ x)
   d = proj₁ aux
@@ -779,7 +796,9 @@ has-prime-factorℕ n 2len = m , (m-is-prime , (mdivn , (λ d 2≤d d∣n → ml
       x≤m : succℕ (succℕ x) ≤ℕ m
       x≤m = divℕ-to-≤ℕ (succℕ (succℕ x)) m xdivm m≠0
       x<m : succℕ (succℕ x) <ℕ m
-      x<m = ind⊎ {P = λ _ → succℕ (succℕ x) <ℕ m} (λ z → z) (λ m≤x → ex-falso (xnem (≤-antisymℕ (succℕ (succℕ x)) m x≤m m≤x))) (<-or-≤ℕ (succℕ (succℕ x)) m)
+      x<m =
+        ind⊎ {P = λ _ → succℕ (succℕ x) <ℕ m} (λ z → z)
+          (λ m≤x → ex-falso (xnem (≤-antisymℕ (succℕ (succℕ x)) m x≤m m≤x))) (<-or-≤ℕ (succℕ (succℕ x)) m)
 
 quotient-<ℕ : (k p n : ℕ) → k ·ℕ p ≡ n → 2ℕ ≤ℕ p → 2ℕ ≤ℕ n → k <ℕ n
 quotient-<ℕ 0ℕ p n kp≡n 2≤p 2≤n = ex-falso (tr (2ℕ ≤ℕ_) (concat (inv kp≡n) (zero-mulℕ p)) 2≤n)
@@ -1104,7 +1123,9 @@ prime-factor-of-oddℕ p n pprime p∣n n-odd p≡2 = n-odd (tr (_∣ n) p≡2 p
 
 -- distℕ (4·n!) 1 + 1 ≡ 4·n! (the key identity: M + 1 = 4·n!)
 dist-4n!-1-addℕ : (n : ℕ) → distℕ (4ℕ ·ℕ factorialℕ n) 1ℕ +ℕ 1ℕ ≡ 4ℕ ·ℕ factorialℕ n
-dist-4n!-1-addℕ n = concat (add-commℕ (distℕ (4ℕ ·ℕ factorialℕ n) 1ℕ) 1ℕ) (concat (ap (λ x → 1ℕ +ℕ x) (dist-symmℕ (4ℕ ·ℕ factorialℕ n) 1ℕ)) (add-distℕ 1ℕ (4ℕ ·ℕ factorialℕ n) (1≤4n!ℕ n)))
+dist-4n!-1-addℕ n =
+  concat (add-commℕ (distℕ (4ℕ ·ℕ factorialℕ n) 1ℕ) 1ℕ)
+    (concat (ap (λ x → 1ℕ +ℕ x) (dist-symmℕ (4ℕ ·ℕ factorialℕ n) 1ℕ)) (add-distℕ 1ℕ (4ℕ ·ℕ factorialℕ n) (1≤4n!ℕ n)))
 
 -- 4·n! - 1 ≡ 3 mod 4 (since 4·n! ≡ 0 mod 4, subtract 1 gives 3 mod 4)
 4n!-1-mod-4ℕ : (n : ℕ) → distℕ (4ℕ ·ℕ factorialℕ n) 1ℕ ≡ℕ 3ℕ mod 4ℕ
@@ -1192,7 +1213,8 @@ div-4n!-1-and-n!-to-div-1ℕ p n p∣M p∣fact = div-sum-rightℕ (distℕ (4�
   3-proper-div (succℕ 0ℕ) _ = refl
   3-proper-div (succℕ (succℕ 0ℕ)) (_ , div) = ex-falso (divℕ-to-≤ℕ 2ℕ 1ℕ (div-sum-partℕ 1ℕ 2ℕ 2ℕ div (div-rflℕ 2ℕ)) (λ ()))
   3-proper-div (succℕ (succℕ (succℕ 0ℕ))) (ne , _) = ex-falso (ne refl)
-  3-proper-div (succℕ (succℕ (succℕ (succℕ x)))) (_ , div) = ex-falso (divℕ-to-≤ℕ (succℕ (succℕ (succℕ (succℕ x)))) 3ℕ div (λ p → zero-ne-succℕ 2ℕ (inv p)))
+  3-proper-div (succℕ (succℕ (succℕ (succℕ x)))) (_ , div) =
+    ex-falso (divℕ-to-≤ℕ (succℕ (succℕ (succℕ (succℕ x)))) 3ℕ div (λ p → zero-ne-succℕ 2ℕ (inv p)))
 
 -- 3 ≡ 3 mod 4
 3-mod-4ℕ : 3ℕ ≡ℕ 3ℕ mod 4ℕ
@@ -1320,10 +1342,14 @@ bezout-mul-modℕ p a g≡1 = result
 -- with gcd p (ι x) ≡ 1 from gcd-prime-coprimeℕ and nonzero-Fin-to-ndivℕ.
 inv-modℤ : (p : ℕ) → (is-primeℕ p) → (x : ℤ-mod p) → ¬ (x ≡ zero-ℤmod p) → ℤ-mod p
 inv-modℤ 0ℕ pprime x xne0 = ex-falso (proj₁ (proj₁ (prime-iff-trivial-divℕ 0ℕ) pprime))
-inv-modℤ (succℕ p) pprime x xne0 = [ proj₁ (bezout-mul-modℕ (succℕ p) (ι-ℤmod p x) (gcd-prime-coprimeℕ (succℕ p) (ι-ℤmod p x) pprime (nonzero-Fin-to-ndivℕ p x xne0))) ] (succℕ p)
+inv-modℤ (succℕ p) pprime x xne0 =
+  [ proj₁
+    (bezout-mul-modℕ (succℕ p) (ι-ℤmod p x) (gcd-prime-coprimeℕ (succℕ p) (ι-ℤmod p x) pprime (nonzero-Fin-to-ndivℕ p x xne0)))
+    ] (succℕ p)
 
 -- Bézout gives k·(ι x) ≡ 1 mod p, and ι [k] ≡ k mod p, so ι [k]·(ι x) ≡ 1 mod p.
-inv-mul-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p)) → mul-ℤmod p (inv-modℤ p pprime x xne0) x ≡ one-ℤmod p
+inv-mul-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p))
+  → mul-ℤmod p (inv-modℤ p pprime x xne0) x ≡ one-ℤmod p
 inv-mul-modℤ 0ℕ pprime x xne0 = ex-falso (proj₁ (proj₁ (prime-iff-trivial-divℕ 0ℕ) pprime))
 inv-mul-modℤ (succℕ p) pprime x xne0 =
   proj₂ (Fin-k-is-ℕmod-k p (ι-ℤmod p y ·ℕ ι-ℤmod p x) 1ℕ)
@@ -1335,7 +1361,8 @@ inv-mul-modℤ (succℕ p) pprime x xne0 =
   k = proj₁ bez
   y = inv-modℤ (succℕ p) pprime x xne0
 
-mul-inv-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p)) → mul-ℤmod p x (inv-modℤ p pprime x xne0) ≡ one-ℤmod p
+mul-inv-modℤ : (p : ℕ) → (pprime : is-primeℕ p) → (x : ℤ-mod p) → (xne0 : ¬ (x ≡ zero-ℤmod p))
+  → mul-ℤmod p x (inv-modℤ p pprime x xne0) ≡ one-ℤmod p
 mul-inv-modℤ p pprime x xne0 = concat (mul-comm-ℤmod p x (inv-modℤ p pprime x xne0)) (inv-mul-modℤ p pprime x xne0)
 
 -- 8.15
@@ -1385,7 +1412,8 @@ replace-top-<ℕ n v x v<sn x<sn x≠v (inr x≠n) with <-succ-to-<-or-≡ℕ x 
 ... | inl x<n = x<n
 ... | inr x≡n = ex-falso (x≠n x≡n)
 
-replace-top-injℕ : (n v x y : ℕ) → ¬ (x ≡ v) → ¬ (y ≡ v) → (dx : is-decidable (x ≡ n)) → (dy : is-decidable (y ≡ n)) → replace-topℕ n v x dx ≡ replace-topℕ n v y dy → x ≡ y
+replace-top-injℕ : (n v x y : ℕ) → ¬ (x ≡ v) → ¬ (y ≡ v) → (dx : is-decidable (x ≡ n))
+  → (dy : is-decidable (y ≡ n)) → replace-topℕ n v x dx ≡ replace-topℕ n v y dy → x ≡ y
 replace-top-injℕ n v x y x≠v y≠v (inl x≡n) (inl y≡n) p = concat x≡n (inv y≡n)
 replace-top-injℕ n v x y x≠v y≠v (inl x≡n) (inr y≠n) p = ex-falso (y≠v (inv p))
 replace-top-injℕ n v x y x≠v y≠v (inr x≠n) (inl y≡n) p = ex-falso (x≠v p)
@@ -1411,7 +1439,8 @@ pigeonholeℕ (succℕ n) f bnd = result (bounded-Σℕ-is-decidable P dP n (λ 
     g-bnd i i≤n = replace-top-<ℕ n v (f i) (bnd (succℕ n) (≤-rflℕ (succℕ n)))
       (bnd i (≤-transℕ {i} {n} {succℕ n} i≤n (≤-succℕ n)))
       (λ fi≡v → no-hit (i , (i≤n , fi≡v))) (ℕ-decidable-eq (f i) n)
-    lift-collision : Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ n) × (g i ≡ g j))) → Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ succℕ n) × (f i ≡ f j)))
+    lift-collision : Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ n) × (g i ≡ g j)))
+      → Σ ℕ (λ i → Σ ℕ (λ j → (i <ℕ j) × (j ≤ℕ succℕ n) × (f i ≡ f j)))
     lift-collision (i , (j , (i<j , (j≤n , gi≡gj)))) =
       (i , (j , (i<j , (≤-transℕ {j} {n} {succℕ n} j≤n (≤-succℕ n) ,
         replace-top-injℕ n v (f i) (f j)

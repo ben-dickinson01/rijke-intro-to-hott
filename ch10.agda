@@ -52,7 +52,9 @@ is-contr-map : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → Set (ℓ ⊔
 is-contr-map {A = A} {B = B} f = (b : B) → is-contr (fib f b)
 
 contr-map-to-equiv : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → is-contr-map f → is-equiv f
-contr-map-to-equiv {A = A} {B = B} f contr = ((λ x → proj₁ (proj₁ (contr x))) , λ x → proj₂ (proj₁ (contr x))) , ((λ x → (proj₁ (proj₁ (contr x)))) , λ x → ap proj₁ (inv (proj₂ (contr (f x)) (x , refl))))
+contr-map-to-equiv {A = A} {B = B} f contr =
+  ((λ x → proj₁ (proj₁ (contr x))) , λ x → proj₂ (proj₁ (contr x))) ,
+    ((λ x → (proj₁ (proj₁ (contr x)))) , λ x → ap proj₁ (inv (proj₂ (contr (f x)) (x , refl))))
 
 is-coh-inv : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → Set (ℓ ⊔ ℓ₁)
 is-coh-inv {A = A} {B = B} f = Σ (B → A) (λ g → Σ (f ∘ g ∼ id) (λ G → Σ (g ∘ f ∼ id) (λ H → (x : A) → G (f x) ≡ ap f (H x))))
@@ -66,7 +68,8 @@ eq-pair× refl refl = refl
 inv-inv : {A : Set ℓ} → {x y : A} → (p : x ≡ y) → inv (inv p) ≡ p
 inv-inv refl = refl
 
-tr-fib : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → {b : B} → {x y : A} → (p : x ≡ y) → (q : f x ≡ b) → tr (λ z → f z ≡ b) p q ≡ concat (inv (ap f p)) q
+tr-fib : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → {b : B} → {x y : A} → (p : x ≡ y) → (q : f x ≡ b)
+  → tr (λ z → f z ≡ b) p q ≡ concat (inv (ap f p)) q
 tr-fib f refl q = inv (left-unit q)
 
 tr-× : {A : Set ℓ} → (P : A → Set ℓ₁) (Q : A → Set ℓ₂) → {u v : A} → (α : u ≡ v) → (w : P u × Q u)
@@ -130,10 +133,13 @@ const𝟙-equiv-to-A-contr : {A : Set ℓ} → is-equiv (const {A = A} {B = 𝟙
 const𝟙-equiv-to-A-contr ((f , cf) , (g , gc)) = g * , λ a → concat (inv (gc a)) (ap g refl)
 
 A-contr-to-const𝟙-equiv : {A : Set ℓ} → is-contr A → is-equiv (const {A = A} {B = 𝟙} {b = *})
-A-contr-to-const𝟙-equiv {A = A} (a , p) = (const {A = 𝟙} {B = A} {b = a} , λ { * → refl}) , ((const {A = 𝟙} {B = A} {b = a} , λ {x →  concat (p ((const ∘ const {A = A} {B = 𝟙} {b = *}) x)) (inv (p x))}))
+A-contr-to-const𝟙-equiv {A = A} (a , p) =
+  (const {A = 𝟙} {B = A} {b = a} , λ { * → refl}) ,
+    ((const {A = 𝟙} {B = A} {b = a} , λ {x →  concat (p ((const ∘ const {A = A} {B = 𝟙} {b = *}) x)) (inv (p x))}))
 
 contr-contr-to-equiv : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → is-contr A → is-contr B → is-equiv f
-contr-contr-to-equiv f (a , pA) (b , pB) = ((λ x → a) , λ x → concat (pB (f a)) (inv (pB x))) , ((λ x → a) , λ x → concat (pA a) (inv (pA x)))
+contr-contr-to-equiv f (a , pA) (b , pB) =
+  ((λ x → a) , λ x → concat (pB (f a)) (inv (pB x))) , ((λ x → a) , λ x → concat (pA a) (inv (pA x)))
 
 is-contr-codomain-equiv : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → is-contr A → is-equiv f → is-contr B
 is-contr-codomain-equiv f (a , pA) ((g , fg) , (h , hf)) = f a , λ b → concat (inv (fg b)) (ap f (pA (g b)))
@@ -168,13 +174,18 @@ contr-loop-refl a pA = concat (proj₂ c (pA a)) (inv (proj₂ c refl))
   c = contr-to-eq-contr (a , pA) a a
 
 is-equiv-pair-contr-base : {A : Set ℓ} (Ac : is-contr A) (B : A → Set ℓ₁) → let a = proj₁ Ac in is-equiv {A = B a} {B = Σ A B} (λ y → (a , y))
-is-equiv-pair-contr-base (a , pA) B = ((λ { (x , b) → tr B (pA x) b}) , λ {(x , b) → eq-pair ((a , tr B (pA x) b)) ((x , b)) (inv (pA x) , tr-inv-tr (pA x) b)}) , ((λ {(x , b) → tr B (pA x) b}) , λ {b → ap (λ p → tr B p b) (contr-loop-refl a pA)})
+is-equiv-pair-contr-base (a , pA) B =
+  ((λ { (x , b) → tr B (pA x) b}) , λ {(x , b) → eq-pair ((a , tr B (pA x) b)) ((x , b)) (inv (pA x) , tr-inv-tr (pA x) b)})
+    , ((λ {(x , b) → tr B (pA x) b}) , λ {b → ap (λ p → tr B p b) (contr-loop-refl a pA)})
 
-is-equiv-fib-proj₁ : {A : Set ℓ} → {B : A → Set ℓ₁} → (a : A) → is-equiv {A = fib (proj₁ {A = A} {B = B}) a} {B = B a} (λ { ((x , y) , p) → tr B p y})
+is-equiv-fib-proj₁ : {A : Set ℓ} → {B : A → Set ℓ₁} → (a : A)
+  → is-equiv {A = fib (proj₁ {A = A} {B = B}) a} {B = B a} (λ { ((x , y) , p) → tr B p y})
 is-equiv-fib-proj₁ a = ((λ {ba → (a , ba) , refl}) , λ x → refl) , ((λ x → (a , x) , refl) , λ { ((x , bx) , refl) → refl})
 
 proj₁-equiv-to-fib-contr : {A : Set ℓ} → {B : A → Set ℓ₁} → is-equiv (proj₁ {A = A} {B = B}) → (x : A) → is-contr (B x)
-proj₁-equiv-to-fib-contr {A = A} {B = B} ((f , pf) , (g , gp)) a = tr B (proj₂ centre-fib) (proj₂ (proj₁ centre-fib)) , λ ba → ap (λ s → tr B (proj₂ s) (proj₂ (proj₁ s))) (proj₂ fib-contr ((a , ba) , refl))
+proj₁-equiv-to-fib-contr {A = A} {B = B} ((f , pf) , (g , gp)) a =
+  tr B (proj₂ centre-fib) (proj₂ (proj₁ centre-fib)) , λ ba → ap (λ s → tr B (proj₂ s) (proj₂ (proj₁ s)))
+    (proj₂ fib-contr ((a , ba) , refl))
   where
     fib-contr : is-contr (fib (proj₁ {A = A} {B = B}) a)
     fib-contr = equiv-to-contr-map (proj₁ {A = A} {B = B}) ((f , pf) , (g , gp)) a
@@ -182,16 +193,24 @@ proj₁-equiv-to-fib-contr {A = A} {B = B} ((f , pf) , (g , gp)) a = tr B (proj�
     centre-fib = proj₁ fib-contr
 
 fib-contr-to-proj₁-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → ((x : A) → is-contr (B x)) → is-equiv (proj₁ {A = A} {B = B})
-fib-contr-to-proj₁-equiv {A = A} {B = B} a→contrBa = ((λ a → a , proj₁ (a→contrBa a)) , λ x → refl) , ((λ a → a , proj₁ (a→contrBa a)) , λ { (x , y) → eq-pair (x , proj₁ (a→contrBa x)) (x , y) (refl , inv (proj₂ (a→contrBa x) y))})
+fib-contr-to-proj₁-equiv {A = A} {B = B} a→contrBa =
+  ((λ a → a , proj₁ (a→contrBa a)) , λ x → refl) ,
+    ((λ a → a , proj₁ (a→contrBa a)) , λ { (x , y) → eq-pair (x , proj₁ (a→contrBa x)) (x , y) (refl , inv (proj₂ (a→contrBa x) y))})
 
-sec-pair-equiv-to-fib-contr : {A : Set ℓ} → {B : A → Set ℓ₁} → (b : (x : A) → B x) → is-equiv {A = A} {B = Σ A B} (λ x → x , b x) → (x : A) → is-contr (B x)
+sec-pair-equiv-to-fib-contr : {A : Set ℓ} → {B : A → Set ℓ₁} → (b : (x : A) → B x)
+  → is-equiv {A = A} {B = Σ A B} (λ x → x , b x) → (x : A) → is-contr (B x)
 sec-pair-equiv-to-fib-contr {A = A} {B = B} b ((f , pf) , (g , gp)) x = b x , λ y →
   let pe = pair-eq (f (x , y) , b (f (x , y))) (x , y) (pf (x , y))
   in concat (inv (proj₂ pe)) (apd b (proj₁ pe))
 
-fib-contr-to-sec-pair-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → (b : (x : A) → B x) → ((x : A) → is-contr (B x)) → is-equiv {A = A} {B = Σ A B} (λ x → x , b x)
-fib-contr-to-sec-pair-equiv {A = A} {B = B} b c = (proj₁ , λ { (x , y) → eq-pair (x , b x) (x , y) (refl , concat (proj₂ (c x) (b x)) (inv (proj₂ (c x) y)))}) , (proj₁ , λ {a → refl})
+fib-contr-to-sec-pair-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → (b : (x : A) → B x)
+  → ((x : A) → is-contr (B x)) → is-equiv {A = A} {B = Σ A B} (λ x → x , b x)
+fib-contr-to-sec-pair-equiv {A = A} {B = B} b c =
+  (proj₁ , λ { (x , y) → eq-pair (x , b x) (x , y) (refl , concat (proj₂ (c x) (b x)) (inv (proj₂ (c x) y)))})
+    , (proj₁ , λ {a → refl})
 
 fib-repl : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → Σ (A ≃ Σ B (λ y → fib f y)) (λ e → (f ∼ proj₁ ∘ (proj₁ e)))
-fib-repl f = ((λ x → f x , (x , refl)) , (((λ { (b , (a , refl)) → a}) , λ { (b , (a , refl)) → refl}) , ((λ { (b , (a , refl)) → a}) , λ a → refl))) , λ a → refl
+fib-repl f =
+  ((λ x → f x , (x , refl)) , (((λ { (b , (a , refl)) → a}) , λ { (b , (a , refl)) → refl}) , ((λ { (b , (a , refl)) → a}) , λ a → refl)))
+    , λ a → refl
 

@@ -28,7 +28,9 @@ inhab-emb-to-emb : {X : Set ℓ} {Y : Set ℓ₁} → (f : X → Y) → (X → i
 inhab-emb-to-emb f emb x y = emb x x y
 
 inhab-contr-to-emb-𝟙 : {A : Set ℓ} → (A → is-contr A) → is-emb (const {A = A} {B = 𝟙} {b = *})
-inhab-contr-to-emb-𝟙 {A = A} f = inhab-emb-to-emb (const {A = A} {B = 𝟙} {b = *}) λ a → equiv-to-emb (const {A = A} {B = 𝟙} {b = *}) (A-contr-to-const𝟙-equiv (f a))
+inhab-contr-to-emb-𝟙 {A = A} f =
+  inhab-emb-to-emb (const {A = A} {B = 𝟙} {b = *}) λ a → equiv-to-emb (const {A = A} {B = 𝟙} {b = *})
+    (A-contr-to-const𝟙-equiv (f a))
 
 emb-𝟙-to-is-prop : {A : Set ℓ} → is-emb (const {A = A} {B = 𝟙} {b = *}) → is-prop A
 emb-𝟙-to-is-prop {A = A} emb x y = is-contr-domain-equiv (ap (const {A = A} {B = 𝟙} {b = *})) (unit-prop * *) (emb x y)
@@ -174,7 +176,8 @@ K-to-set KA a a' =
 
 -- Theorem 12.3.4
 
-rfl-prop-rel-to-equiv : {A : Set ℓ} → (R : A → A → Set ℓ₁) → ((x y : A) → is-prop (R x y)) → (ρ : (x : A) → R x x) → (f : (x y : A) → R x y → x ≡ y) → (x y : A) → (g : x ≡ y → R x y) → is-equiv g
+rfl-prop-rel-to-equiv : {A : Set ℓ} → (R : A → A → Set ℓ₁) → ((x y : A) → is-prop (R x y))
+  → (ρ : (x : A) → R x x) → (f : (x y : A) → R x y → x ≡ y) → (x y : A) → (g : x ≡ y → R x y) → is-equiv g
 rfl-prop-rel-to-equiv {A = A} R Rprop ρ f x y g =
   htpy-of-equiv-is-equiv (ind-eq x (ρ x) y) g
     (λ p → proj₁ (Rprop x y _ _))
@@ -189,7 +192,8 @@ rfl-prop-rel-to-equiv {A = A} R Rprop ρ f x y g =
     ind-eq : (x : A) → R x x → (y : A) → (x ≡ y) → R x y
     ind-eq x ρx .x refl = ρx
 
-rfl-prop-rel-to-set : {A : Set ℓ} → (R : A → A → Set ℓ₁) → ((x y : A) → is-prop (R x y)) → (ρ : (x : A) → R x x) → (f : (x y : A) → R x y → x ≡ y) → is-set A
+rfl-prop-rel-to-set : {A : Set ℓ} → (R : A → A → Set ℓ₁) → ((x y : A) → is-prop (R x y))
+  → (ρ : (x : A) → R x x) → (f : (x y : A) → R x y → x ≡ y) → is-set A
 rfl-prop-rel-to-set {A = A} R Rprop ρ f x y =
   proj₂ (≃-to-iff-prop (ind-eq x (ρ x) y , rfl-prop-rel-to-equiv R Rprop ρ f x y (ind-eq x (ρ x) y))) (Rprop x y)
   where
@@ -233,7 +237,9 @@ is-trunc-map : {A : Set ℓ} {B : Set ℓ₁} → (k : 𝕋) → (f : A → B) �
 is-trunc-map {A = A} {B = B} k f = (x : B) → is-trunc k (fib f x)
 
 type-is-succ-type : {A : Set ℓ} → {t : 𝕋} → is-trunc t A → is-trunc (succ𝕋 t) A
-type-is-succ-type {t = -2𝕋} trunctA = λ x y → concat (proj₂ (trunctA) x) (inv (proj₂ (trunctA) y)) , λ {refl → inv (right-inv (proj₂ (trunctA) x))}
+type-is-succ-type {t = -2𝕋} trunctA =
+  λ x y → concat (proj₂ (trunctA) x) (inv (proj₂ (trunctA) y)) , λ
+    {refl → inv (right-inv (proj₂ (trunctA) x))}
 type-is-succ-type {t = succ𝕋 t} trunctA x y = type-is-succ-type (trunctA x y)
 
 k-type-has-k-type-ids : {A : Set ℓ} → {k : 𝕋} → is-trunc k A → (x y : A) → is-trunc k (x ≡ y)
@@ -248,13 +254,17 @@ equiv-to-same-k-type {k = succ𝕋 k} (e , eequiv) truncB x y =
 emb-to-same-k-type : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A → B) → is-emb f → is-trunc (succ𝕋 k) B → is-trunc (succ𝕋 k) A
 emb-to-same-k-type f femb truncB x y = equiv-to-same-k-type (ap f , femb x y) (truncB (f x) (f y))
 
-k+1-trunc-map-to-ap-k-trunc : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A → B) → is-trunc-map (succ𝕋 k) f → (x y : A) → is-trunc-map k (ap f {x = x} {y = y})
+k+1-trunc-map-to-ap-k-trunc : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A → B) → is-trunc-map (succ𝕋 k) f
+  → (x y : A) → is-trunc-map k (ap f {x = x} {y = y})
 k+1-trunc-map-to-ap-k-trunc {A = A} {B = B} {k = k} f truncf x y fp = equiv-to-same-k-type fibequiv (truncf (f y) (x , fp) (y , refl))
   where
     fibequiv : fib (ap f {x} {y}) fp ≃ ((x , fp) ≡ (y , refl {a = f y}))
-    fibequiv = (λ {(refl , refl) → eq-pair _ _ (refl , refl)}) , (((λ {refl → refl , refl}) , λ {refl → refl}) , ((λ {refl → refl , refl}) , λ {(refl , refl) → refl}))
+    fibequiv =
+      (λ {(refl , refl) → eq-pair _ _ (refl , refl)}) ,
+        (((λ {refl → refl , refl}) , λ {refl → refl}) , ((λ {refl → refl , refl}) , λ {(refl , refl) → refl}))
 
-ap-k-trunc-to-k+1-trunc-map : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A → B) → ((x y : A) → is-trunc-map k (ap f {x} {y})) → is-trunc-map (succ𝕋 k) f
+ap-k-trunc-to-k+1-trunc-map : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A → B)
+  → ((x y : A) → is-trunc-map k (ap f {x} {y})) → is-trunc-map (succ𝕋 k) f
 ap-k-trunc-to-k+1-trunc-map f apftrunc b (x , p) (y , q) =
   equiv-to-same-k-type (pair-eq (x , p) (y , q) , pair-eq-is-equiv (x , p) (y , q))
     (equiv-to-same-k-type (tot Eq-to-fib , fam-equiv-to-tot-equiv Eq-to-fib Eq-to-fib-equiv)
@@ -315,7 +325,8 @@ ap-k-trunc-to-k+1-trunc-map f apftrunc b (x , p) (y , q) =
 -- 12.2
 
 is-poset : (A : Set ℓ) → (_≤A_ : A → A → Set ℓ₁) → Set (ℓ ⊔ ℓ₁)
-is-poset A _≤A_ = (((a b : A) → is-prop (a ≤A b)) × ((x : A) → x ≤A x) × ((a b : A) → a ≤A b → b ≤A a → a ≡ b) × ((a b c : A) → a ≤A b → b ≤A c → a ≤A c))
+is-poset A _≤A_ =
+  (((a b : A) → is-prop (a ≤A b)) × ((x : A) → x ≤A x) × ((a b : A) → a ≤A b → b ≤A a → a ≡ b) × ((a b c : A) → a ≤A b → b ≤A c → a ≤A c))
 
 prop-× : {A : Set ℓ} {B : Set ℓ₁} → is-prop A → is-prop B → is-prop (A × B)
 prop-× {A = A} {B = B} Aprop Bprop (a , b) (a' , b') =
@@ -333,7 +344,9 @@ poset-is-set {A = A} {≤A = ≤A} (≤prop , (≤rfl , (≤antisym , ≤trans))
 
 -- 12.3
 inj-to-set-is-emb : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → ((x y : A) → (f x ≡ f y) → (x ≡ y)) → is-set B → is-emb f
-inj-to-set-is-emb f finj Bset a a' = (finj a a' , λ {fafa' → proj₁ (Bset (f a) (f a') ((ap f ∘ finj a a') fafa') fafa')}) , ((finj a a') , (λ {refl → proj₁ (Aset a a (finj a a refl) refl)}))
+inj-to-set-is-emb f finj Bset a a' =
+  (finj a a' , λ {fafa' → proj₁ (Bset (f a) (f a') ((ap f ∘ finj a a') fafa') fafa')}) ,
+    ((finj a a') , (λ {refl → proj₁ (Aset a a (finj a a refl) refl)}))
   where
     Aset = rfl-prop-rel-to-set (λ a b → f a ≡ f b) (λ a b → Bset (f a) (f b)) (λ _ → refl) finj
 
@@ -456,7 +469,8 @@ diag-k-trunc-to-k+1-trunc {A = A} {k = k} diagtrunc x y = equiv-to-same-k-type (
 
 -- 12.6
 fam-trunc-to-Σ-trunc : {A : Set ℓ} → {B : A → Set ℓ₁} → {k : 𝕋} → is-trunc k A → ((x : A) → is-trunc k (B x)) → is-trunc k (Σ A B)
-fam-trunc-to-Σ-trunc {k = -2𝕋} Acontr aBcontr = (a , b) , λ { (x , y) → eq-pair _ _ (proj₂ Acontr x , proj₂ (aBcontr a) (tr _ (proj₂ Acontr x) y)) }
+fam-trunc-to-Σ-trunc {k = -2𝕋} Acontr aBcontr =
+  (a , b) , λ { (x , y) → eq-pair _ _ (proj₂ Acontr x , proj₂ (aBcontr a) (tr _ (proj₂ Acontr x) y)) }
   where
     a = proj₁ Acontr
     b = proj₁ (aBcontr a)
@@ -475,8 +489,11 @@ trunc-to-trunc-map : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A �
 trunc-to-trunc-map {A = A} {B = B} {k = k} f Btrunc Atrunc b = fam-trunc-to-Σ-trunc Atrunc (λ a → k-type-has-k-type-ids Btrunc (f a) b)
 
 -- 12.7
-trunc-funs-to-prod-trunc : {A : Set ℓ} {B : Set ℓ₁} {k : 𝕋} → (B → is-trunc (succ𝕋 k) A) → (A → is-trunc (succ𝕋 k) B) → is-trunc (succ𝕋 k) (A × B)
-trunc-funs-to-prod-trunc f g (a , b) (x , y) = equiv-to-same-k-type ((pair-eq _ _) , (pair-eq-is-equiv _ _)) (fam-trunc-to-Σ-trunc (f b a x) λ {refl → g a b y})
+trunc-funs-to-prod-trunc : {A : Set ℓ} {B : Set ℓ₁} {k : 𝕋} → (B → is-trunc (succ𝕋 k) A)
+  → (A → is-trunc (succ𝕋 k) B) → is-trunc (succ𝕋 k) (A × B)
+trunc-funs-to-prod-trunc f g (a , b) (x , y) =
+  equiv-to-same-k-type ((pair-eq _ _) , (pair-eq-is-equiv _ _))
+    (fam-trunc-to-Σ-trunc (f b a x) λ {refl → g a b y})
 
 retr-k-type : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A → B) → retr f → is-trunc k B → is-trunc k A
 retr-k-type {k = -2𝕋} f (g , gf) (b , eqb) = (g b) , λ x → concat (inv (gf x)) (ap g (eqb (f x)))
@@ -487,7 +504,8 @@ retr-k-type {k = succ𝕋 k} f (g , gf) Btrunc a a' =
       λ {refl → concat (ap (concat (inv (gf a))) (left-unit (gf a))) (left-inv (gf a))})
     (Btrunc (f a) (f a'))
 
-prod-trunc-to-trunc-funs : {A : Set ℓ} {B : Set ℓ₁} {k : 𝕋} → is-trunc (succ𝕋 k) (A × B) → (B → is-trunc (succ𝕋 k) A) × (A → is-trunc (succ𝕋 k) B)
+prod-trunc-to-trunc-funs : {A : Set ℓ} {B : Set ℓ₁} {k : 𝕋} → is-trunc (succ𝕋 k) (A × B)
+  → (B → is-trunc (succ𝕋 k) A) × (A → is-trunc (succ𝕋 k) B)
 prod-trunc-to-trunc-funs ABtrunc =
   (λ b → retr-k-type (λ z → (z , b)) (proj₁ , λ _ → refl) ABtrunc) ,
   (λ a → retr-k-type (λ z → (a , z)) (proj₂ , λ _ → refl) ABtrunc)
@@ -507,7 +525,9 @@ inhab-prod-trunc-to-fac-trunc {k = succ𝕋 k} a b ABtrunc = f b , g a
 
 -- 12.8
 retr-ap : {A : Set ℓ} {B : Set ℓ₁} (i : A → B) → retr i → {x y : A} → retr (ap i {x = x} {y = y})
-retr-ap i (f , fi) {x = x} {y = y} = (λ {ixiy → concat (inv (fi x)) (concat (ap f ixiy) (fi y))}) , λ {refl → concat  (ap (concat (inv (fi x))) (left-unit (fi x))) (left-inv (fi x))}
+retr-ap i (f , fi) {x = x} {y = y} =
+  (λ {ixiy → concat (inv (fi x)) (concat (ap f ixiy) (fi y))}) , λ
+    {refl → concat  (ap (concat (inv (fi x))) (left-unit (fi x))) (left-inv (fi x))}
 
 -- 12.8b is retr-k-type proven earlier
 
@@ -640,7 +660,8 @@ fam-k-trunc-map-to-tot-k-trunc-map : {A : Set ℓ} → {B : A → Set ℓ₁} {C
   → (f : (x : A) → B x → C x)
   → ((x : A) → is-trunc-map k (f x))
   → is-trunc-map k (tot f)
-fam-k-trunc-map-to-tot-k-trunc-map {A = A} {B = B} {C = C} {k = k} f famtrunc (a , c) = equiv-to-same-k-type (fib-tot-equiv-fib (λ x → f x) ((a , c))) (famtrunc a c)
+fam-k-trunc-map-to-tot-k-trunc-map {A = A} {B = B} {C = C} {k = k} f famtrunc (a , c) =
+  equiv-to-same-k-type (fib-tot-equiv-fib (λ x → f x) ((a , c))) (famtrunc a c)
 
 tot-k-trunc-map-to-fam-k-trunc-map : {A : Set ℓ} → {B : A → Set ℓ₁} {C : A → Set ℓ₂} → {k : 𝕋}
   → (f : (x : A) → B x → C x)
@@ -668,7 +689,8 @@ k+1-trunc-to-fib-incl-k-trunc Atrunc B a (x , bx) =
 fib-incl-k-trunc-to-k+1-trunc : {A : Set} → {k : 𝕋}
   → ((B : A → Set) → (a : A) → is-trunc-map k (fib-incl B a))
   → is-trunc (succ𝕋 k) A
-fib-incl-k-trunc-to-k+1-trunc BatruncBa a a' = equiv-to-same-k-type (inv-≃ (fib-fib-incl-≃-≡ (λ _ → 𝟙) a a' *)) (BatruncBa (λ _ → 𝟙) a (a' , *))
+fib-incl-k-trunc-to-k+1-trunc BatruncBa a a' =
+  equiv-to-same-k-type (inv-≃ (fib-fib-incl-≃-≡ (λ _ → 𝟙) a a' *)) (BatruncBa (λ _ → 𝟙) a (a' , *))
 
 set-to-fib-incl-emb : {A : Set ℓ}
   → is-set A

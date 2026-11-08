@@ -112,7 +112,8 @@ inlFin k = inl
 neg-oneFin : (k : ℕ) → Fin (succℕ k)
 neg-oneFin k = inr *
 
-indFin : {p : (k : ℕ) → Fin k → Set} → ((k : ℕ) → (x : Fin k) → p (succℕ k) (inlFin k x)) → ((k : ℕ) → p (succℕ k) (neg-oneFin k)) → (k : ℕ) → (x : Fin k) → p k x
+indFin : {p : (k : ℕ) → Fin k → Set} → ((k : ℕ) → (x : Fin k) → p (succℕ k) (inlFin k x))
+  → ((k : ℕ) → p (succℕ k) (neg-oneFin k)) → (k : ℕ) → (x : Fin k) → p k x
 indFin {p} f-left f-neg1 (succℕ k) (inl x) = f-left k x
 indFin {p} f-left f-neg1 (succℕ k) (inr *) = f-neg1 k
 
@@ -203,7 +204,8 @@ eqℕ-to-eq-modℕ k x y p = (0ℕ , concat (zero-mulℕ k) (inv (≡-to-dist0�
 
 eq-modℕ-to-eqℕ : (k : ℕ) → (x y : ℕ) → (x ≡ℕ y mod k) → (distℕ x y <ℕ k) → x ≡ y
 eq-modℕ-to-eqℕ 0ℕ x y (kxy , pxy) d = ex-falso (<-zeroℕ (distℕ x y) d)
-eq-modℕ-to-eqℕ (succℕ k) x y (kxy , pxy) d = dist0-to-≡ℕ x y (concat (inv pxy) (concat pxy (<-div-to-zeroℕ (succℕ k) (distℕ x y) d (kxy , pxy))))
+eq-modℕ-to-eqℕ (succℕ k) x y (kxy , pxy) d =
+  dist0-to-≡ℕ x y (concat (inv pxy) (concat pxy (<-div-to-zeroℕ (succℕ k) (distℕ x y) d (kxy , pxy))))
 
 dist-bounded-<ℕ : (x y k : ℕ) → x <ℕ k → y <ℕ k → distℕ x y <ℕ k
 dist-bounded-<ℕ 0ℕ 0ℕ 0ℕ () yk

@@ -41,7 +41,8 @@ has-htpy-ind {ℓ} {ℓ₁} {A} {B} f = (P : (g : (x : A) → B x) → f ∼ g �
 
 funext-at-to-is-contr-total-htpy : {A : Set ℓ} → {B : A → Set ℓ₁} → (f : (x : A) → B x)
   → funext-at f → is-contr-total-htpy f
-funext-at-to-is-contr-total-htpy {A = A} {B = B} f fext = is-contr-codomain-equiv (tot (htpy-eq f)) (Σ-≡-contractible f) (fam-equiv-to-tot-equiv (htpy-eq f) fext)
+funext-at-to-is-contr-total-htpy {A = A} {B = B} f fext =
+  is-contr-codomain-equiv (tot (htpy-eq f)) (Σ-≡-contractible f) (fam-equiv-to-tot-equiv (htpy-eq f) fext)
 
 is-contr-total-htpy-to-has-htpy-ind : {A : Set ℓ} → {B : A → Set ℓ₁} → (f : (x : A) → B x)
   → is-contr-total-htpy f → has-htpy-ind f
@@ -69,7 +70,9 @@ weak-funext : Set₁
 weak-funext = (A : Set) → (B : A → Set) → ((x : A) → is-contr (B x)) → is-contr ((x : A) → B x)
 
 funext-principle-to-weak-funext : funext-principle → weak-funext
-funext-principle-to-weak-funext fext A B xcontrBx = (λ a → proj₁ (xcontrBx a)) , λ aBa → proj₁ (proj₁ (fext A B aBa λ a → proj₁ (xcontrBx a))) λ a → proj₂ (xcontrBx a) (aBa a)
+funext-principle-to-weak-funext fext A B xcontrBx =
+  (λ a → proj₁ (xcontrBx a)) , λ aBa → proj₁ (proj₁ (fext A B aBa λ a → proj₁ (xcontrBx a))) λ a → proj₂
+    (xcontrBx a) (aBa a)
 
 weak-funext-to-funext-principle : weak-funext → funext-principle
 weak-funext-to-funext-principle wfext A B f g = total-contr-to-fam-equiv (rfl-htpy f) (htpy-eq f) refl
@@ -85,7 +88,9 @@ fam-trunc-to-Π-trunc {A = A} {B = B} {k = -2𝕋} xcontrBx = (λ a → xcentre 
     xcentre a = proj₁ (xcontrBx a)
     eqcentre : (a : A) → (x : B a) → x ≡ (xcentre a)
     eqcentre a x = proj₂ (xcontrBx a) x
-fam-trunc-to-Π-trunc {A = A} {B = B} {k = succ𝕋 k} xtruncBx f g = equiv-to-same-k-type ((htpy-eq f g , fun-ext f g)) (fam-trunc-to-Π-trunc {k = k} λ a → xtruncBx a (f a) (g a))
+fam-trunc-to-Π-trunc {A = A} {B = B} {k = succ𝕋 k} xtruncBx f g =
+  equiv-to-same-k-type ((htpy-eq f g , fun-ext f g))
+    (fam-trunc-to-Π-trunc {k = k} λ a → xtruncBx a (f a) (g a))
 
 codom-trunc-to-→-trunc : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → is-trunc k B → is-trunc k (A → B)
 codom-trunc-to-→-trunc Btrunc = fam-trunc-to-Π-trunc λ a → Btrunc
@@ -103,16 +108,21 @@ codom-trunc-to-→-trunc Btrunc = fam-trunc-to-Π-trunc λ a → Btrunc
   cnst : B * → (x : 𝟙) → B x
   cnst b = indUnit b
 
-choice : {A : Set ℓ} → {B : A → Set ℓ₁} → {C : (x : A) → B x → Set ℓ₂} → ((x : A) → Σ (B x) (C x)) → (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x)))
+choice : {A : Set ℓ} → {B : A → Set ℓ₁} → {C : (x : A) → B x → Set ℓ₂} → ((x : A) → Σ (B x) (C x))
+  → (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x)))
 choice h = (λ x → proj₁ (h x)) , λ x → proj₂ (h x)
 
-choice-inv : {A : Set ℓ} → {B : A → Set ℓ₁} → {C : (x : A) → B x → Set ℓ₂} → (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x))) → ((x : A) → Σ (B x) (C x))
+choice-inv : {A : Set ℓ} → {B : A → Set ℓ₁} → {C : (x : A) → B x → Set ℓ₂}
+  → (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x))) → ((x : A) → Σ (B x) (C x))
 choice-inv (f , g) x = f x , g x
 
 choice-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → {C : (x : A) → B x → Set ℓ₂} → is-equiv (choice {A = A} {B = B} {C = C})
-choice-equiv {A = A} {B = B} {C = C} = (choice-inv , λ {(f , g) → refl}) , (choice-inv , λ {h → eq-htpy ((choice-inv ∘ choice) h) (id h) λ x → eq-pair _ _ (refl , refl)})
+choice-equiv {A = A} {B = B} {C = C} =
+  (choice-inv , λ {(f , g) → refl}) ,
+    (choice-inv , λ {h → eq-htpy ((choice-inv ∘ choice) h) (id h) λ x → eq-pair _ _ (refl , refl)})
 
-Π-distrib-Σ : {A : Set ℓ} → {B : A → Set ℓ₁} → {C : (x : A) → B x → Set ℓ₂} → ((x : A) → Σ (B x) (C x)) ≃ (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x)))
+Π-distrib-Σ : {A : Set ℓ} → {B : A → Set ℓ₁} → {C : (x : A) → B x → Set ℓ₂}
+  → ((x : A) → Σ (B x) (C x)) ≃ (Σ ((x : A) → B x) (λ f → (x : A) → C x (f x)))
 Π-distrib-Σ {A = A} {B = B} {C = C} = choice , choice-equiv
 
 Π-distrib-× : {I : Set ℓ} → (P : I → Set ℓ₁) (Q : I → Set ℓ₂)
@@ -135,7 +145,9 @@ choice-equiv {A = A} {B = B} {C = C} = (choice-inv , λ {(f , g) → refl}) , (c
 Π-fib-equiv-sec {A = A} {B = B} f = choice , choice-equiv
 
 total-htpy-is-contr : (A : Set ℓ) → is-contr (Σ (A → A) (λ f → f ∼ id))
-total-htpy-is-contr A = is-contr-codomain-equiv (tot (λ f → htpy-eq f id)) (identity-contr id) (fam-equiv-to-tot-equiv (λ x → htpy-eq x id) λ f → fun-ext f id)
+total-htpy-is-contr A =
+  is-contr-codomain-equiv (tot (λ f → htpy-eq f id)) (identity-contr id)
+    (fam-equiv-to-tot-equiv (λ x → htpy-eq x id) λ f → fun-ext f id)
 
 sec-proj₁-equiv-Π : {A : Set ℓ} → {B : A → Set ℓ₁} → sec (proj₁ {A = A} {B = B}) ≃ ((x : A) → B x)
 sec-proj₁-equiv-Π {A = A} {B = B} = concat-≃ distrib (concat-≃ reassoc collapse)
@@ -152,14 +164,18 @@ sec-proj₁-equiv-Π {A = A} {B = B} = concat-≃ distrib (concat-≃ reassoc co
 
     collapse : Σ (Σ (A → A) (λ f → f ∼ id)) (λ w → (x : A) → B (proj₁ w x))
           ≃ ((x : A) → B x)
-    collapse = inv-≃ ((λ y → proj₁ (total-htpy-is-contr A) , y) , is-equiv-pair-contr-base (total-htpy-is-contr A) λ v → (x : A) → B (proj₁ v x))
+    collapse =
+      inv-≃
+        ((λ y → proj₁ (total-htpy-is-contr A) , y) , is-equiv-pair-contr-base (total-htpy-is-contr A) λ v → (x : A) → B (proj₁ v x))
 
 Π-id-sys : {A : Set ℓ} → {B : A → Set ℓ} → (E : (a : A) → B a → B a → Set ℓ)
   → (e : (a : A) → (b : B a) → E a b b)
   → ((a : A) → (b : B a) → is-id-sys (E a b) b (e a b))
   → (f : (x : A) → B x)
   → is-id-sys (λ g → (x : A) → E x (f x) (g x)) f (λ x → e x (f x))
-Π-id-sys {A = A} {B = B} E e hyp f P = total-contr-to-id-sys (λ x → e x (f x)) (λ x₁ x₂ x₃ → tr (E x₃ (f x₃)) (htpy-eq f x₁ x₂ x₃) (e x₃ (f x₃))) refl
+Π-id-sys {A = A} {B = B} E e hyp f P =
+  total-contr-to-id-sys (λ x → e x (f x)) (λ x₁ x₂ x₃ → tr (E x₃ (f x₃)) (htpy-eq f x₁ x₂ x₃) (e x₃ (f x₃)))
+    refl
   (is-contr-codomain-equiv (proj₁ Π-distrib-Σ) (fam-trunc-to-Π-trunc fiber-contr) (proj₂ Π-distrib-Σ)) P
   where
     canonical-map : (a : A) → (y : B a) → (f a ≡ y) → E a (f a) y
@@ -185,7 +201,9 @@ ev-refl-dep : {A : Set ℓ} → {a : A} → {B : (x : A) → a ≡ x → Set ℓ
 ev-refl-dep f = f _ refl
 
 dep-univ-prop-id : {A : Set ℓ} → {a : A} → {B : (x : A) → a ≡ x → Set ℓ₁} → is-equiv (ev-refl-dep {A = A} {a = a} {B = B})
-dep-univ-prop-id {A = A} {a = a} {B = B} = (ind≡ , (λ x → refl)) , (ind≡ , λ f → eq-htpy _ _ λ y → eq-htpy _ _ (ind≡ {A = A} {a = a} {P = λ x p → ind≡ (ev-refl-dep f) x p ≡ f x p} refl y))
+dep-univ-prop-id {A = A} {a = a} {B = B} =
+  (ind≡ , (λ x → refl)) ,
+    (ind≡ , λ f → eq-htpy _ _ λ y → eq-htpy _ _ (ind≡ {A = A} {a = a} {P = λ x p → ind≡ (ev-refl-dep f) x p ≡ f x p} refl y))
 
 univ-prop-id : {A : Set ℓ} → {a : A} → {B : A → Set ℓ₁} → is-equiv (ev-refl-dep {A = A} {a = a} {B = λ x _ → B x})
 univ-prop-id {A = A} {a = a} {B = B} = dep-univ-prop-id {A = A} {a = a} {B = λ x _ → B x}
@@ -211,7 +229,8 @@ precomp-Π-is-equiv {ℓ₂ = ℓ₂} {B = B} f = (P : B → Set ℓ₂) → is-
 precomp-is-equiv : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → Set (ℓ ⊔ ℓ₁ ⊔ lsuc ℓ₂)
 precomp-is-equiv {ℓ₂ = ℓ₂} f = (X : Set ℓ₂) → is-equiv (precomp f X)
 
-tr-ap : {A : Set ℓ} {B : Set ℓ₁} → (P : B → Set ℓ₂) → (f : A → B) → {x y : A} → (p : x ≡ y) → (u : P (f x)) → tr P (ap f p) u ≡ tr (λ x → P (f x)) p u
+tr-ap : {A : Set ℓ} {B : Set ℓ₁} → (P : B → Set ℓ₂) → (f : A → B) → {x y : A} → (p : x ≡ y) → (u : P (f x))
+  → tr P (ap f p) u ≡ tr (λ x → P (f x)) p u
 tr-ap P f refl u = refl
 
 -- the theorem: (i) ⇒ (ii) ⇒ (iii) ⇒ (i)
@@ -275,9 +294,12 @@ strong-indℕ {P = P} p0 f n = indℕ {P = P̃} p̃0 p̃S n n (≤-rflℕ n)
 -- Exercises
 -- 13.1
 inv-htpy-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g : (x : A) → B x} → is-equiv (inv-htpy {A = A} {B = B} {f = f} {g = g})
-inv-htpy-equiv = (inv-htpy , λ H → eq-htpy ((inv-htpy ∘ inv-htpy) H) (id H) λ x → inv-inv (H x)) , (inv-htpy , λ H → eq-htpy _ _ λ x → inv-inv (H x))
+inv-htpy-equiv =
+  (inv-htpy , λ H → eq-htpy ((inv-htpy ∘ inv-htpy) H) (id H) λ x → inv-inv (H x)) ,
+    (inv-htpy , λ H → eq-htpy _ _ λ x → inv-inv (H x))
 
-concat-htpy-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h : (x : A) → B x} → (H : f ∼ g) → is-equiv (concat-htpy {A = A} {B = B} {f = f} {g = g} {h = h} H)
+concat-htpy-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h : (x : A) → B x} → (H : f ∼ g)
+  → is-equiv (concat-htpy {A = A} {B = B} {f = f} {g = g} {h = h} H)
 concat-htpy-equiv H =
   ((λ K a → concat (inv (H a)) (K a)) ,
    λ K → eq-htpy _ _ λ x →
@@ -291,7 +313,8 @@ concat-htpy-equiv H =
 concat-htpy' : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h : (x : A) → B x} → g ∼ h → f ∼ g → f ∼ h
 concat-htpy' K H = concat-htpy H K
 
-concat-htpy'-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h : (x : A) → B x} → (K : g ∼ h) → is-equiv (concat-htpy' {A = A} {B = B} {f = f} {g = g} {h = h} K)
+concat-htpy'-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h : (x : A) → B x} → (K : g ∼ h)
+  → is-equiv (concat-htpy' {A = A} {B = B} {f = f} {g = g} {h = h} K)
 concat-htpy'-equiv K =
   ((λ L a → concat (L a) (inv (K a))) ,
    λ L → eq-htpy _ _ λ x →
@@ -351,10 +374,12 @@ comm-tri-post {A = A} {B = B} f g = Σ (A → B) (λ h → triangle-commutes f h
 Eq-comm-tri-post : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (s t : comm-tri-post f g) → Set (ℓ ⊔ ℓ₁ ⊔ ℓ₂)
 Eq-comm-tri-post {A = A} {B = B} {X = X} f g (h , H) (h' , H') = Σ (h ∼ h') (λ K → (x : A) → concat (H x) (ap g (K x)) ≡ H' x)
 
-comm-tri-post-eq : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (s t : comm-tri-post f g) → s ≡ t → Eq-comm-tri-post f g s t
+comm-tri-post-eq : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
+  → (s t : comm-tri-post f g) → s ≡ t → Eq-comm-tri-post f g s t
 comm-tri-post-eq {A = A} {B = B} {X = X} f g (h , H) (h' , H') refl = rfl-htpy h , λ x → right-unit (H x)
 
-comm-tri-post-eq-is-equiv : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (s t : comm-tri-post f g) → is-equiv (comm-tri-post-eq f g s t)
+comm-tri-post-eq-is-equiv : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
+  → (s t : comm-tri-post f g) → is-equiv (comm-tri-post-eq f g s t)
 comm-tri-post-eq-is-equiv {A = A} {B = B} {X = X} f g (h , H) (h' , H') =
   total-contr-to-fam-equiv
     (rfl-htpy h , λ x → right-unit (H x))
@@ -377,10 +402,12 @@ comm-tri-pre {A = A} {X = X} {Y = Y} f g = Σ (X → Y) (λ h → triangle-commu
 Eq-comm-tri-pre : {A : Set ℓ} {X : Set ℓ₁} {Y : Set ℓ₂} → (f : A → X) → (g : A → Y) → (s t : comm-tri-pre f g) → Set (ℓ ⊔ ℓ₁ ⊔ ℓ₂)
 Eq-comm-tri-pre {A = A} {X = X} {Y = Y} f g (h , H) (h' , H') = Σ (h ∼ h') (λ K → (x : A) → concat (H x) (K (f x)) ≡ H' x)
 
-comm-tri-pre-eq : {A : Set ℓ} {X : Set ℓ₁} {Y : Set ℓ₂} → (f : A → X) → (g : A → Y) → (s t : comm-tri-pre f g) → s ≡ t → Eq-comm-tri-pre f g s t
+comm-tri-pre-eq : {A : Set ℓ} {X : Set ℓ₁} {Y : Set ℓ₂} → (f : A → X) → (g : A → Y) → (s t : comm-tri-pre f g)
+  → s ≡ t → Eq-comm-tri-pre f g s t
 comm-tri-pre-eq {A = A} {X = X} {Y = Y} f g (h , H) (h' , H') refl = (λ x → refl) , λ x → right-unit (H x)
 
-comm-tri-pre-eq-is-equiv : {A : Set ℓ} {X : Set ℓ₁} {Y : Set ℓ₂} → (f : A → X) → (g : A → Y) → (s t : comm-tri-pre f g) → is-equiv (comm-tri-pre-eq f g s t)
+comm-tri-pre-eq-is-equiv : {A : Set ℓ} {X : Set ℓ₁} {Y : Set ℓ₂} → (f : A → X) → (g : A → Y)
+  → (s t : comm-tri-pre f g) → is-equiv (comm-tri-pre-eq f g s t)
 comm-tri-pre-eq-is-equiv {A = A} {X = X} {Y = Y} f g (h , H) (h' , H') =
   total-contr-to-fam-equiv
     (rfl-htpy h , λ x → right-unit (H x))
@@ -404,12 +431,16 @@ comm-sq : {A : Set ℓ} {X : Set ℓ₁} {B : Set ℓ₂} {Y : Set ℓ₃} → (
 comm-sq {A = A} {X = X} {B = B} {Y = Y} f g = Σ (A → X) (λ i → (Σ (B → Y) (λ j → (square-commutes f i g j))))
 
 Eq-comm-sq : {A : Set ℓ} {X : Set ℓ₁} {B : Set ℓ₂} {Y : Set ℓ₃} → (f : A → B) → (g : X → Y) → (s t : comm-sq f g) → Set (ℓ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
-Eq-comm-sq {A = A} {X = X} {B = B} {Y = Y} f g (i , (j , H)) (i' , (j' , H')) = Σ (i ∼ i') (λ Ki → (Σ (j ∼ j') (λ Kj → (a : A) → concat (H a) (ap g (Ki a)) ≡ concat (Kj (f a)) (H' a))))
+Eq-comm-sq {A = A} {X = X} {B = B} {Y = Y} f g (i , (j , H)) (i' , (j' , H')) =
+  Σ (i ∼ i') (λ Ki → (Σ (j ∼ j') (λ Kj → (a : A) → concat (H a) (ap g (Ki a)) ≡ concat (Kj (f a)) (H' a))))
 
-comm-sq-eq : {A : Set ℓ} {X : Set ℓ₁} {B : Set ℓ₂} {Y : Set ℓ₃} → (f : A → B) → (g : X → Y) → (s t : comm-sq f g) → s ≡ t → Eq-comm-sq f g s t
-comm-sq-eq {A = A} {X = X} {B = B} {Y = Y} f g (i , (j , H)) (i' , (j' , H')) refl = (rfl-htpy i) , ((rfl-htpy j) , λ a → concat (right-unit (H a)) (inv (left-unit (H a))))
+comm-sq-eq : {A : Set ℓ} {X : Set ℓ₁} {B : Set ℓ₂} {Y : Set ℓ₃} → (f : A → B) → (g : X → Y)
+  → (s t : comm-sq f g) → s ≡ t → Eq-comm-sq f g s t
+comm-sq-eq {A = A} {X = X} {B = B} {Y = Y} f g (i , (j , H)) (i' , (j' , H')) refl =
+  (rfl-htpy i) , ((rfl-htpy j) , λ a → concat (right-unit (H a)) (inv (left-unit (H a))))
 
-comm-sq-eq-is-equiv : {A : Set ℓ} {X : Set ℓ₁} {B : Set ℓ₂} {Y : Set ℓ₃} → (f : A → B) → (g : X → Y) → (s t : comm-sq f g) → is-equiv (comm-sq-eq f g s t)
+comm-sq-eq-is-equiv : {A : Set ℓ} {X : Set ℓ₁} {B : Set ℓ₂} {Y : Set ℓ₃} → (f : A → B) → (g : X → Y)
+  → (s t : comm-sq f g) → is-equiv (comm-sq-eq f g s t)
 comm-sq-eq-is-equiv {A = A} {X = X} {B = B} {Y = Y} f g (i , (j , H)) (i' , (j' , H')) =
   total-contr-to-fam-equiv
   ((rfl-htpy i) , ((rfl-htpy j) , λ a → concat (right-unit (H a)) (inv (left-unit (H a)))))
@@ -458,7 +489,9 @@ comm-sq-eq-is-equiv {A = A} {X = X} {B = B} {Y = Y} f g (i , (j , H)) (i' , (j' 
 -- 13.3
 -- (a)
 contr-is-prop : (A : Set ℓ) → is-prop (is-contr A)
-contr-is-prop A c c' = fam-trunc-to-Σ-trunc (type-is-succ-type c) (λ x → fam-trunc-to-Π-trunc λ a → type-is-succ-type (type-is-succ-type c a x)) c c'
+contr-is-prop A c c' =
+  fam-trunc-to-Σ-trunc (type-is-succ-type c)
+    (λ x → fam-trunc-to-Π-trunc λ a → type-is-succ-type (type-is-succ-type c a x)) c c'
 
 -- (b)
 trunc-is-prop : (A : Set ℓ) → {k : 𝕋} → is-prop (is-trunc k A)
@@ -494,7 +527,9 @@ equiv-to-contr-retr {A = A} {B = B} f e =
 
 -- (c)
 equiv-is-prop : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → is-prop (is-equiv f)
-equiv-is-prop f fequiv fequiv' = type-is-succ-type (contr-to-prod-contr (equiv-to-contr-sec f fequiv) (equiv-to-contr-retr f fequiv)) fequiv fequiv'
+equiv-is-prop f fequiv fequiv' =
+  type-is-succ-type (contr-to-prod-contr (equiv-to-contr-sec f fequiv) (equiv-to-contr-retr f fequiv)) fequiv
+    fequiv'
 
 -- (d)
 ≃-htpy-eq : {A : Set ℓ} {B : Set ℓ₁} → (e e' : A ≃ B) → e ≡ e' → proj₁ e ∼ proj₁ e'
@@ -523,7 +558,9 @@ type-to-≃-type {A = A} {B = B} {k = -2𝕋} Atrunc Btrunc =
     ABcontr = codom-trunc-to-→-trunc Btrunc
 
     f0contr : is-contr (is-equiv (proj₁ ABcontr))
-    f0contr = is-prop'-to-inhab-contr (is-prop-to-is-prop' (equiv-is-prop (proj₁ ABcontr))) (contr-contr-to-equiv (proj₁ ABcontr) Atrunc Btrunc)
+    f0contr =
+      is-prop'-to-inhab-contr (is-prop-to-is-prop' (equiv-is-prop (proj₁ ABcontr)))
+        (contr-contr-to-equiv (proj₁ ABcontr) Atrunc Btrunc)
 type-to-≃-type {A = A} {B = B} {k = succ𝕋 k} Atrunc Btrunc e e' =
   equiv-to-same-k-type
     (≃-htpy-eq e e' , ≃-htpy-eq-is-equiv e e')
@@ -674,7 +711,9 @@ const-up-endo A = is-equiv (λ (x : A) → λ (y : A) → x)
 
 -- (i) → (ii)
 contr-to-dep-up : {A : Set ℓ} → is-contr A → contr-dep-up {ℓ₁ = ℓ₁} A
-contr-to-dep-up (a , xeqa) = a , λ P → ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → ap (λ p → tr P p pa) (right-inv (xeqa a))) ,
+contr-to-dep-up (a , xeqa) =
+  a , λ P →
+    ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → ap (λ p → tr P p pa) (right-inv (xeqa a))) ,
   ((λ pa x → tr P (concat (xeqa a) (inv (xeqa x))) pa) , λ pa → eq-htpy _ _ λ x → apd pa (concat (xeqa a) (inv (xeqa x))))
 
 -- (ii) → (iii)
@@ -683,7 +722,9 @@ contr-dep-up-to-up dupA = proj₁ dupA , λ X → proj₂ dupA (λ _ → X)
 
 -- (iii) → (v)
 contr-up-to-const-up : {A : Set ℓ} → contr-up A → const-up A
-contr-up-to-const-up Acontrup X = 3-for-2-f-g-to-h (λ z → z) (λ f → f (proj₁ Acontrup)) (λ v v₁ → v) (λ x → refl) (((λ z → z) , (λ x → refl)) , ((λ z → z) , (λ x → refl))) (proj₂ Acontrup X)
+contr-up-to-const-up Acontrup X =
+  3-for-2-f-g-to-h (λ z → z) (λ f → f (proj₁ Acontrup)) (λ v v₁ → v) (λ x → refl)
+    (((λ z → z) , (λ x → refl)) , ((λ z → z) , (λ x → refl))) (proj₂ Acontrup X)
 
 -- (v) → (vi)
 const-up-to-const-up-endo : {A : Set ℓ} → const-up A → const-up-endo A
@@ -691,7 +732,9 @@ const-up-to-const-up-endo {A = A} Aconstup = Aconstup A
 
 -- (vi) → (iv)
 const-up-endo-to-up-endo : {A : Set ℓ} → const-up-endo A → contr-up-endo A
-const-up-endo-to-up-endo Aconstupendo = proj₁ (proj₁ Aconstupendo) id , 3-for-2-f-h-to-g id (λ z → z (proj₁ (proj₁ Aconstupendo) id)) (λ z z₁ → z) (λ x → refl) (((λ z → z) , (λ x → refl)) , ((λ z → z) , (λ x → refl))) Aconstupendo
+const-up-endo-to-up-endo Aconstupendo =
+  proj₁ (proj₁ Aconstupendo) id , 3-for-2-f-h-to-g id (λ z → z (proj₁ (proj₁ Aconstupendo) id)) (λ z z₁ → z)
+    (λ x → refl) (((λ z → z) , (λ x → refl)) , ((λ z → z) , (λ x → refl))) Aconstupendo
 
 -- (iv) → (i)
 up-endo-to-contr : {A : Set ℓ} → contr-up-endo A → is-contr A
@@ -877,7 +920,8 @@ fib-map-Π-equiv-Π-fib {I = I} A B f b =
   htpy : (g : (i : I) → A i) → (map-Π A B f g ≡ b) → ((i : I) → f i (g i) ≡ b i)
   htpy g p = htpy-eq _ _ p
 
-trunc-map-Π : {I : Set ℓ} → {k : 𝕋} → (A : I → Set ℓ₁) (B : I → Set ℓ₂) → (f : (i : I) → A i → B i) → ((i : I) → is-trunc-map k (f i)) → is-trunc-map k (map-Π A B f)
+trunc-map-Π : {I : Set ℓ} → {k : 𝕋} → (A : I → Set ℓ₁) (B : I → Set ℓ₂) → (f : (i : I) → A i → B i)
+  → ((i : I) → is-trunc-map k (f i)) → is-trunc-map k (map-Π A B f)
 trunc-map-Π A B f ftrunc iBi = equiv-to-same-k-type (fib-map-Π-equiv-Π-fib A B f iBi) (fam-trunc-to-Π-trunc λ i → ftrunc i (iBi i))
 
 -- a fibrewise equivalence induces an equivalence on Π-types
@@ -917,7 +961,10 @@ trunc-map-Π-to-fam-trunc-map : {I : Set ℓ} → {k : 𝕋} → (A : I → Set 
   → ((X : Set) → (α : X → I)
      → is-trunc-map k (map-Π (λ x → A (α x)) (λ x → B (α x)) (λ x → f (α x))))
   → (i : I) → is-trunc-map k (f i)
-trunc-map-Π-to-fam-trunc-map A B f H i b = equiv-to-same-k-type (concat-≃ (inv-≃ (Π-𝟙 λ _ → fib (f i) b)) (inv-≃ (fib-map-Π-equiv-Π-fib (λ _ → A i) (λ _ → B i) (λ i₁ → f i) λ i₁ → b))) (H 𝟙 (λ _ → i) (λ _ → b))
+trunc-map-Π-to-fam-trunc-map A B f H i b =
+  equiv-to-same-k-type
+    (concat-≃ (inv-≃ (Π-𝟙 λ _ → fib (f i) b)) (inv-≃ (fib-map-Π-equiv-Π-fib (λ _ → A i) (λ _ → B i) (λ i₁ → f i) λ i₁ → b)))
+    (H 𝟙 (λ _ → i) (λ _ → b))
 
 -- (d) f is k-truncated  iff  postcomposition by f is k-truncated for every type X
 -- postcomposition is map-Π at constant families, so (a) and Π-𝟙 do the work again
@@ -930,7 +977,10 @@ trunc-map-to-postcomp-trunc-map {A = A} {B = B} {k = k} f ftrunc X = trunc-map-�
 
 postcomp-trunc-map-to-trunc-map : {A : Set ℓ} {B : Set ℓ₁} → {k : 𝕋} → (f : A → B)
   → ((X : Set) → is-trunc-map k (postcomp f X)) → is-trunc-map k f
-postcomp-trunc-map-to-trunc-map {A = A} {B = B} {k = k} f H b = equiv-to-same-k-type (concat-≃ (inv-≃ (Π-𝟙 (λ _ → fib f b))) (inv-≃ (fib-map-Π-equiv-Π-fib (λ _ → A) (λ _ → B) (λ i → f) λ i → b))) (H 𝟙 (λ i → b))
+postcomp-trunc-map-to-trunc-map {A = A} {B = B} {k = k} f H b =
+  equiv-to-same-k-type
+    (concat-≃ (inv-≃ (Π-𝟙 (λ _ → fib f b))) (inv-≃ (fib-map-Π-equiv-Π-fib (λ _ → A) (λ _ → B) (λ i → f) λ i → b)))
+    (H 𝟙 (λ i → b))
 
 -- corollaries of (d): k := -2𝕋 reads as "equivalence", k := succ𝕋 -2𝕋 as "embedding"
 equiv-to-postcomp-equiv : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B)
@@ -1077,10 +1127,11 @@ tr-sec-htpy : {B : Set ℓ} {X : Set ℓ₁} → (g : B → X) → (k₁ k₂ : 
 tr-sec-htpy g k .k refl G = eq-htpy _ _ λ x → inv (left-unit (G x))
 
 -- 13.14
-comm-tri-sec-h-to-sec-g-retr-of-sec-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → sec h → is-retract-of (sec g) (sec f)
-comm-tri-sec-h-to-sec-g-retr-of-sec-f {A = A} {B = B} {X = X} f g h commfhg (hsec , hsec-htpy) = 
-  proj₂ (comm-tri-sec-h-to-sec-f-iff-sec-g f g h commfhg (hsec , hsec-htpy)) , 
-  ((proj₁ (comm-tri-sec-h-to-sec-f-iff-sec-g f g h commfhg (hsec , hsec-htpy))) , 
+comm-tri-sec-h-to-sec-g-retr-of-sec-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
+  → (h : A → B) → triangle-commutes f h g → sec h → is-retract-of (sec g) (sec f)
+comm-tri-sec-h-to-sec-g-retr-of-sec-f {A = A} {B = B} {X = X} f g h commfhg (hsec , hsec-htpy) =
+  proj₂ (comm-tri-sec-h-to-sec-f-iff-sec-g f g h commfhg (hsec , hsec-htpy)) ,
+  ((proj₁ (comm-tri-sec-h-to-sec-f-iff-sec-g f g h commfhg (hsec , hsec-htpy))) ,
   λ {(gsec , gsec-htpy) → eq-pair _ _ (eq-htpy _ _ (λ x → hsec-htpy (gsec x)) , final gsec gsec-htpy)})
   where
   iff : sec f ↔ sec g
@@ -1133,7 +1184,8 @@ tr-retr-htpy : {B : Set ℓ} {X : Set ℓ₁} → (h : X → B) → (k₁ k₂ :
     h x))) (G x))
 tr-retr-htpy h k .k refl G = eq-htpy _ _ λ x → inv (left-unit (G x))
 
-comm-tri-retr-g-to-retr-h-retr-of-retr-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → retr g → is-retract-of (retr h) (retr f)
+comm-tri-retr-g-to-retr-h-retr-of-retr-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
+  → (h : A → B) → triangle-commutes f h g → retr g → is-retract-of (retr h) (retr f)
 comm-tri-retr-g-to-retr-h-retr-of-retr-f {A = A} {B = B} {X = X} f g h commfhg (gret , gret-htpy) =
   proj₂ iff ,
   (proj₁ iff ,
@@ -1207,7 +1259,7 @@ hom X f g = comm-tri-post f g
   → is-equiv (Π-Σ-curry B C)
 Π-Σ-curry-is-equiv B C = (bwd B C , sec-htpy B C) , ((bwd B C) , retr-htpy B C)
   where
-  bwd : {A : Set ℓ} → (B : A → Set ℓ₁) → (C : Σ A B → Set ℓ₂) → ((a : A) → (b : B a) → C (a , b)) → ((w : Σ A B) → C w) 
+  bwd : {A : Set ℓ} → (B : A → Set ℓ₁) → (C : Σ A B → Set ℓ₂) → ((a : A) → (b : B a) → C (a , b)) → ((w : Σ A B) → C w)
   bwd B C abC (a , b) = abC a b
   sec-htpy : {A : Set ℓ} → (B : A → Set ℓ₁) → (C : Σ A B → Set ℓ₂) → (Π-Σ-curry B C) ∘ (bwd B C) ∼ id
   sec-htpy B C abC = eq-htpy _ _ λ a → eq-htpy _ _ λ b → refl
@@ -1219,7 +1271,8 @@ hom X f g = comm-tri-post f g
 Π-swap C h b a = h a b
 
 Π-swap-is-equiv : {A : Set ℓ} {B : Set ℓ₁} → (C : A → B → Set ℓ₂) → is-equiv (Π-swap C)
-Π-swap-is-equiv {A = A} {B = B} C = ((Π-swap (λ z _ → (x : B) → C z x) λ a b x → b x a) , λ x → refl) , ((λ x x₁ x₂ → x x₂ x₁) , (λ x → refl))
+Π-swap-is-equiv {A = A} {B = B} C =
+  ((Π-swap (λ z _ → (x : B) → C z x) λ a b x → b x a) , λ x → refl) , ((λ x x₁ x₂ → x x₂ x₁) , (λ x → refl))
 
 -- evaluation at (x , refl) out of a family over the singleton x ≡ _
 ev-refl-sing : {X : Set ℓ} → (x : X) → (P : X → Set ℓ₁) → ((y : X) → x ≡ y → P y) → P x
@@ -1228,28 +1281,28 @@ ev-refl-sing x P h = h x refl
 ev-refl-sing-is-equiv : {X : Set ℓ} → (x : X) → (P : X → Set ℓ₁) → is-equiv (ev-refl-sing x P)
 ev-refl-sing-is-equiv x P = (bwd x P , λ x₁ → refl) , ((bwd x P) , retr-htpy x P)
   where
-  bwd : {X : Set ℓ} → (x : X) → (P : X → Set ℓ₁) → P x → ((y : X) → x ≡ y → P y) 
+  bwd : {X : Set ℓ} → (x : X) → (P : X → Set ℓ₁) → P x → ((y : X) → x ≡ y → P y)
   bwd x P Px .x refl = Px
-  retr-htpy : {X : Set ℓ} → (x : X) → (P : X → Set ℓ₁) → (bwd x P) ∘ (ev-refl-sing x P) ∼ id 
+  retr-htpy : {X : Set ℓ} → (x : X) → (P : X → Set ℓ₁) → (bwd x P) ∘ (ev-refl-sing x P) ∼ id
   retr-htpy x P f = eq-htpy _ _ λ y → eq-htpy _ _ λ {refl → refl}
 
 ev-fib-refl : {A : Set ℓ} {X : Set ℓ₁} → (f : A → X) → (P : X → Set ℓ₂) → ((x : X) → fib f x → P x) → ((a : A) → P (f a))
 ev-fib-refl f P fibP a = fibP (f a) (a , refl)
 
 ev-fib-refl-is-equiv : {A : Set ℓ} {X : Set ℓ₁} → (f : A → X) → (P : X → Set ℓ₂) → is-equiv (ev-fib-refl f P)
-ev-fib-refl-is-equiv {A = A} {X = X} f P = equiv-comp 
-  (map-Π (λ x → (fib f x → P x)) (λ x → (a : A) → f a ≡ x → P x) λ x → λ faxP a fax → faxP (a , fax)) 
-  (λ z a → z (f a) a refl) 
-  (fam-equiv-to-Π-equiv 
-    (λ x → fib f x → P x) 
-    (λ x → (a : A) → f a ≡ x → P x) 
-    (λ x afaxP a fax → afaxP (a , fax)) 
-    λ x → Π-Σ-curry-is-equiv (λ z → f z ≡ x) λ _ → P x) 
-  (equiv-comp 
+ev-fib-refl-is-equiv {A = A} {X = X} f P = equiv-comp
+  (map-Π (λ x → (fib f x → P x)) (λ x → (a : A) → f a ≡ x → P x) λ x → λ faxP a fax → faxP (a , fax))
+  (λ z a → z (f a) a refl)
+  (fam-equiv-to-Π-equiv
+    (λ x → fib f x → P x)
+    (λ x → (a : A) → f a ≡ x → P x)
+    (λ x afaxP a fax → afaxP (a , fax))
+    λ x → Π-Σ-curry-is-equiv (λ z → f z ≡ x) λ _ → P x)
+  (equiv-comp
     (Π-swap λ x a → f a ≡ x → P x)
-    (λ z a → z a (f a) refl) 
-    (Π-swap-is-equiv (λ x a → f a ≡ x → P x)) 
-    (fam-equiv-to-Π-equiv (λ z → (a : X) → f z ≡ a → P a) (λ z → P (f z)) (λ i z → z (f i) refl) λ a → ev-refl-sing-is-equiv (f a) P)) 
+    (λ z a → z a (f a) refl)
+    (Π-swap-is-equiv (λ x a → f a ≡ x → P x))
+    (fam-equiv-to-Π-equiv (λ z → (a : X) → f z ≡ a → P a) (λ z → P (f z)) (λ i z → z (f i) refl) λ a → ev-refl-sing-is-equiv (f a) P))
 
 Π-fib-map-equiv-Π-precomp : {A : Set ℓ} {X : Set ℓ₁} → (f : A → X) → (P : X → Set ℓ₂) → ((x : X) → fib f x → P x) ≃ ((a : A) → P (f a))
 Π-fib-map-equiv-Π-precomp f P = ev-fib-refl f P , ev-fib-refl-is-equiv f P
@@ -1279,10 +1332,10 @@ comm-tri-hom-fib f g (h , commfgh) = eq-htpy _ _ λ a → eq-pair _ _ (refl , in
 -- β and γ are equivalences directly; α follows by 3-for-2 on the triangle
 
 hom-to-Π-fib-is-equiv : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → is-equiv (hom-to-Π-fib f g)
-hom-to-Π-fib-is-equiv f g = equiv-comp 
-  (tot λ h commfgh → inv-htpy λ x → commfgh x) 
+hom-to-Π-fib-is-equiv f g = equiv-comp
+  (tot λ h commfgh → inv-htpy λ x → commfgh x)
   choice-inv
-  (fam-equiv-to-tot-equiv (λ k commfxg → inv-htpy commfxg) λ k → inv-htpy-equiv) 
+  (fam-equiv-to-tot-equiv (λ k commfxg → inv-htpy commfxg) λ k → inv-htpy-equiv)
   (sec-map-is-equiv (λ x → choice x) choice-equiv)
 
 hom-equiv-Π-fib : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
@@ -1401,11 +1454,14 @@ equiv-≃-iso {A = A} {B = B} Aset Bset =
         reassoc = Σ-assoc (λ g → f ∘ g ≡ id) (λ w → proj₁ w ∘ f ≡ id)
 
 -- 13.17
-fam-contr-to-Π-contr : {I : Set ℓ} → {A : I → Set ℓ₁} → is-set I → has-decidable-eq I → ((i : I) → is-contr (A i)) → is-contr ((i : I) → A i)
+fam-contr-to-Π-contr : {I : Set ℓ} → {A : I → Set ℓ₁} → is-set I → has-decidable-eq I
+  → ((i : I) → is-contr (A i)) → is-contr ((i : I) → A i)
 fam-contr-to-Π-contr Iset Ideceq icontrAi = (λ i → proj₁ (icontrAi i)) , λ iAi → eq-htpy _ _ λ i → proj₂ (icontrAi i) (iAi i)
 
-Π-contr-to-fam-contr : {I : Set ℓ} → {A : I → Set ℓ₁} → is-set I → has-decidable-eq I → is-contr ((i : I) → A i) → ((i : I) → is-contr (A i))
-Π-contr-to-fam-contr {I = I} {A = A} Iset Ideceq (iAi , eqiAi) i = (iAi i) , (λ ai → concat (ai-ext-eq-ai ai) (htpy-eq _ _ (eqiAi (ext ai)) i))
+Π-contr-to-fam-contr : {I : Set ℓ} → {A : I → Set ℓ₁} → is-set I → has-decidable-eq I
+  → is-contr ((i : I) → A i) → ((i : I) → is-contr (A i))
+Π-contr-to-fam-contr {I = I} {A = A} Iset Ideceq (iAi , eqiAi) i =
+  (iAi i) , (λ ai → concat (ai-ext-eq-ai ai) (htpy-eq _ _ (eqiAi (ext ai)) i))
   where
     ext : A i → (j : I) → A j
     ext ai j with Ideceq i j

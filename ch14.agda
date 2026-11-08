@@ -249,7 +249,8 @@ prop-trunc-to-weakly-constant g = (g ∘ η) , λ x y → ap g (α (η x) (η y)
 -- proof, step 1: f extends in at most one way
 set-ext-along-η-unique : {A : Set ℓ} {B : Set ℓ₁} → is-set B → (f : A → B) → (g h : ∥ A ∥ → B)
   → triangle-commutes f η g → triangle-commutes f η h → g ∼ h
-set-ext-along-η-unique {A = A} {B = B} Bset f g h G H = ind-prop-trunc-prop (λ t → g t ≡ h t) (λ t → Bset (g t) (h t)) (λ a → concat (inv (G a)) (H a))
+set-ext-along-η-unique {A = A} {B = B} Bset f g h G H =
+  ind-prop-trunc-prop (λ t → g t ≡ h t) (λ t → Bset (g t) (h t)) (λ a → concat (inv (G a)) (H a))
 
 -- proof, step 2: Σ (b : B) ∥ fib f b ∥ is a proposition
 weakly-constant-image-prop : {A : Set ℓ} {B : Set ℓ₁} → is-set B → (f : A → B) → is-weakly-constant f
@@ -264,7 +265,9 @@ weakly-constant-prop Bset f = Π-prop _ λ x → Π-prop _ λ y → Bset (f x) (
 
 -- proof, step 3: a weakly constant map into a set extends along η
 weakly-constant-ext : {A : Set ℓ} {B : Set ℓ₁} → is-set B → (f : A → B) → is-weakly-constant f → ∥ A ∥ → B
-weakly-constant-ext {A = A} {B = B} Bset f H = proj₁ ∘ rec-prop-trunc (Σ B (λ b → ∥ fib f b ∥)) (weakly-constant-image-prop Bset f H) (λ x → f x , η (x , refl))
+weakly-constant-ext {A = A} {B = B} Bset f H =
+  proj₁ ∘ rec-prop-trunc (Σ B (λ b → ∥ fib f b ∥)) (weakly-constant-image-prop Bset f H)
+    (λ x → f x , η (x , refl))
 
 weakly-constant-ext-η : {A : Set ℓ} {B : Set ℓ₁} → (Bset : is-set B) → (f : A → B) → (H : is-weakly-constant f)
   → (a : A) → weakly-constant-ext Bset f H (η a) ≡ f a
@@ -294,7 +297,9 @@ prop-trunc-to-double-prop-trunc ta = η ta
 
 -- b
 prop-trunc-dec-to-dec-prop-trunc : {A : Set ℓ} → ∥ is-decidable A ∥ → is-decidable ∥ A ∥
-prop-trunc-dec-to-dec-prop-trunc {A = A} = rec-prop-trunc (is-decidable ∥ A ∥) (to-neg-to-prop-⊎ (prop-trunc-is-prop A) (¬-prop ∥ A ∥) dni) λ {(inl a) → inl (η a)
+prop-trunc-dec-to-dec-prop-trunc {A = A} =
+  rec-prop-trunc (is-decidable ∥ A ∥) (to-neg-to-prop-⊎ (prop-trunc-is-prop A) (¬-prop ∥ A ∥) dni) λ
+    {(inl a) → inl (η a)
                                                                                     ; (inr na) → inr (rec-prop-trunc 𝟘 empty-prop na)}
 
 dec-prop-trunc-to-prop-trunc-dec : {A : Set ℓ} → is-decidable ∥ A ∥ → ∥ is-decidable A ∥
@@ -393,7 +398,8 @@ equiv-to-prop-trunc : {A P : Set ℓ} → (Pprop : is-prop P) → (f : A → P) 
 equiv-to-prop-trunc {A = A} {P = P} Pprop f fequiv = iff-prop-to-prop-trunc Pprop f (proj₁ (proj₁ fequiv))
 
 prop-to-prop-trunc-to-equiv : {A P : Set ℓ} → (Pprop : is-prop P) → (f : A → P) → (Aprop : is-prop A) → is-prop-trunc Pprop f → is-equiv f
-prop-to-prop-trunc-to-equiv {A = A} Pprop f Aprop fproptrunc = proj₂ (iff-to-≃ Aprop Pprop (f , is-prop-trunc-to-ext Pprop f fproptrunc A Aprop id))
+prop-to-prop-trunc-to-equiv {A = A} Pprop f Aprop fproptrunc =
+  proj₂ (iff-to-≃ Aprop Pprop (f , is-prop-trunc-to-ext Pprop f fproptrunc A Aprop id))
 
 prop-id-is-prop-trunc : {A : Set ℓ} → (Aprop : is-prop A) → is-prop-trunc Aprop id
 prop-id-is-prop-trunc {A = A} Aprop = equiv-to-prop-trunc Aprop id (is-equiv-id A)

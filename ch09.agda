@@ -15,7 +15,8 @@ neg-neg𝟚 false = refl
 triangle-commutes : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (h : A → B) → (g : B → X) → Set (ℓ ⊔ ℓ₂)
 triangle-commutes f h g = f ∼ (g ∘ h)
 
-square-commutes : {A : Set ℓ} {A' : Set ℓ₁} {B : Set ℓ₂} {B' : Set ℓ₃} → (f : A → B) → (g : A → A') → (f' : A' → B') → (g' : B → B') → Set (ℓ ⊔ ℓ₃)
+square-commutes : {A : Set ℓ} {A' : Set ℓ₁} {B : Set ℓ₂} {B' : Set ℓ₃} → (f : A → B) → (g : A → A')
+  → (f' : A' → B') → (g' : B → B') → Set (ℓ ⊔ ℓ₃)
 square-commutes f g f' g' = (g' ∘ f) ∼ (f' ∘ g)
 
 rfl-htpy : {A : Set ℓ} → {B : A → Set ℓ₁} → (f : (x : A) → B x) → f ∼ f
@@ -27,7 +28,8 @@ inv-htpy f∼g x = inv (f∼g x)
 concat-htpy : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h : (x : A) → B x } → f ∼ g → g ∼ h → f ∼ h
 concat-htpy f∼g g∼h x = concat (f∼g x) (g∼h x)
 
-assoc-htpy : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h i : (x : A) → B x} → (H : f ∼ g) → (K : g ∼ h) → (L : h ∼ i) → concat-htpy (concat-htpy H K) L ∼ concat-htpy H (concat-htpy K L)
+assoc-htpy : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g h i : (x : A) → B x} → (H : f ∼ g) → (K : g ∼ h)
+  → (L : h ∼ i) → concat-htpy (concat-htpy H K) L ∼ concat-htpy H (concat-htpy K L)
 assoc-htpy {A = A} {B = B} {f = f} {g = g} {h = h} {i = i} H K L x = assoc (H x) (K x) (L x)
 
 left-unit-htpy : {A : Set ℓ} → {B : A → Set ℓ₁} → {f g : (x : A) → B x} → (H : f ∼ g) → concat-htpy (rfl-htpy f) H ∼ H
@@ -246,7 +248,9 @@ sec-map-is-equiv g ge@((s , gs) , (r , rg)) = inv-equiv-is-equiv g ge (equiv-to-
 ×-symm A B = (λ { (a , b) → b , a}) , (((λ { (b , a) → a , b}) , λ { (b , a) → refl}) , ((λ { (b , a) → a , b}) , λ { (a , b) → refl}))
 
 ×-assoc : (A : Set ℓ) (B : Set ℓ₁) (C : Set ℓ₂) → (A × B) × C ≃ A × (B × C)
-×-assoc A B C = (λ {((a , b) , c) → a , (b , c)}) , (((λ { (a , (b , c)) → (a , b) , c}) , λ { (a , (b , c)) → refl}) , ((λ { (a , (b , c)) → (a , b) , c}) , λ {((a , b) , c) → refl}))
+×-assoc A B C =
+  (λ {((a , b) , c) → a , (b , c)}) ,
+    (((λ { (a , (b , c)) → (a , b) , c}) , λ { (a , (b , c)) → refl}) , ((λ { (a , (b , c)) → (a , b) , c}) , λ {((a , b) , c) → refl}))
 
 ×-distrib-⊎ : (A : Set ℓ) (B : Set ℓ₁) (C : Set ℓ₂) → A × (B ⊎ C) ≃ (A × B) ⊎ (A × C)
 ×-distrib-⊎ A B C = (λ { (a , inl b) → inl (a , b) ; (a , inr c) → inr (a , c)}) , (((λ { (inl (a , b)) → a , inl b ; (inr (a , c)) → a , inr c}) , λ { (inl (a , b)) → refl ; (inr (a , c)) → refl}) , ((λ { (inl (x , x₁)) → x , inl x₁ ; (inr (x , x₁)) → x , inr x₁}) , λ { (x , inl x₁) → refl ; (x , inr x₁) → refl}))
@@ -285,7 +289,8 @@ pair-eq : {A : Set ℓ} → {B : A → Set ℓ₁} → (s t : Σ A B) → s ≡ 
 pair-eq {A = A} {B = B} s t refl = rfl-Eq-Σ s
 
 pair-eq-is-equiv : {A : Set ℓ} → {B : A → Set ℓ₁} → (s t : Σ A B) → is-equiv (pair-eq s t)
-pair-eq-is-equiv (sa , sb) (ta , tb) = ((λ { (refl , refl) → refl}) , λ { (refl , refl) → refl}) , ((λ { (refl , refl) → refl}) , λ { refl → refl})
+pair-eq-is-equiv (sa , sb) (ta , tb) =
+  ((λ { (refl , refl) → refl}) , λ { (refl , refl) → refl}) , ((λ { (refl , refl) → refl}) , λ { refl → refl})
 
 -- Exercises
 -- 9.1
@@ -329,7 +334,9 @@ maxFin (succℕ k) f = maxℕ (maxFin k (λ x → f (inl x))) (f (inr *))
 
 maxFin-ub : (k : ℕ) → (f : Fin (succℕ k) → ℕ) → (x : Fin (succℕ k)) → f x ≤ℕ maxFin k f
 maxFin-ub 0ℕ f (inr *) = ≤-rflℕ (f (inr *))
-maxFin-ub (succℕ k) f (inl x) = ≤-transℕ {f (inl x)} {maxFin k (λ z → f (inl z))} {maxℕ (maxFin k (λ z → f (inl z))) (f (inr *))} (maxFin-ub k (λ z → f (inl z)) x) (≤-left-maxℕ (maxFin k (λ z → f (inl z))) (f (inr *)))
+maxFin-ub (succℕ k) f (inl x) =
+  ≤-transℕ {f (inl x)} {maxFin k (λ z → f (inl z))} {maxℕ (maxFin k (λ z → f (inl z))) (f (inr *))}
+    (maxFin-ub k (λ z → f (inl z)) x) (≤-left-maxℕ (maxFin k (λ z → f (inl z))) (f (inr *)))
 maxFin-ub (succℕ k) f (inr *) = ≤-right-maxℕ (maxFin k (λ z → f (inl z))) (f (inr *))
 
 succ-≰-selfℕ : (m : ℕ) → ¬ (succℕ m ≤ℕ m)
@@ -340,45 +347,63 @@ succ-≰-selfℕ m p = <-to-≱ m (succℕ m) (<-succℕ m) p
 ℕ-nequiv-Fin (succℕ k) (f , ((g , fg) , (h , hf))) = succ-≰-selfℕ (maxFin k g) (tr (_≤ℕ maxFin k g) (concat (sec-equiv-retr f (g , fg) (h , hf) (f (succℕ (maxFin k g)))) (hf (succℕ (maxFin k g)))) (maxFin-ub k g (f (succℕ (maxFin k g)))))
 
 htpy-of-equiv-is-equiv : {A : Set ℓ} {B : Set ℓ₁} → (f g : A → B) → (H : f ∼ g) → is-equiv f → is-equiv g
-htpy-of-equiv-is-equiv f g H ((h , fh) , (k , kf)) = (h , concat-htpy (right-whisker h g f (inv-htpy H)) fh) , (k , concat-htpy (left-whisker g f k (inv-htpy H)) kf)
+htpy-of-equiv-is-equiv f g H ((h , fh) , (k , kf)) =
+  (h , concat-htpy (right-whisker h g f (inv-htpy H)) fh) ,
+    (k , concat-htpy (left-whisker g f k (inv-htpy H)) kf)
 
-htpy-to-inv-htpy : {A : Set ℓ} {B : Set ℓ₁} → (f g : A → B) → (H : f ∼ g) → (finv : has-inverse f) → (ginv : has-inverse g) → proj₁ finv ∼ proj₁ ginv
+htpy-to-inv-htpy : {A : Set ℓ} {B : Set ℓ₁} → (f g : A → B) → (H : f ∼ g) → (finv : has-inverse f)
+  → (ginv : has-inverse g) → proj₁ finv ∼ proj₁ ginv
 htpy-to-inv-htpy f g H (h , (fh , hf)) (k , (fk , kf)) = λ x → concat (ap h (inv (fk x))) (concat (ap h (inv (H (k x)))) (hf (k x)))
 
-comm-tri-sec-h-to-comm-tri : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (sech : sec h) → triangle-commutes g (proj₁ sech) f
+comm-tri-sec-h-to-comm-tri : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → (sech : sec h) → triangle-commutes g (proj₁ sech) f
 comm-tri-sec-h-to-comm-tri f g h comm (s , hs) = λ x → inv (concat (comm (s x)) (ap g (hs x)))
 
-comm-tri-sec-h-to-sec-f-iff-sec-g : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (sech : sec h) → (sec f ↔ sec g)
-comm-tri-sec-h-to-sec-f-iff-sec-g f g h comm (s , hs) = (λ {(k , fk) → (h ∘ k) , concat-htpy (right-whisker k (g ∘ h) f (inv-htpy comm)) fk}) , λ {(k , gk) → (s ∘ k) , concat-htpy (right-whisker k (f ∘ s) g (inv-htpy (comm-tri-sec-h-to-comm-tri f g h comm (s , hs)))) gk}
+comm-tri-sec-h-to-sec-f-iff-sec-g : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
+  → (h : A → B) → triangle-commutes f h g → (sech : sec h) → (sec f ↔ sec g)
+comm-tri-sec-h-to-sec-f-iff-sec-g f g h comm (s , hs) =
+  (λ {(k , fk) → (h ∘ k) , concat-htpy (right-whisker k (g ∘ h) f (inv-htpy comm)) fk}) , λ
+    {(k , gk) → (s ∘ k) , concat-htpy (right-whisker k (f ∘ s) g (inv-htpy (comm-tri-sec-h-to-comm-tri f g h comm (s , hs)))) gk}
 
-comm-tri-retr-g-to-comm-tri : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (retg : retr g) → triangle-commutes h f (proj₁ retg)
+comm-tri-retr-g-to-comm-tri : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → (retg : retr g) → triangle-commutes h f (proj₁ retg)
 comm-tri-retr-g-to-comm-tri f g h comm (r , rg) = λ x → inv (concat (ap r (comm x)) (rg (h x)))
 
-comm-tri-retr-g-to-retr-f-iff-retr-h : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → (retg : retr g) → (retr f ↔ retr h)
-comm-tri-retr-g-to-retr-f-iff-retr-h f g h comm (r , rg) = (λ {(k , kf) → (k ∘ g) , concat-htpy (λ x → ap k (inv (comm x))) kf}) , λ {(k , kh) → (k ∘ r) , concat-htpy (λ x → ap k (inv (comm-tri-retr-g-to-comm-tri f g h comm (r , rg) x))) kh}
+comm-tri-retr-g-to-retr-f-iff-retr-h : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X)
+  → (h : A → B) → triangle-commutes f h g → (retg : retr g) → (retr f ↔ retr h)
+comm-tri-retr-g-to-retr-f-iff-retr-h f g h comm (r , rg) =
+  (λ {(k , kf) → (k ∘ g) , concat-htpy (λ x → ap k (inv (comm x))) kf}) , λ
+    {(k , kh) → (k ∘ r) , concat-htpy (λ x → ap k (inv (comm-tri-retr-g-to-comm-tri f g h comm (r , rg) x))) kh}
 
 
-3-for-2-f-g-to-h : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → is-equiv f → is-equiv g → is-equiv h
+3-for-2-f-g-to-h : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-equiv f → is-equiv g → is-equiv h
 3-for-2-f-g-to-h f g h comm ((s , fs) , (r , rf)) ((s' , gs') , (r' , r'g)) =
   ((s ∘ g) , λ b → concat (inv (r'g (h (s (g b))))) (concat (ap r' (concat (inv (comm (s (g b)))) (fs (g b)))) (r'g b))) ,
   ((r ∘ g) , λ a → concat (ap r (inv (comm a))) (rf a))
 
-3-for-2-f-h-to-g : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → is-equiv f → is-equiv h → is-equiv g
+3-for-2-f-h-to-g : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-equiv f → is-equiv h → is-equiv g
 3-for-2-f-h-to-g f g h comm ((s , fs) , (r , rf)) ((s' , hs') , (r' , r'h)) =
   ((h ∘ s) , λ x → concat (inv (comm (s x))) (fs x)) ,
   ((h ∘ r) , λ b → concat (inv (ap h (sec-equiv-retr h (s' , hs') ((r ∘ g) , retr-h) b))) (hs' b))
   where retr-h = λ a → concat (ap r (inv (comm a))) (rf a)
 
-3-for-2-g-h-to-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B) → triangle-commutes f h g → is-equiv g → is-equiv h → is-equiv f
+3-for-2-g-h-to-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂} → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-equiv g → is-equiv h → is-equiv f
 3-for-2-g-h-to-f f g h comm ((s , gs) , (r , rg)) ((s' , hs') , (r' , r'h)) =
   ((s' ∘ s) , λ x → concat (comm (s' (s x))) (concat (ap g (hs' (s x))) (gs x))) ,
   ((r' ∘ r) , λ a → concat (ap r' (ap r (comm a))) (concat (ap r' (rg (h a))) (r'h a)))
 
 Σ-swap : {A : Set ℓ} {B : Set ℓ₁} → (C : A → B → Set ℓ₂) → Σ A (λ a → Σ B (λ b → C a b)) ≃ Σ B (λ b → Σ A (λ a → C a b))
-Σ-swap C = (λ { (a , (b , c)) → b , (a , c)}) , (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl}) , (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl})))
+Σ-swap C =
+  (λ { (a , (b , c)) → b , (a , c)}) ,
+    (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl}) , (((λ {(b , (a , c)) → a , (b , c)}) , λ {(b , (a , c)) → refl})))
 
 Σ-Σ-swap : {A : Set ℓ} → (B : A → Set ℓ₁) (C : A → Set ℓ₂) → Σ (Σ A B) (λ b → C (proj₁ b)) ≃ Σ (Σ A C) (λ c → B (proj₁ c))
-Σ-Σ-swap B C = (λ { ((a , b) , c) → (a , c) , b}) , (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl}) , (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl})))
+Σ-Σ-swap B C =
+  (λ { ((a , b) , c) → (a , c) , b}) ,
+    (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl}) , (((λ { ((a , c) , b) → (a , b) , c}) , λ {((a , c) , b) → refl})))
 
 infix 1 _⊎'_
 _⊎'_ : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A') → (g : B → B') → A ⊎ B → A' ⊎ B'
@@ -388,15 +413,21 @@ _⊎'_ : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → 
 id⊎id-equiv-id : {A : Set ℓ} {B : Set ℓ₁} → ((id {A = A}) ⊎' (id {A = B})) ∼ id {A = A ⊎ B}
 id⊎id-equiv-id = λ { (inl x) → refl ; (inr x) → refl}
 
-∘⊎∘-equiv-⊎∘⊎ : {A : Set ℓ} {A' : Set ℓ₁} {A'' : Set ℓ₂} {B : Set ℓ₃} {B' : Set ℓ₄} {B'' : Set ℓ₅} → (f : A → A') → (f' : A' → A'') → (g : B → B') → (g' : B' → B'') → ((f' ∘ f) ⊎' (g' ∘ g)) ∼ (f' ⊎' g') ∘ (f ⊎' g)
+∘⊎∘-equiv-⊎∘⊎ : {A : Set ℓ} {A' : Set ℓ₁} {A'' : Set ℓ₂} {B : Set ℓ₃} {B' : Set ℓ₄} {B'' : Set ℓ₅}
+  → (f : A → A') → (f' : A' → A'') → (g : B → B') → (g' : B' → B'')
+  → ((f' ∘ f) ⊎' (g' ∘ g)) ∼ (f' ⊎' g') ∘ (f ⊎' g)
 ∘⊎∘-equiv-⊎∘⊎ f f' g g' = λ { (inl x) → refl ; (inr x) → refl}
 
 infix 1 _⊎∼_
-_⊎∼_ : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → {f f' : A → C} → {g g' : B → D} → (H : f ∼ f') → (K : g ∼ g') → (f ⊎' g) ∼ (f' ⊎' g')
+_⊎∼_ : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → {f f' : A → C} → {g g' : B → D} → (H : f ∼ f')
+  → (K : g ∼ g') → (f ⊎' g) ∼ (f' ⊎' g')
 H ⊎∼ K = λ { (inl x) → ap inl (H x) ; (inr x) → ap inr (K x)}
 
-equiv⊎equiv-to-equiv : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → (f : A → C) → (g : B → D) → is-equiv f → is-equiv g → is-equiv (f ⊎' g)
-equiv⊎equiv-to-equiv f g ((s , fs) , (r , rf)) ((t , gt) , (q , qg)) = ((s ⊎' t) , λ { (inl x) → ap inl (fs x) ; (inr x) → ap inr (gt x)}) , ((r ⊎' q) , λ { (inl x) → ap inl (rf x) ; (inr x) → ap inr (qg x)})
+equiv⊎equiv-to-equiv : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → (f : A → C) → (g : B → D)
+  → is-equiv f → is-equiv g → is-equiv (f ⊎' g)
+equiv⊎equiv-to-equiv f g ((s , fs) , (r , rf)) ((t , gt) , (q , qg)) =
+  ((s ⊎' t) , λ { (inl x) → ap inl (fs x) ; (inr x) → ap inr (gt x)}) ,
+    ((r ⊎' q) , λ { (inl x) → ap inl (rf x) ; (inr x) → ap inr (qg x)})
 
 infix 1 _×'_
 _×'_ : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → (f : A → B) → (g : C → D) → A × C → B × D
@@ -405,15 +436,21 @@ _×'_ : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → (f 
 id×id-equiv-id : {A : Set ℓ} {B : Set ℓ₁} → (id {A = A} ×' id {A = B}) ∼ id
 id×id-equiv-id = λ { (x , x₁) → refl}
 
-∘×∘-equiv-×∘× : {A : Set ℓ} {A' : Set ℓ₁} {A'' : Set ℓ₂} {B : Set ℓ₃} {B' : Set ℓ₄} {B'' : Set ℓ₅} → (f : A → A') → (f' : A' → A'') → (g : B → B') → (g' : B' → B'') → ((f' ∘ f) ×' (g' ∘ g)) ∼ (f' ×' g') ∘ (f ×' g)
+∘×∘-equiv-×∘× : {A : Set ℓ} {A' : Set ℓ₁} {A'' : Set ℓ₂} {B : Set ℓ₃} {B' : Set ℓ₄} {B'' : Set ℓ₅}
+  → (f : A → A') → (f' : A' → A'') → (g : B → B') → (g' : B' → B'')
+  → ((f' ∘ f) ×' (g' ∘ g)) ∼ (f' ×' g') ∘ (f ×' g)
 ∘×∘-equiv-×∘× f f' g g' = λ { (a , b) → refl}
 
 infix 1 _×∼_
-_×∼_ : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → {f f' : A → C} → {g g' : B → D} → (H : f ∼ f') → (K : g ∼ g') → (f ×' g) ∼ (f' ×' g')
+_×∼_ : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → {f f' : A → C} → {g g' : B → D} → (H : f ∼ f')
+  → (K : g ∼ g') → (f ×' g) ∼ (f' ×' g')
 (H ×∼ K) (a , b) = concat (ap (λ x → x , _) (H a)) (ap (λ y → _ , y) (K b))
 
-equiv×equiv-to-equiv : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A') → (g : B → B') → is-equiv f → is-equiv g → is-equiv (f ×' g)
-equiv×equiv-to-equiv f g ((s , fs) , (r , rf)) ((t , gt) , (q , qg)) = ((λ { (a' , b') → s a' , t b'}) , λ { (a , b) → (fs ×∼ gt) (a , b)}) , ((r ×' q) , λ {(a , b) → (rf ×∼ qg) (a , b)})
+equiv×equiv-to-equiv : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A') → (g : B → B')
+  → is-equiv f → is-equiv g → is-equiv (f ×' g)
+equiv×equiv-to-equiv f g ((s , fs) , (r , rf)) ((t , gt) , (q , qg)) =
+  ((λ { (a' , b') → s a' , t b'}) , λ { (a , b) → (fs ×∼ gt) (a , b)}) ,
+    ((r ×' q) , λ {(a , b) → (rf ×∼ qg) (a , b)})
 
 ×'-proj₁ : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} {D : Set ℓ₃} → (f : A → C) → (g : B → D) → (p : A × B) → proj₁ ((f ×' g) p) ≡ f (proj₁ p)
 ×'-proj₁ f g (a , b) = refl
@@ -424,7 +461,8 @@ equiv×equiv-to-equiv f g ((s , fs) , (r , rf)) ((t , gt) , (q , qg)) = ((λ { (
 η-pair : {A : Set ℓ} → {B : A → Set ℓ₁} → (p : Σ A B) → (proj₁ p , proj₂ p) ≡ p
 η-pair (a , b) = refl
 
-×'-equiv-to-fiberwise-equiv : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A') → (g : B → B') → is-equiv (f ×' g) → (B → is-equiv f) × (A → is-equiv g)
+×'-equiv-to-fiberwise-equiv : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A')
+  → (g : B → B') → is-equiv (f ×' g) → (B → is-equiv f) × (A → is-equiv g)
 ×'-equiv-to-fiberwise-equiv f g ((s , fgs) , (r , rfg)) =
   (λ b → ((λ a' → proj₁ (s (a' , g b))) ,
            (λ a' → concat (inv (×'-proj₁ f g (s (a' , g b)))) (ap proj₁ (fgs (a' , g b))))) ,
@@ -435,7 +473,8 @@ equiv×equiv-to-equiv f g ((s , fs) , (r , rf)) ((t , gt) , (q , qg)) = ((λ { (
           ((λ b' → proj₂ (r (f a , b'))) ,
            (λ b → ap proj₂ (rfg (a , b)))))
 
-fiberwise-equiv-to-×'-equiv : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A') → (g : B → B') → A → B → (B → is-equiv f) × (A → is-equiv g) → is-equiv (f ×' g)
+fiberwise-equiv-to-×'-equiv : {A : Set ℓ} {B : Set ℓ₁} {A' : Set ℓ₂} {B' : Set ℓ₃} → (f : A → A')
+  → (g : B → B') → A → B → (B → is-equiv f) × (A → is-equiv g) → is-equiv (f ×' g)
 fiberwise-equiv-to-×'-equiv f g a₀ b₀ (α , β) = equiv×equiv-to-equiv f g (α b₀) (β a₀)
 
 inv-≃ : {A : Set ℓ} {B : Set ℓ₁} → A ≃ B → B ≃ A
