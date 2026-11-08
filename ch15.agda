@@ -242,7 +242,7 @@ surj-to-is-image {ℓ₃ = ℓ₃} {A = A} {B = B} {X = X} f q m memb H qsurj = 
         over-m = proj₁ (proj₁ (surj-to-dup-surj q qsurj (λ y → fib m' (m y)) (λ y → emb-to-fib-prop m' m'emb (m y))))
           over-mq
 
--- Corollary 15.2.6: factorizations of f as a surjection followed by an embedding are unique
+-- Corollary 15.2.6: factorisations of f as a surjection followed by an embedding are unique
 -- the conclusion is that of image-uniq-i-i'-to-e, so B and B' share a level as there
 surj-emb-fact-uniq : {A : Set ℓ} {B B' : Set ℓ₁} {X : Set ℓ₂} → (f : A → X)
   → (q : A → B) → (i : B → X) → (I : triangle-commutes f q i) → is-surj q → is-emb i

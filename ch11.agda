@@ -366,7 +366,7 @@ dep-id-sys-to-Σ-id-sys {ℓ = ℓ} {A = A} B C a b c C-id-sys D d D-dep-id-sys 
     f-inner : (y : B a) → (b ≡ y) → D a y c
     f-inner .b refl = d
 
--- Example 11.6.3: characterization of the identity type of fib
+-- Example 11.6.3: characterisation of the identity type of fib
 
 -- The identity-system structure on path types
 path-id-sys : {A : Set ℓ} → (x : A) → is-id-sys (λ y → x ≡ y) x refl

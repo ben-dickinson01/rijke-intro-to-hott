@@ -970,7 +970,7 @@ is-sorted-tail x (y ∷ ys) (_ , sys) = sys
     (proj₁ (proj₁ (prime-iff-trivial-divℕ p) pprime))
     (≤-mul-leftℕ 1ℕ (prod-List rest) p (1≤-prod-all-primeℕ rest aprest))
 
--- Uniqueness of prime factorization
+-- Uniqueness of prime factorisation
 unique-prime-factorsℕ : (bound : ℕ) → (lst1 lst2 : List ℕ) →
   prod-List lst1 ≤ℕ bound →
   prod-List lst1 ≡ prod-List lst2 →
