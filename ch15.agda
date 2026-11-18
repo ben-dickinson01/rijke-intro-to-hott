@@ -334,3 +334,33 @@ const𝟙-is-image-to-prop-trunc : {A P : Set ℓ} → (Pprop : is-prop P) → (
   → is-prop-trunc Pprop f
 const𝟙-is-image-to-prop-trunc Pprop f constimage =
   surj-to-prop-trunc Pprop f (is-image-to-surj const f const (is-prop-to-emb-𝟙 Pprop) (λ x → refl) constimage)
+
+-- 15.3
+-- Equiv to surj and emb comes from equiv-to-surj and equiv-to-emb
+surj-emb-to-equiv : {A : Set ℓ} {B : Set ℓ₁} → (f : A → B) → (femb : is-emb f) → (fsurj : is-surj f) → is-equiv f
+surj-emb-to-equiv f femb fsurj = contr-map-to-equiv f λ b → is-prop'-to-inhab-contr (is-prop-to-is-prop' (emb-to-fib-prop f femb b)) (rec-prop-trunc (fib f b) (emb-to-fib-prop f femb b) (λ z → z) (fsurj b))
+
+-- 15.4
+-- (a)
+comm-tri-surj-f-to-surj-g : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂}
+  → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-surj f
+  → is-surj g
+comm-tri-surj-f-to-surj-g f g h H fsurj = {!   !}
+
+-- (b)
+comm-tri-surj-g-to-surj-h-to-surj-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂}
+  → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-surj g → is-surj h
+  → is-surj f
+comm-tri-surj-g-to-surj-h-to-surj-f f g h H gsurj hsurj = {!   !}
+
+-- (c)
+-- As printed ("f and h k-truncated ⇒ g k-truncated") this is false: take A = ∅, or 1 → S¹ → 1.
+-- The true converse to 12.11 needs h k-connected; we only have the k = -1 case,
+-- where (-1)-connected = surjective and (-1)-truncated = embedding.
+comm-tri-emb-f-to-surj-h-to-emb-g : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂}
+  → (f : A → X) → (g : B → X) → (h : A → B)
+  → triangle-commutes f h g → is-emb f → is-surj h
+  → is-emb g
+comm-tri-emb-f-to-surj-h-to-emb-g f g h H femb hsurj = {!   !}
