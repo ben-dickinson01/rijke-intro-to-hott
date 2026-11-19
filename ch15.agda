@@ -357,41 +357,13 @@ comm-tri-surj-g-to-surj-h-to-surj-f f g h H gsurj hsurj x = rec-prop-trunc ∥ f
 
 -- (c)
 -- As printed ("f and h k-truncated ⇒ g k-truncated") this is false: take A = ∅, or 1 → S¹ → 1.
--- The true converse to 12.11 needs h k-connected; we only have the k = -1 case,
--- where (-1)-connected = surjective and (-1)-truncated = embedding.
+-- Replacing h by a surjection (k = -1) is also false, see the note before comm-tri-emb-f-to-surj-h-to-emb-g's former location.
 
--- a retract of a proposition is a proposition
-retract-of-prop-to-prop : {A : Set ℓ} {B : Set ℓ₁} → is-prop B → is-retract-of A B → is-prop A
-retract-of-prop-to-prop Bprop (i , (r , rH)) x y =
-  concat (inv (rH x)) (concat (ap r (proj₁ (Bprop (i x) (i y)))) (rH y)) ,
-  λ { refl → inv (concat (ap (λ p → concat (inv (rH x)) p) step3) (left-inv (rH x))) }
-  where
-    step1 : ap r (proj₁ (Bprop (i x) (i x))) ≡ refl
-    step1 = concat (ap (ap r) (inv (proj₂ (Bprop (i x) (i x)) refl))) (ap-refl r (i x))
-
-    step3 : concat (ap r (proj₁ (Bprop (i x) (i x)))) (rH x) ≡ rH x
-    step3 = concat (ap (λ p → concat p (rH x)) step1) (left-unit (rH x))
-
--- given the commuting triangle and an actual point of fib h b, build a point of fib f x
-comm-tri-fib-h-to-fib-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂}
-  → (f : A → X) → (g : B → X) → (h : A → B) → (H : triangle-commutes f h g)
-  → (x : X) → (b : B) → (p : g b ≡ x) → fib h b → fib f x
-comm-tri-fib-h-to-fib-f f g h H x b p (a , q) = {!   !}
-
--- using h surjective and f an embedding, build the reverse map fib g x → fib f x
-comm-tri-surj-h-emb-f-to-fib-g-to-fib-f : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂}
-  → (f : A → X) → (g : B → X) → (h : A → B) → (H : triangle-commutes f h g)
-  → is-emb f → is-surj h → (x : X) → fib g x → fib f x
-comm-tri-surj-h-emb-f-to-fib-g-to-fib-f f g h H femb hsurj x (b , p) =
-  rec-prop-trunc (fib f x) (emb-to-fib-prop f femb x) (comm-tri-fib-h-to-fib-f f g h H x b p) (hsurj b)
-
-comm-tri-emb-f-to-surj-h-to-emb-g : {A : Set ℓ} {B : Set ℓ₁} {X : Set ℓ₂}
-  → (f : A → X) → (g : B → X) → (h : A → B)
-  → triangle-commutes f h g → is-emb f → is-surj h
-  → is-emb g
-comm-tri-emb-f-to-surj-h-to-emb-g f g h H femb hsurj =
-  fib-prop-to-emb g λ x →
-    retract-of-prop-to-prop (emb-to-fib-prop f femb x)
-      (comm-tri-surj-h-emb-f-to-fib-g-to-fib-f f g h H femb hsurj x ,
-       (fib-triangle f g h H x ,
-        {!   !}))
+-- 15.5 Lawvere's Fixed Point Theorem
+Lawvere-fixed-point : {A : Set ℓ₁} {B : Set ℓ₂} → (∃ (A → (A → B)) is-surj) → ((h : B → B) → ∃ B (λ b → h b ≡ b))
+Lawvere-fixed-point {A = A} {B = B} xf h = rec-prop-trunc _ (prop-trunc-is-prop _)
+  (λ {(f , fsurj) → rec-prop-trunc ∥ Σ B (λ z → h z ≡ z) ∥ (prop-trunc-is-prop _)
+    (λ {(a , p) → η (f a a , inv (ap (λ k → k a) p))})
+    (fsurj (λ a → h (f a a)))})
+  xf
+   
