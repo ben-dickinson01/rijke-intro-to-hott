@@ -263,3 +263,115 @@ count-to-×-count {B = B} cA cB = count-to-Σ-count (λ _ → B) cA (λ _ → cB
       concat-≃ (Σ-assoc (λ _ → B) (λ w → proj₁ w ≡ a))
         (concat-≃ (Σ-swap (λ x y → x ≡ a))
           (proj₁ , fib-contr-to-proj₁-equiv (λ y → identity-contr a)))
+
+
+-- 16.2 Double counting in type theory
+-- Proposition 16.2.1
+-- (i)
+star-value : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙)) → is-equiv e
+  → (x : X) → e (inl x) ≡ inr * → Σ Y (λ y → inl y ≡ e (inr *))
+star-value {X = X} {Y = Y} e eequiv x p = go (e (inr *)) refl
+  where
+    go : (z : Y ⊎ 𝟙) → e (inr *) ≡ z → Σ Y (λ y → inl y ≡ e (inr *))
+    go (inl y) q = y , inv q
+    go (inr *) q =
+      ex-falso (inl-ne-inr x *
+        (is-equiv-to-injective e eequiv (concat p (inv q))))
+
+-- (ii)
+map-⊎-𝟙-aux : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙)) → is-equiv e
+  → (x : X) → (u : Y ⊎ 𝟙) → e (inl x) ≡ u → Y
+map-⊎-𝟙-aux e eequiv x (inl y) p = y
+map-⊎-𝟙-aux e eequiv x (inr *) p = proj₁ (star-value e eequiv x p)
+
+map-⊎-𝟙 : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙)) → is-equiv e → X → Y
+map-⊎-𝟙 e eequiv x = map-⊎-𝟙-aux e eequiv x (e (inl x)) refl
+
+map-⊎-𝟙-aux-inl : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙))
+  → (eequiv : is-equiv e) → (x : X) → (u : Y ⊎ 𝟙) → (q : e (inl x) ≡ u) → (y : Y)
+  → u ≡ inl y
+  → map-⊎-𝟙-aux e eequiv x u q ≡ y
+map-⊎-𝟙-aux-inl e eequiv x (inl y) q .y refl = refl
+
+map-⊎-𝟙-aux-inr : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙))
+  → (eequiv : is-equiv e) → (x : X) → (u : Y ⊎ 𝟙) → (q : e (inl x) ≡ u) → (r : u ≡ inr *)
+  → map-⊎-𝟙-aux e eequiv x u q ≡ proj₁ (star-value e eequiv x (concat q r))
+map-⊎-𝟙-aux-inr e eequiv x (inr *) q refl =
+  ap (λ s → proj₁ (star-value e eequiv x s)) (inv (right-unit _))
+
+map-⊎-𝟙-inl : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙))
+  → (eequiv : is-equiv e) → (x : X) → (y : Y) → e (inl x) ≡ inl y → map-⊎-𝟙 e eequiv x ≡ y
+map-⊎-𝟙-inl e eequiv x y p = map-⊎-𝟙-aux-inl e eequiv x (e (inl x)) refl y p
+
+map-⊎-𝟙-inr : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙))
+  → (eequiv : is-equiv e) → (x : X) → (p : e (inl x) ≡ inr *)
+  → map-⊎-𝟙 e eequiv x ≡ proj₁ (star-value e eequiv x p)
+map-⊎-𝟙-inr e eequiv x p =
+  concat (map-⊎-𝟙-aux-inr e eequiv x (e (inl x)) refl p)
+    (ap (λ s → proj₁ (star-value e eequiv x s)) (left-unit _))
+
+-- (iii) g := map-⊎-𝟙 applied to the inverse equivalence; δ and ε are the instances
+-- map-⊎-𝟙-inl and map-⊎-𝟙-inr at inv-≃ e.
+
+-- (iv)
+section-⊎-𝟙 : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) ≃ (Y ⊎ 𝟙)) → (y : Y)
+  → map-⊎-𝟙 (proj₁ e) (proj₂ e) (map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) y) ≡ y
+section-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) y = go (g (inl y)) refl
+  where
+    ef = proj₂ e
+    eg = proj₂ (inv-≃ e)
+
+    go : (z : X ⊎ 𝟙) → g (inl y) ≡ z
+      → map-⊎-𝟙 f ef (map-⊎-𝟙 g eg y) ≡ y
+    go (inl x) p =
+      map-⊎-𝟙-inl f ef (map-⊎-𝟙 g eg y) y
+        (concat (ap (λ t → f (inl t)) (map-⊎-𝟙-inl g eg y x p))
+                (concat (ap f (inv p)) (fg (inl y))))
+    go (inr *) p =
+      ap (λ { (inl a) → a ; (inr _) → y })
+         (concat (ap inl (map-⊎-𝟙-inr f ef (map-⊎-𝟙 g eg y) q))
+                 (concat (proj₂ (star-value f ef (map-⊎-𝟙 g eg y) q))
+                         (concat (ap f (inv p)) (fg (inl y)))))
+      where
+        q : f (inl (map-⊎-𝟙 g eg y)) ≡ inr *
+        q = concat (ap (λ t → f (inl t)) (map-⊎-𝟙-inr g eg y p))
+              (concat (ap f (proj₂ (star-value g eg y p))) (fg (inr *)))
+
+retraction-⊎-𝟙 : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) ≃ (Y ⊎ 𝟙)) → (x : X)
+  → map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) (map-⊎-𝟙 (proj₁ e) (proj₂ e) x) ≡ x
+retraction-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) x = go (f (inl x)) refl
+  where
+    ef = proj₂ e
+    eg = proj₂ (inv-≃ e)
+
+    -- g (f u) ≡ u
+    gf : (u : X ⊎ 𝟙) → g (f u) ≡ u
+    gf = proj₂ (proj₂ (equiv-to-inverse f ef))
+
+    go : (z : Y ⊎ 𝟙) → f (inl x) ≡ z
+      → map-⊎-𝟙 g eg (map-⊎-𝟙 f ef x) ≡ x
+    go (inl y) p =
+      concat (ap (map-⊎-𝟙 g eg) (map-⊎-𝟙-inl f ef x y p))
+        (map-⊎-𝟙-inl g eg y x (concat (ap g (inv p)) (gf (inl x))))
+    go (inr *) p =
+      ap (λ { (inl a) → a ; (inr _) → x })
+         (concat (ap inl (map-⊎-𝟙-inr g eg (map-⊎-𝟙 f ef x) q))
+                 (concat (proj₂ (star-value g eg (map-⊎-𝟙 f ef x) q))
+                         (concat (ap g (inv p)) (gf (inl x)))))
+      where
+        q : g (inl (map-⊎-𝟙 f ef x)) ≡ inr *
+        q = concat (ap (λ t → g (inl t)) (map-⊎-𝟙-inr f ef x p))
+              (concat (ap g (proj₂ (star-value f ef x p))) (gf (inr *)))
+
+⊎-𝟙-equiv-to-equiv : {X : Set ℓ} {Y : Set ℓ₁} → (X ⊎ 𝟙) ≃ (Y ⊎ 𝟙) → X ≃ Y
+⊎-𝟙-equiv-to-equiv {X = X} {Y = Y} e =
+  map-⊎-𝟙 (proj₁ e) (proj₂ e) ,
+  ((map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) , section-⊎-𝟙 e) ,
+   (map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) , retraction-⊎-𝟙 e))
+
+Fin-equiv-to-same-ℕ : (k l : ℕ) → Fin k ≃ Fin l → k ≡ l
+Fin-equiv-to-same-ℕ 0ℕ 0ℕ (e , eequiv) = refl
+Fin-equiv-to-same-ℕ 0ℕ (succℕ l) (e , eequiv) = ex-falso ((proj₁ (proj₂ eequiv)) (inr *))
+Fin-equiv-to-same-ℕ (succℕ k) 0ℕ (e , eequiv) = ex-falso (e (inr *))
+Fin-equiv-to-same-ℕ (succℕ k) (succℕ l) (e , eequiv) = ap succℕ (Fin-equiv-to-same-ℕ k l (⊎-𝟙-equiv-to-equiv (e , eequiv)))
+
