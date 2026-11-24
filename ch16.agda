@@ -270,11 +270,11 @@ count-to-×-count {B = B} cA cB = count-to-Σ-count (λ _ → B) cA (λ _ → cB
 -- (i)
 star-value : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) → (Y ⊎ 𝟙)) → is-equiv e
   → (x : X) → e (inl x) ≡ inr * → Σ Y (λ y → inl y ≡ e (inr *))
-star-value {X = X} {Y = Y} e eequiv x p = go (e (inr *)) refl
+star-value {X = X} {Y = Y} e eequiv x p = star-cases (e (inr *)) refl
   where
-    go : (z : Y ⊎ 𝟙) → e (inr *) ≡ z → Σ Y (λ y → inl y ≡ e (inr *))
-    go (inl y) q = y , inv q
-    go (inr *) q =
+    star-cases : (z : Y ⊎ 𝟙) → e (inr *) ≡ z → Σ Y (λ y → inl y ≡ e (inr *))
+    star-cases (inl y) q = y , inv q
+    star-cases (inr *) q =
       ex-falso (inl-ne-inr x *
         (is-equiv-to-injective e eequiv (concat p (inv q))))
 
@@ -316,18 +316,18 @@ map-⊎-𝟙-inr e eequiv x p =
 -- (iv)
 section-⊎-𝟙 : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) ≃ (Y ⊎ 𝟙)) → (y : Y)
   → map-⊎-𝟙 (proj₁ e) (proj₂ e) (map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) y) ≡ y
-section-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) y = go (g (inl y)) refl
+section-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) y = section-cases (g (inl y)) refl
   where
     ef = proj₂ e
     eg = proj₂ (inv-≃ e)
 
-    go : (z : X ⊎ 𝟙) → g (inl y) ≡ z
+    section-cases : (z : X ⊎ 𝟙) → g (inl y) ≡ z
       → map-⊎-𝟙 f ef (map-⊎-𝟙 g eg y) ≡ y
-    go (inl x) p =
+    section-cases (inl x) p =
       map-⊎-𝟙-inl f ef (map-⊎-𝟙 g eg y) y
         (concat (ap (λ t → f (inl t)) (map-⊎-𝟙-inl g eg y x p))
                 (concat (ap f (inv p)) (fg (inl y))))
-    go (inr *) p =
+    section-cases (inr *) p =
       ap (λ { (inl a) → a ; (inr _) → y })
          (concat (ap inl (map-⊎-𝟙-inr f ef (map-⊎-𝟙 g eg y) q))
                  (concat (proj₂ (star-value f ef (map-⊎-𝟙 g eg y) q))
@@ -339,7 +339,7 @@ section-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) y = go (g (inl y)
 
 retraction-⊎-𝟙 : {X : Set ℓ} {Y : Set ℓ₁} → (e : (X ⊎ 𝟙) ≃ (Y ⊎ 𝟙)) → (x : X)
   → map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) (map-⊎-𝟙 (proj₁ e) (proj₂ e) x) ≡ x
-retraction-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) x = go (f (inl x)) refl
+retraction-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) x = retraction-cases (f (inl x)) refl
   where
     ef = proj₂ e
     eg = proj₂ (inv-≃ e)
@@ -348,12 +348,12 @@ retraction-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) x = go (f (inl
     gf : (u : X ⊎ 𝟙) → g (f u) ≡ u
     gf = proj₂ (proj₂ (equiv-to-inverse f ef))
 
-    go : (z : Y ⊎ 𝟙) → f (inl x) ≡ z
+    retraction-cases : (z : Y ⊎ 𝟙) → f (inl x) ≡ z
       → map-⊎-𝟙 g eg (map-⊎-𝟙 f ef x) ≡ x
-    go (inl y) p =
+    retraction-cases (inl y) p =
       concat (ap (map-⊎-𝟙 g eg) (map-⊎-𝟙-inl f ef x y p))
         (map-⊎-𝟙-inl g eg y x (concat (ap g (inv p)) (gf (inl x))))
-    go (inr *) p =
+    retraction-cases (inr *) p =
       ap (λ { (inl a) → a ; (inr _) → x })
          (concat (ap inl (map-⊎-𝟙-inr g eg (map-⊎-𝟙 f ef x) q))
                  (concat (proj₂ (star-value g eg (map-⊎-𝟙 f ef x) q))
@@ -369,9 +369,310 @@ retraction-⊎-𝟙 {X = X} {Y = Y} e@(f , ((g , fg) , (h , hf))) x = go (f (inl
   ((map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) , section-⊎-𝟙 e) ,
    (map-⊎-𝟙 (proj₁ (inv-≃ e)) (proj₂ (inv-≃ e)) , retraction-⊎-𝟙 e))
 
+-- Theorem 16.2.2
 Fin-equiv-to-same-ℕ : (k l : ℕ) → Fin k ≃ Fin l → k ≡ l
 Fin-equiv-to-same-ℕ 0ℕ 0ℕ (e , eequiv) = refl
-Fin-equiv-to-same-ℕ 0ℕ (succℕ l) (e , eequiv) = ex-falso ((proj₁ (proj₂ eequiv)) (inr *))
+Fin-equiv-to-same-ℕ 0ℕ (succℕ l) (e , eequiv) =
+  ex-falso ((proj₁ (proj₂ eequiv)) (inr *))
 Fin-equiv-to-same-ℕ (succℕ k) 0ℕ (e , eequiv) = ex-falso (e (inr *))
-Fin-equiv-to-same-ℕ (succℕ k) (succℕ l) (e , eequiv) = ap succℕ (Fin-equiv-to-same-ℕ k l (⊎-𝟙-equiv-to-equiv (e , eequiv)))
+Fin-equiv-to-same-ℕ (succℕ k) (succℕ l) (e , eequiv) =
+  ap succℕ (Fin-equiv-to-same-ℕ k l (⊎-𝟙-equiv-to-equiv (e , eequiv)))
 
+-- 16.3 Finite types
+
+-- Definition 16.3.1
+is-finite : (X : Set ℓ) → Set _
+is-finite X = ∥ count X ∥
+
+𝔽 : Set _
+𝔽 = Σ Set is-finite
+
+BS : (k : ℕ) → Set _
+BS k = Σ Set (λ X → ∥ Fin k ≃ X ∥)
+
+-- Remark 16.3.2
+count-to-finite : (X : Set ℓ) → count X → is-finite X
+count-to-finite X cX = η cX
+
+equiv-finite-to-finite : {X : Set ℓ} {Y : Set ℓ₁} → X ≃ Y → is-finite Y → is-finite X
+equiv-finite-to-finite e Yfin = map-prop-trunc (count-equiv (inv-≃ e)) Yfin
+
+is-decidable-is-prop : {A : Set ℓ} → is-prop A → is-prop (is-decidable A)
+is-decidable-is-prop {A = A} Aprop = to-neg-to-prop-⊎ Aprop (¬-prop A) λ z z₁ → z₁ z
+
+finite-to-set : {X : Set ℓ} → is-finite X → is-set X
+finite-to-set {X = X} Xfin =
+  rec-prop-trunc (is-set X)
+    (Π-prop _ (λ x → Π-prop _ λ y → trunc-is-prop (x ≡ y)))
+    (λ c → Hedberg (count-to-dec-eq c)) Xfin
+
+finite-to-dec-eq : {X : Set ℓ} → is-finite X → has-decidable-eq X
+finite-to-dec-eq {X = X} Xfin =
+  rec-prop-trunc (has-decidable-eq X)
+    (Π-prop _ (λ x → Π-prop _ λ y →
+      is-decidable-is-prop (finite-to-set Xfin x y)))
+    count-to-dec-eq Xfin
+
+-- Theorem 16.3.3
+-- (helper: the number k is determined by a merely-existing equivalence)
+trunc-Fin-equiv-to-same-ℕ : {X : Set ℓ} → (k l : ℕ)
+  → ∥ Fin k ≃ X ∥ → ∥ Fin l ≃ X ∥ → k ≡ l
+trunc-Fin-equiv-to-same-ℕ k l u v =
+  rec-prop-trunc (k ≡ l) (ℕ-set k l)
+    (λ e → rec-prop-trunc (k ≡ l) (ℕ-set k l)
+      (λ e' → Fin-equiv-to-same-ℕ k l (concat-≃ e (inv-≃ e'))) v) u
+
+is-finite' : (X : Set ℓ) → Set _
+is-finite' X = Σ ℕ (λ k → ∥ Fin k ≃ X ∥)
+
+is-finite'-is-prop : (X : Set ℓ) → is-prop (is-finite' X)
+is-finite'-is-prop X = is-prop'-to-is-prop λ { (k , u) (l , v) →
+  let p = trunc-Fin-equiv-to-same-ℕ k l u v
+  in eq-pair _ _ (p , is-prop-to-is-prop' (prop-trunc-is-prop _)
+       (tr (λ k₁ → ∥ Fin k₁ ≃ X ∥) p u) v) }
+
+is-finite-to-is-finite' : (X : Set ℓ) → is-finite X → is-finite' X
+is-finite-to-is-finite' X Xfin =
+  rec-prop-trunc (is-finite' X) (is-finite'-is-prop X)
+    (λ { (k , e) → k , η e }) Xfin
+
+is-finite'-to-is-finite : (X : Set ℓ) → is-finite' X → is-finite X
+is-finite'-to-is-finite X (k , u) =
+  rec-prop-trunc (is-finite X) (prop-trunc-is-prop _) (λ e → η (k , e)) u
+
+card : (X : Set ℓ) → is-finite' X → ℕ
+card X Xfin' = proj₁ Xfin'
+
+𝔽-equiv-Σ-BS : 𝔽 ≃ Σ ℕ BS
+𝔽-equiv-Σ-BS =
+  concat-≃
+    (tot (is-finite-to-is-finite') ,
+      fam-equiv-to-tot-equiv is-finite-to-is-finite' λ X →
+        proj₂ (iff-to-≃ (prop-trunc-is-prop _) (is-finite'-is-prop X)
+          (is-finite-to-is-finite' X , is-finite'-to-is-finite X)))
+    (Σ-swap λ X k → ∥ Fin k ≃ X ∥)
+
+-- Proposition 16.3.5
+-- (helper: finite choice for Fin k, by induction on k)
+finite-choice-Fin : (k : ℕ) → (B : Fin k → Set ℓ)
+  → ((i : Fin k) → ∥ B i ∥) → ∥ ((i : Fin k) → B i) ∥
+finite-choice-Fin 0ℕ B h =
+  rec-prop-trunc ∥ ((i : Fin 0ℕ) → B i) ∥ (prop-trunc-is-prop _)
+    (λ z → z) (η (η λ ()))
+finite-choice-Fin (succℕ k) B h = map-prop-trunc (λ {x (inl n) → proj₁ x n
+                                                   ; x (inr *) → proj₂ x}) both
+  where
+    IH : ∥ ((i : Fin k) → B (inl i)) ∥
+    IH = finite-choice-Fin k (λ i → B (inl i)) (λ i → h (inl i))
+
+    both : ∥ ((i : Fin k) → B (inl i)) × B (inr *) ∥
+    both = proj₁ (inv-≃ prop-trunc-×-≃-×-prop-trunc) (IH , h (inr *))
+
+finite-choice : {A : Set ℓ} {B : A → Set ℓ₁} → is-finite A
+  → ((x : A) → ∥ B x ∥) → ∥ ((x : A) → B x) ∥
+finite-choice {A = A} {B = B} Afin h =
+  rec-prop-trunc ∥ ((x : A) → B x) ∥ (prop-trunc-is-prop _) from-counting Afin
+  where
+    from-counting : count A → ∥ ((x : A) → B x) ∥
+    from-counting (k , e) =
+      map-prop-trunc (map-Π-≃ e (B ∘ proj₁ e) B λ i z → z)
+        (finite-choice-Fin k (B ∘ proj₁ e) λ i → h (proj₁ e i))
+
+-- Theorem 16.3.6 (i)
+finite-to-⊎-finite : {X : Set ℓ} {Y : Set ℓ₁} → is-finite X → is-finite Y
+  → is-finite (X ⊎ Y)
+finite-to-⊎-finite {X = X} {Y = Y} Xfin Yfin =
+  rec-prop-trunc (is-finite (X ⊎ Y)) (prop-trunc-is-prop _)
+    (λ cX → rec-prop-trunc (is-finite (X ⊎ Y)) (prop-trunc-is-prop _)
+      (λ cY → η (count-to-⊎-count cX cY)) Yfin) Xfin
+
+⊎-finite-to-finite : {X : Set ℓ} {Y : Set ℓ₁} → is-finite (X ⊎ Y)
+  → is-finite X × is-finite Y
+⊎-finite-to-finite {X = X} {Y = Y} XYfin =
+  rec-prop-trunc (is-finite X) (prop-trunc-is-prop _)
+    (λ cXY → η (proj₁ (⊎-count-to-count cXY))) XYfin ,
+  rec-prop-trunc (is-finite Y) (prop-trunc-is-prop _)
+    (λ cXY → η (proj₂ (⊎-count-to-count cXY))) XYfin
+
+-- Theorem 16.3.6 (ii)
+finite-to-×-finite : {X : Set ℓ} {Y : Set ℓ₁} → is-finite X → is-finite Y
+  → is-finite (X × Y)
+finite-to-×-finite {X = X} {Y = Y} Xfin Yfin =
+  rec-prop-trunc (is-finite (X × Y)) (prop-trunc-is-prop _)
+    (λ cX → rec-prop-trunc (is-finite (X × Y)) (prop-trunc-is-prop _)
+      (λ cY → η (count-to-Σ-count (λ _ → Y) cX λ _ → cY)) Yfin) Xfin
+
+×-finite-to-finite-left : {X : Set ℓ} {Y : Set ℓ₁} → is-finite (X × Y) → Y
+  → is-finite X
+×-finite-to-finite-left {X = X} {Y = Y} XYfin y =
+  rec-prop-trunc (is-finite X) (prop-trunc-is-prop _)
+    (λ cXY → η (×-count-to-count-left cXY y)) XYfin
+
+×-finite-to-finite-right : {X : Set ℓ} {Y : Set ℓ₁} → is-finite (X × Y) → X
+  → is-finite Y
+×-finite-to-finite-right {X = X} {Y = Y} XYfin x =
+  rec-prop-trunc (is-finite Y) (prop-trunc-is-prop _)
+    (λ cXY → η (×-count-to-count-right cXY x)) XYfin
+
+-- Theorem 16.3.6 (iii)
+-- (helpers: a counted type is decidable, hence finite types are
+-- merely-inhabited-or-empty and their negations are finite)
+count-to-dec : {X : Set ℓ} → count X → is-decidable X
+count-to-dec {ℓ} {X} (0ℕ , e) = inr (proj₁ (inv-≃ e))
+count-to-dec {ℓ} {X} (succℕ k , e) = inl (proj₁ e (inr *))
+
+finite-to-dec-trunc : {X : Set ℓ} → is-finite X → is-decidable ∥ X ∥
+finite-to-dec-trunc {X = X} Xfin =
+  rec-prop-trunc (is-decidable ∥ X ∥)
+    (is-decidable-is-prop (prop-trunc-is-prop _))
+    (λ cX → dec-trunc (count-to-dec cX)) Xfin
+  where
+    dec-trunc : is-decidable X → is-decidable ∥ X ∥
+    dec-trunc (inl x) = inl (η x)
+    dec-trunc (inr n) = inr λ tx → (rec-prop-trunc Empty (λ ()) n tx)
+
+finite-to-¬-finite : {X : Set ℓ} → is-finite X → is-finite (¬ X)
+finite-to-¬-finite {X = X} Xfin =
+  rec-prop-trunc (is-finite (¬ X)) (prop-trunc-is-prop _)
+    (λ cX → η (prop-dec-to-count (¬ X) (¬-prop X) (¬-is-decidable (count-to-dec cX)))) Xfin
+
+-- (helper: the fibre of the section map x ↦ (x , f x) at (x , y) is f x ≡ y)
+fib-section-≃-≡ : {A : Set ℓ} → (B : A → Set ℓ₁) → (f : (x : A) → B x)
+  → (z : Σ A B) → fib (λ x → x , f x) z ≃ (f (proj₁ z) ≡ proj₂ z)
+fib-section-≃-≡ {A = A} B f (a , y) =
+  concat-≃
+    (tot (λ x → pair-eq (x , f x) (a , y)) ,
+     fam-equiv-to-tot-equiv (λ x → pair-eq (x , f x) (a , y)) λ x → pair-eq-is-equiv (x , f x) (a , y))
+    (concat-≃
+      (inv-≃ (Σ-assoc (λ z → z ≡ a) λ x → tr B (proj₂ x) (f (proj₁ x)) ≡ y))
+      (inv-≃ (_,_ (proj₁ (identity-contr a)) ,
+              is-equiv-pair-contr-base (identity-contr a) λ x → tr B (proj₂ x) (f (proj₁ x)) ≡ y)))
+
+finite-fam-to-Σ-finite : {A : Set ℓ} → (B : A → Set ℓ₁) → is-finite A
+  → ((x : A) → is-finite (B x)) → is-finite (Σ A B)
+finite-fam-to-Σ-finite {A = A} B Afin Bfin =
+  rec-prop-trunc (is-finite (Σ A B)) (prop-trunc-is-prop _)
+    (λ cA → rec-prop-trunc (is-finite (Σ A B)) (prop-trunc-is-prop _)
+      (λ cB → η (count-to-Σ-count B cA cB)) (finite-choice Afin λ x → Bfin x)) Afin
+
+Σ-finite-to-finite-fam : {A : Set ℓ} → (B : A → Set ℓ₁) → is-finite A
+  → is-finite (Σ A B) → (x : A) → is-finite (B x)
+Σ-finite-to-finite-fam {A = A} B Afin ΣABfin x =
+  rec-prop-trunc (is-finite (B x)) (prop-trunc-is-prop _)
+    (λ cA → rec-prop-trunc (is-finite (B x)) (prop-trunc-is-prop _)
+      (λ cAB → η (Σ-count-to-fib-count B cA cAB x)) ΣABfin) Afin
+
+finite-to-set-Σ-¬-finite : {A : Set ℓ} → (B : A → Set ℓ₁)
+  → ((x : A) → is-finite (B x)) → is-finite (Σ A B) → is-finite A
+  → is-set A × is-finite (Σ A (λ x → ¬ (B x)))
+finite-to-set-Σ-¬-finite {A = A} B Bfin ΣABfin Afin = Aset , ¬B-fin
+  where
+    Aset : is-set A
+    Aset = finite-to-set Afin
+
+    ¬B-fin : is-finite (Σ A (λ x → ¬ (B x)))
+    ¬B-fin = finite-fam-to-Σ-finite (λ x → ¬ (B x)) Afin λ x → finite-to-¬-finite (Bfin x)
+
+sec-finite-to-finite : {A : Set ℓ} → (B : A → Set ℓ₁)
+  → ((x : A) → is-finite (B x)) → is-finite (Σ A B) → ((x : A) → B x)
+  → is-finite A
+sec-finite-to-finite {A = A} B Bfin ΣABfin f =
+  rec-prop-trunc (is-finite A) (prop-trunc-is-prop _) from-counting ΣABfin
+  where
+    s : A → Σ A B
+    s x = x , f x
+
+    P : Σ A B → Set _
+    P z = fib s z
+
+    B-set : (z : Σ A B) → is-set (B (proj₁ z))
+    B-set z = finite-to-set (Bfin (proj₁ z))
+
+    ≡-prop : (z : Σ A B) → is-prop (f (proj₁ z) ≡ proj₂ z)
+    ≡-prop z = B-set z (f (proj₁ z)) (proj₂ z)
+
+    P-prop : (z : Σ A B) → is-prop (P z)
+    P-prop z = (proj₂ (≃-to-iff-prop (fib-section-≃-≡ B f z))) (≡-prop z)
+
+    P-dec : (z : Σ A B) → is-decidable (P z)
+    P-dec z =
+      proj₁ (iff-to-iff-decidable (≃-to-iff (≡-prop z) (P-prop z) (inv-≃ (fib-section-≃-≡ B f z)))) ≡-dec
+      where
+        ≡-dec : is-decidable (f (proj₁ z) ≡ proj₂ z)
+        ≡-dec = rec-prop-trunc (is-decidable (f (proj₁ z) ≡ proj₂ z)) (is-decidable-is-prop (≡-prop z))
+          (λ cBz → count-to-dec-eq cBz (f (proj₁ z)) (proj₂ z)) (Bfin (proj₁ z))
+
+    A-equiv : A ≃ Σ (Σ A B) P
+    A-equiv = proj₁ (fib-repl s)
+
+    from-counting : count (Σ A B) → is-finite A
+    from-counting c =
+      η (count-equiv (inv-≃ A-equiv)
+          (count-to-Σ-count P c λ z → prop-dec-to-count (P z) (P-prop z) (P-dec z)))
+
+-- (helper: restricting B to the base points where it is merely inhabited
+--  does not change the total space)
+Σ-Σ-trunc-≃ : {A : Set ℓ} → (B : A → Set ℓ₁)
+  → Σ (Σ A (λ x → ∥ B x ∥)) (λ t → B (proj₁ t)) ≃ Σ A B
+Σ-Σ-trunc-≃ B =
+  concat-≃ (Σ-assoc (λ x → ∥ B x ∥) λ t → B (proj₁ t))
+    (tot (λ x → proj₂) ,
+     fam-equiv-to-tot-equiv (λ x → proj₂) λ x →
+       ((λ b → η b , b) , λ b → refl) ,
+       ((λ b → η b , b) , λ { (t , b) → eq-pair× (proj₁ (prop-trunc-is-prop (B x) (η b) t)) refl }))
+
+set-Σ-¬-finite-to-finite : {A : Set ℓ} → (B : A → Set ℓ₁)
+  → ((x : A) → is-finite (B x)) → is-finite (Σ A B)
+  → is-set A × is-finite (Σ A (λ x → ¬ (B x))) → is-finite A
+set-Σ-¬-finite-to-finite {A = A} B Bfin ΣABfin (Aset , ΣA¬Bfin) =
+  equiv-finite-to-finite A-equiv (finite-to-⊎-finite ∥B∥-fin ΣA¬Bfin)
+  where
+    A-equiv : A ≃ (Σ A (λ x → ∥ B x ∥) ⊎ Σ A (λ x → ¬ (B x)))
+    A-equiv =
+      concat-≃ (inv-≃ (Σ-A-𝟙 A))
+        (concat-≃
+          ((tot λ x _ → dec-B x) ,
+           fam-equiv-to-tot-equiv (λ x _ → dec-B x) λ x →
+             contr-contr-to-equiv (λ _ → dec-B x) (* , λ {* → refl})
+               (⊕-to-contr-⊎ (⊕-B x (dec-B x)) (prop-trunc-is-prop _) (¬-prop _)))
+          (Σ-distrib-⊎ (λ x → ∥ B x ∥) λ x → ¬ (B x)))
+      where
+        dec-B : (x : A) → ∥ B x ∥ ⊎ ¬ (B x)
+        dec-B x = aux (finite-to-dec-trunc (Bfin x))
+          where
+            aux : is-decidable ∥ B x ∥ → ∥ B x ∥ ⊎ ¬ (B x)
+            aux (inl tbx) = inl tbx
+            aux (inr ntbx) = inr λ bx → ntbx (η bx)
+
+        ⊕-B : (x : A) → ∥ B x ∥ ⊎ ¬ (B x) → ∥ B x ∥ ⊕ ¬ (B x)
+        ⊕-B x (inl tbx) = inl (tbx , λ nbx → rec-prop-trunc Empty (λ ()) nbx tbx)
+        ⊕-B x (inr nbx) = inr (nbx , λ tbx → rec-prop-trunc Empty (λ ()) nbx tbx)
+
+    ∥B∥-fin : is-finite (Σ A (λ x → ∥ B x ∥))
+    ∥B∥-fin =
+      rec-prop-trunc (is-finite (Σ A (λ x → ∥ B x ∥))) (prop-trunc-is-prop _) from-counting ΣABfin
+      where
+        dec-eq : (a x : A) → ∥ B x ∥ → is-decidable (a ≡ x)
+        dec-eq a x tx = rec-prop-trunc (is-decidable (a ≡ x)) (is-decidable-is-prop (Aset a x))
+          (λ bx → to-dec (finite-to-dec-trunc (equiv-finite-to-finite (inv-≃ (fib-fib-incl-≃-≡ B a x bx))
+            (finite-fam-to-Σ-finite (λ b → (a , b) ≡ (x , bx)) (Bfin a)
+              (λ b → η (prop-dec-to-count _ (finite-to-set ΣABfin _ _) (finite-to-dec-eq ΣABfin _ _)))))))
+          tx
+          where
+            to-dec : {a x : A} → is-decidable ∥ a ≡ x ∥ → is-decidable (a ≡ x)
+            to-dec (inl t) = inl (rec-prop-trunc _ (Aset _ _) (λ p → p) t)
+            to-dec (inr n) = inr (λ p → n (η p))
+
+        section : count (Σ A B) → (t : Σ A (λ x → ∥ B x ∥)) → B (proj₁ t)
+        section (k , (f , ((g , fg) , _))) (a , ta) =
+          tr B (proj₂ (pick a ta)) (proj₂ (f (proj₁ (pick a ta))))
+          where
+            pick : (a : A) → ∥ B a ∥ → Σ (Fin k) (λ i → proj₁ (f i) ≡ a)
+            pick a ta = ∃-to-Σ-decidableFin k (λ i → proj₁ (f i) ≡ a)
+              (λ i → dec-eq (proj₁ (f i)) a ta)
+              (rec-prop-trunc _ (prop-trunc-is-prop _) (λ b → η (g (a , b) , ap proj₁ (fg (a , b)))) ta)
+
+        from-counting : count (Σ A B) → is-finite (Σ A (λ x → ∥ B x ∥))
+        from-counting e =
+          sec-finite-to-finite (λ t → B (proj₁ t)) (λ t → Bfin (proj₁ t))
+            (equiv-finite-to-finite (Σ-Σ-trunc-≃ B) ΣABfin) (section e)
