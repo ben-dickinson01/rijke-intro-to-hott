@@ -707,17 +707,130 @@ Fin-fact-equiv-Fin-equiv (succℕ n) = concat-≃ (Fin-mul-equiv-× (succℕ n) 
     perm-equiv = fwd , ((bwd , fwd-bwd) , (bwd , bwd-fwd))
       where
         -- the transposition swapping z and the last point
+        swap : Fin (succℕ n) → Fin (succℕ n) → Fin (succℕ n)
+        swap z x with Fin-decidable-eq (succℕ n) z x
+        ... | inl p = inr *
+        ... | inr np with Fin-decidable-eq (succℕ n) x (inr *)
+        ... | inl q = z
+        ... | inr nq = x
+
+        -- computation facts for swap, matching its own case split
+        swap-eq : (z x : Fin (succℕ n)) → z ≡ x → swap z x ≡ inr *
+        swap-eq z x p with Fin-decidable-eq (succℕ n) z x
+        ... | inl _ = refl
+        ... | inr np = ex-falso (np p)
+
+        swap-pt : (z x : Fin (succℕ n)) → ¬ (z ≡ x) → x ≡ inr * → swap z x ≡ z
+        swap-pt z x np q with Fin-decidable-eq (succℕ n) z x
+        ... | inl p = ex-falso (np p)
+        ... | inr _ with Fin-decidable-eq (succℕ n) x (inr *)
+        ...   | inl _ = refl
+        ...   | inr nq = ex-falso (nq q)
+
+        swap-fix : (z x : Fin (succℕ n)) → ¬ (z ≡ x) → ¬ (x ≡ inr *) → swap z x ≡ x
+        swap-fix z x np nq with Fin-decidable-eq (succℕ n) z x
+        ... | inl p = ex-falso (np p)
+        ... | inr _ with Fin-decidable-eq (succℕ n) x (inr *)
+        ...   | inl q = ex-falso (nq q)
+        ...   | inr _ = refl
+
+        -- swap-swap mirrors swap's own case split with nested `with`s,
+        -- so each reduction fires the same way it does inside swap itself.
+        swap-swap : (x : Fin (succℕ n)) → (swap x) ∘ (swap x) ∼ id
+        swap-swap x z with Fin-decidable-eq (succℕ n) x z
+        swap-swap x z | inl refl with Fin-decidable-eq (succℕ n) x x
+        swap-swap x z | inl refl | inl _ with Fin-decidable-eq (succℕ n) x (inr *)
+        swap-swap x z | inl refl | inl _ | inl q = inv q
+        swap-swap x z | inl refl | inl _ | inr _ = refl
+        swap-swap x z | inl refl | inr absurd = ex-falso (absurd refl)
+        swap-swap x z | inr np with Fin-decidable-eq (succℕ n) z (inr *)
+        swap-swap x z | inr np | inl q with Fin-decidable-eq (succℕ n) x x
+        swap-swap x z | inr np | inl q | inl _ = inv q
+        swap-swap x z | inr np | inl q | inr absurd = ex-falso (absurd refl)
+        swap-swap x z | inr np | inr nq with Fin-decidable-eq (succℕ n) x z
+        swap-swap x z | inr np | inr nq | inl p = ex-falso (np p)
+        swap-swap x z | inr np | inr nq | inr _ with Fin-decidable-eq (succℕ n) z (inr *)
+        swap-swap x z | inr np | inr nq | inr _ | inl q' = ex-falso (nq q')
+        swap-swap x z | inr np | inr nq | inr _ | inr _ = refl
+
         transp : Fin (succℕ n) → Fin (succℕ n) ≃ Fin (succℕ n)
-        transp z = {!   !}
+        transp z = swap z , ((swap z , swap-swap z) , (swap z , swap-swap z))
 
         fwd : (Fin (succℕ n) × (Fin n ≃ Fin n)) → (Fin (succℕ n) ≃ Fin (succℕ n))
-        fwd (z , g) = {!   !}
+        fwd (z , g) = concat-≃ (⊎-equiv-left g) (transp z)
 
         bwd : (Fin (succℕ n) ≃ Fin (succℕ n)) → (Fin (succℕ n) × (Fin n ≃ Fin n))
-        bwd e = {!   !}
+        bwd e = proj₁ e (inr *) , ⊎-𝟙-equiv-to-equiv e
+
+        -- transport in a constant family is trivial
+        tr-triv : {A : Set ℓ} {C : Set ℓ₁} {u v : A} (q : u ≡ v) {c c' : C}
+          → c ≡ c' → tr (λ _ → C) q c ≡ c'
+        tr-triv refl eq = eq
+
+        -- two equivalences with equal underlying maps are equal
+        eq-≃ : {X : Set ℓ} {Y : Set ℓ₁} → (e e' : X ≃ Y) → proj₁ e ≡ proj₁ e' → e ≡ e'
+        eq-≃ (f , ef) (f' , ef') q =
+          eq-pair (f , ef) (f' , ef') (q , is-prop-to-is-prop' (equiv-is-prop f') (tr is-equiv q ef) ef')
+
+        -- injectivity of inl, as a constructor
+        inl-inj : {A : Set ℓ} {B : Set ℓ₁} {a b : A} → _≡_ {A = A ⊎ B} (inl a) (inl b) → a ≡ b
+        inl-inj refl = refl
+
+        -- (helper: the underlying map of concat-≃, since it's stuck on an abstract equivalence)
+        concat-≃-apply : {A : Set ℓ} {B : Set ℓ₁} {C : Set ℓ₂} (e1 : A ≃ B) (e2 : B ≃ C) (x : A)
+          → proj₁ (concat-≃ e1 e2) x ≡ proj₁ e2 (proj₁ e1 x)
+        concat-≃-apply (f , ((sf , fsf) , (rf , rff))) (g , ((sg , gsg) , (rg , rgg))) x = refl
+
+        ⊎-equiv-left-inl : {A : Set ℓ} {A' : Set ℓ₁} {B : Set ℓ₂} (e : A ≃ A') (x : A)
+          → proj₁ (⊎-equiv-left {B = B} e) (inl x) ≡ inl (proj₁ e x)
+        ⊎-equiv-left-inl (f , ef) x = refl
+
+        ⊎-equiv-left-inr : {A : Set ℓ} {A' : Set ℓ₁} {B : Set ℓ₂} (e : A ≃ A') (y : B)
+          → proj₁ (⊎-equiv-left {B = B} e) (inr y) ≡ inr y
+        ⊎-equiv-left-inr (f , ef) y = refl
+
+        swap-inr-fix : (z : Fin (succℕ n)) → swap z (inr *) ≡ z
+        swap-inr-fix z with Fin-decidable-eq (succℕ n) z (inr *)
+        ... | inl q = inv q
+        ... | inr nq = refl
 
         fwd-bwd : (e : Fin (succℕ n) ≃ Fin (succℕ n)) → fwd (bwd e) ≡ e
         fwd-bwd e = {!   !}
 
         bwd-fwd : (p : Fin (succℕ n) × (Fin n ≃ Fin n)) → bwd (fwd p) ≡ p
-        bwd-fwd p = {!   !} 
+        bwd-fwd (z , g) = eq-pair (bwd (fwd (z , g))) (z , g) (p1 , tr-triv p1 p2)
+          where
+            h : Fin (succℕ n) → Fin (succℕ n)
+            h = proj₁ (fwd (z , g))
+
+            he : is-equiv h
+            he = proj₂ (fwd (z , g))
+
+            h-inl : (i : Fin n) → h (inl i) ≡ swap z (inl (proj₁ g i))
+            h-inl i = concat (concat-≃-apply (⊎-equiv-left g) (transp z) (inl i))
+                              (ap (proj₁ (transp z)) (⊎-equiv-left-inl g i))
+
+            h-inr* : h (inr *) ≡ swap z (inr *)
+            h-inr* = concat (concat-≃-apply (⊎-equiv-left g) (transp z) (inr *))
+                             (ap (proj₁ (transp z)) (⊎-equiv-left-inr g *))
+
+            -- the last point of fwd (z , g) does land on z
+            p1 : h (inr *) ≡ z
+            p1 = concat h-inr* (swap-inr-fix z)
+
+            -- the permutation extracted back out of fwd (z , g) is g, pointwise
+            g-hom : (i : Fin n) → map-⊎-𝟙 h he i ≡ proj₁ g i
+            g-hom i with Fin-decidable-eq (succℕ n) z (inl (proj₁ g i))
+            g-hom i | inl r = concat (map-⊎-𝟙-inr h he i hp) (inl-inj (concat (proj₂ (star-value h he i hp)) hinr))
+              where
+                hp : h (inl i) ≡ inr *
+                hp = concat (h-inl i) (swap-eq z (inl (proj₁ g i)) r)
+                hinr : h (inr *) ≡ inl (proj₁ g i)
+                hinr = concat p1 r
+            g-hom i | inr nr = map-⊎-𝟙-inl h he i (proj₁ g i) hp
+              where
+                hp : h (inl i) ≡ inl (proj₁ g i)
+                hp = concat (h-inl i) (swap-fix z (inl (proj₁ g i)) nr (λ q → inl-ne-inr (proj₁ g i) * q))
+
+            p2 : ⊎-𝟙-equiv-to-equiv (fwd (z , g)) ≡ g
+            p2 = eq-≃ (⊎-𝟙-equiv-to-equiv (fwd (z , g))) g (eq-htpy _ _ g-hom)
