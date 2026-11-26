@@ -521,15 +521,16 @@ count-to-dec : {X : Set ℓ} → count X → is-decidable X
 count-to-dec {ℓ} {X} (0ℕ , e) = inr (proj₁ (inv-≃ e))
 count-to-dec {ℓ} {X} (succℕ k , e) = inl (proj₁ e (inr *))
 
+-- decidability of a type upgrades to decidability of its truncation
+dec-trunc : {X : Set ℓ} → is-decidable X → is-decidable ∥ X ∥
+dec-trunc (inl x) = inl (η x)
+dec-trunc (inr n) = inr λ tx → (rec-prop-trunc Empty (λ ()) n tx)
+
 finite-to-dec-trunc : {X : Set ℓ} → is-finite X → is-decidable ∥ X ∥
 finite-to-dec-trunc {X = X} Xfin =
   rec-prop-trunc (is-decidable ∥ X ∥)
     (is-decidable-is-prop (prop-trunc-is-prop _))
     (λ cX → dec-trunc (count-to-dec cX)) Xfin
-  where
-    dec-trunc : is-decidable X → is-decidable ∥ X ∥
-    dec-trunc (inl x) = inl (η x)
-    dec-trunc (inr n) = inr λ tx → (rec-prop-trunc Empty (λ ()) n tx)
 
 finite-to-¬-finite : {X : Set ℓ} → is-finite X → is-finite (¬ X)
 finite-to-¬-finite {X = X} Xfin =
@@ -934,7 +935,8 @@ finite-to-equiv-finite {A = A} Afin =
 
 -- ex 16.2
 count-to-retr-count : {A : Set ℓ} {B : Set ℓ₁} → (is-retract-of A B) → count B → count A
-count-to-retr-count {A = A} {B = B} (f , (g , gf)) (k , eB) = count-equiv ΣBP≃A (subtype-decidable-to-count P P-prop (k , eB) P-dec)
+count-to-retr-count {A = A} {B = B} (f , (g , gf)) (k , eB) =
+  count-equiv ΣBP≃A (subtype-decidable-to-count P P-prop (k , eB) P-dec)
   where
     P : B → Set _
     P b = f (g b) ≡ b
@@ -963,3 +965,95 @@ count-to-retr-count {A = A} {B = B} (f , (g , gf)) (k , eB) = count-equiv ΣBP�
 finite-to-retr-finite : {A : Set ℓ} {B : Set ℓ₁} → is-retract-of A B → is-finite B → is-finite A
 finite-to-retr-finite {A = A} AretrB Bfin = rec-prop-trunc (is-finite A) (prop-trunc-is-prop _) (λ cB → η (count-to-retr-count AretrB cB)) Bfin
 
+-- 16.3
+-- (a)
+
+-- (not used by finite-fam-to-Π-dec below; a true, self-contained fact kept on its own)
+Fin-fam-to-Π-dec : {k : ℕ} {A : Fin k → Set ℓ} → ((i : Fin k) → is-decidable (A i)) → is-decidable ((i : Fin k) → A i)
+Fin-fam-to-Π-dec {k = 0ℕ} Adec = inl λ ()
+Fin-fam-to-Π-dec {k = succℕ k} {A = A} Adec with Adec (inr *)
+Fin-fam-to-Π-dec {k = succℕ k} {A = A} Adec | inr np = inr (λ g → np (g (inr *)))
+Fin-fam-to-Π-dec {k = succℕ k} {A = A} Adec | inl p with Fin-fam-to-Π-dec {k = k} (λ i → Adec (inl i))
+Fin-fam-to-Π-dec {k = succℕ k} {A = A} Adec | inl A* | inl iAi = inl λ {(inl x) → iAi x
+                                                                      ; (inr *) → A*}
+Fin-fam-to-Π-dec {k = succℕ k} {A = A} Adec | inl p | inr niAi = inr λ Ai → niAi λ i → Ai (inl i)
+
+finite-fam-to-Π-dec : {I : Set ℓ} {A : I → Set ℓ₁} → is-finite I → ((i : I) → is-decidable (A i)) → is-decidable ((i : I) → A i)
+finite-fam-to-Π-dec {I = I} {A = A} Ifin Adec = Π-dec dec-trunc-Q
+  where
+    Q : Set _
+    Q = Σ I (λ i → ¬ (A i))
+
+    Q-count : count I → count Q
+    Q-count I-count =
+      subtype-decidable-to-count (λ i → ¬ (A i)) (λ i → ¬-prop _) I-count (λ i → ¬-is-decidable (Adec i))
+
+    dec-Q : count I → is-decidable Q
+    dec-Q I-count = count-to-dec (Q-count I-count)
+
+    dec-trunc-Q : is-decidable ∥ Q ∥
+    dec-trunc-Q =
+      rec-prop-trunc (is-decidable ∥ Q ∥) (is-decidable-is-prop (prop-trunc-is-prop _)) (λ cI → dec-trunc (dec-Q cI)) Ifin
+
+    Π-dec : (is-decidable ∥ Q ∥) → is-decidable ((i : I) → A i)
+    Π-dec (inl tq) = inr (rec-prop-trunc (¬ ((i : I) → A i)) (¬-prop _) (λ {(i , na) iAi → na (iAi i)}) tq)
+    Π-dec (inr ntq) = inl g
+      where
+        g : (i : I) → A i
+        g i with Adec i
+        ... | inl p = p
+        ... | inr np = ex-falso (ntq (η (i , np)))
+
+-- (b)
+is-injective : {A : Set ℓ} {B : Set ℓ₁} → (A → B) → Set _
+is-injective {A = A} f = (x y : A) → f x ≡ f y → x ≡ y
+
+finite-to-emb-dec : {I : Set ℓ} {J : Set ℓ₁} → is-finite I → is-finite J → (f : I → J) → is-decidable (is-emb f)
+finite-to-emb-dec {I = I} {J = J} Ifin Jfin f = proj₂ (iff-to-iff-decidable f-emb-iff-inj) inj-dec
+  where
+    f-emb-iff-inj : is-emb f ↔ is-injective f
+    f-emb-iff-inj = fwd , bwd
+      where
+        fwd : is-emb f → is-injective f
+        fwd femb x y fp = proj₁ (equiv-to-inverse (ap f {x} {y}) (femb x y)) fp
+
+        bwd : is-injective f → is-emb f
+        bwd finj = inj-to-set-is-emb f finj (finite-to-set Jfin)
+
+    pointwise-dec : (x y : I) → is-decidable (f x ≡ f y → x ≡ y)
+    pointwise-dec x y = with-decidable-arrow (finite-to-dec-eq Jfin (f x) (f y)) (λ _ → finite-to-dec-eq Ifin x y)
+
+    row-dec : (x : I) → is-decidable ((y : I) → f x ≡ f y → x ≡ y)
+    row-dec x = finite-fam-to-Π-dec Ifin (pointwise-dec x)
+
+    inj-dec : is-decidable (is-injective f)
+    inj-dec = finite-fam-to-Π-dec Ifin row-dec
+
+-- (c)
+finite-to-surj-dec : {I : Set ℓ} {J : Set ℓ₁} → is-finite I → is-finite J → (f : I → J) → is-decidable (is-surj f)
+finite-to-surj-dec {I = I} {J = J} Ifin Jfin f = finite-fam-to-Π-dec Jfin tfib-dec
+  where
+    tfib-dec : (b : J) → is-decidable ∥ fib f b ∥
+    tfib-dec b = finite-to-dec-trunc fib-finite
+      where
+        eq-finite : (i : I) → is-finite (f i ≡ b)
+        eq-finite i = count-to-finite (f i ≡ b) (prop-dec-to-count (f i ≡ b) (finite-to-set Jfin (f i) b) (finite-to-dec-eq Jfin (f i) b))
+
+        fib-finite : is-finite (fib f b)
+        fib-finite = finite-fam-to-Σ-finite (λ z → f z ≡ b) Ifin eq-finite
+
+-- (d)
+finite-to-equiv-dec : {I : Set ℓ} {J : Set ℓ₁} → is-finite I → is-finite J → (f : I → J) → is-decidable (is-equiv f)
+finite-to-equiv-dec {I = I} {J = J} Ifin Jfin f = proj₂ (iff-to-iff-decidable f-equiv-iff-emb-surj) emb-surj-dec
+  where
+    f-equiv-iff-emb-surj : is-equiv f ↔ (is-emb f × is-surj f)
+    f-equiv-iff-emb-surj = fwd , bwd
+      where
+        fwd : is-equiv f → is-emb f × is-surj f
+        fwd fe = equiv-to-emb f fe , equiv-to-surj f fe
+
+        bwd : is-emb f × is-surj f → is-equiv f
+        bwd (femb , fsurj) = surj-emb-to-equiv f femb fsurj
+
+    emb-surj-dec : is-decidable (is-emb f × is-surj f)
+    emb-surj-dec = with-decidable-prod (finite-to-emb-dec Ifin Jfin f) (λ _ → finite-to-surj-dec Ifin Jfin f)
