@@ -931,3 +931,35 @@ finite-to-equiv-finite : {A : Set ℓ} → is-finite A → is-finite (A ≃ A)
 finite-to-equiv-finite {A = A} Afin =
   rec-prop-trunc (is-finite (A ≃ A)) (prop-trunc-is-prop _)
     (λ { (k , eA) → η (factorialℕ k , concat-≃ (Fin-fact-equiv-Fin-equiv k) (≃-conj eA)) }) Afin
+
+-- ex 16.2
+count-to-retr-count : {A : Set ℓ} {B : Set ℓ₁} → (is-retract-of A B) → count B → count A
+count-to-retr-count {A = A} {B = B} (f , (g , gf)) (k , eB) = count-equiv ΣBP≃A (subtype-decidable-to-count P P-prop (k , eB) P-dec)
+  where
+    P : B → Set _
+    P b = f (g b) ≡ b
+
+    P-dec : (b : B) → is-decidable (P b)
+    P-dec b = count-to-dec-eq (k , eB) (f (g b)) b
+
+    P-prop : (b : B) → is-prop (P b)
+    P-prop b = Hedberg (count-to-dec-eq (k , eB)) (f (g b)) b
+
+    ΣBP≃A : Σ B P ≃ A
+    ΣBP≃A = fwd , ((bwd , fwd-bwd) , (bwd , bwd-fwd))
+      where
+        fwd : Σ B P → A
+        fwd (b , p) = g b
+
+        bwd : A → Σ B P
+        bwd a = f a , ap f (gf a)
+
+        fwd-bwd : fwd ∘ bwd ∼ id
+        fwd-bwd a = gf a
+
+        bwd-fwd : bwd ∘ fwd ∼ id
+        bwd-fwd (b , p) = eq-pair _ _ (p , proj₁ (P-prop b (tr (λ z → f (g z) ≡ z) p (ap f (gf (g b)))) p))
+
+finite-to-retr-finite : {A : Set ℓ} {B : Set ℓ₁} → is-retract-of A B → is-finite B → is-finite A
+finite-to-retr-finite {A = A} AretrB Bfin = rec-prop-trunc (is-finite A) (prop-trunc-is-prop _) (λ cB → η (count-to-retr-count AretrB cB)) Bfin
+
