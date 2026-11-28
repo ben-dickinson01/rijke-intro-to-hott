@@ -22,7 +22,8 @@ Generative AI (Claude) has been used for clarifying parts of the book and asking
 | [ch12.agda](ch12.agda) | 12 Propositions, sets, and the higher truncation levels | done |
 | [ch13.agda](ch13.agda) | 13 Function extensionality | done |
 | [ch14.agda](ch14.agda) | 14 Propositional truncations | done |
-| [ch15.agda](ch15.agda) | 15 Image factorizations | §15.1–15.3, Exercises 15.1–15.2 |
+| [ch15.agda](ch15.agda) | 15 Image factorizations | done |
+| [ch16.agda](ch16.agda) | 16 Finite types | §16.1–16.3, Exercises 16.1–16.4 |
 
 Chapter 1 sets out the rules of dependent type theory, which Agda provides, so it has no file.
 
@@ -36,11 +37,13 @@ Chapter 1 sets out the rules of dependent type theory, which Agda provides, so i
 - **Kraus's theorem** (Theorem 14.4.6): weakly constant maps into a set factor through the propositional truncation — [ch14.agda](ch14.agda)
 - **The surjection–embedding factorisation** (Theorem 15.2.5, Corollary 15.2.6): every map factors uniquely as a surjection followed by an embedding — [ch15.agda](ch15.agda), `surj-emb-fact-uniq`
 - **Cantor's theorem** (Theorem 15.3.2): there is no surjection from a type onto its power set — [ch15.agda](ch15.agda), `no-surj-to-pow-set`
+- **Double counting** (Theorem 16.2.2): if `Fin k ≃ Fin l` then `k = l`, so the number of elements of a finite type is well defined — [ch16.agda](ch16.agda), `Fin-equiv-to-same-ℕ`
+- **Finiteness of Σ-types** (Theorem 16.3.6 (iii)): the total space of a family of finite types over a finite type is finite, with a converse when the base is a set — [ch16.agda](ch16.agda), `finite-fam-to-Σ-finite` and `set-Σ-¬-finite-to-finite`
 
 ## Setup
 
 - Every file uses `--without-K`, and definitions are universe-polymorphic (`Set ℓ`) throughout.
-- Each chapter imports the previous one, so `ch15.agda` checks the whole development.
+- Each chapter imports the previous one, so `ch16.agda` checks the whole development.
 - Comments label each definition with the book's numbering (e.g. `-- Theorem 15.2.5`), so the code can be read alongside the book.
 
 ### Postulates
@@ -58,7 +61,7 @@ Further higher inductive types will be postulated in their relevant chapter.
 Tested with Agda 2.8.0. To typecheck everything:
 
 ```
-agda ch15.agda
+agda ch16.agda
 ```
 
 CI typechecks every chapter on each push.
