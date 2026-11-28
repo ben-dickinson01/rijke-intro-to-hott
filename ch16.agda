@@ -1057,3 +1057,30 @@ finite-to-equiv-dec {I = I} {J = J} Ifin Jfin f = proj₂ (iff-to-iff-decidable 
 
     emb-surj-dec : is-decidable (is-emb f × is-surj f)
     emb-surj-dec = with-decidable-prod (finite-to-emb-dec Ifin Jfin f) (λ _ → finite-to-surj-dec Ifin Jfin f)
+
+-- 16.4
+-- (the converse direction is already finite-to-dec-eq)
+surj-finite-dec-eq-to-finite : {A : Set ℓ} {B : Set ℓ₁} {f : A → B} → is-finite A → is-surj f → has-decidable-eq B → is-finite B
+surj-finite-dec-eq-to-finite {A = A} {B = B} {f = f} Afin fsurj Bdeceq = rec-prop-trunc (is-finite B) (prop-trunc-is-prop _) from-count Afin
+  where
+    B-set : is-set B
+    B-set = Hedberg Bdeceq
+
+    mere-dec-to-actual : {X : Set ℓ} → ∥ X ∥ → is-decidable X → X
+    mere-dec-to-actual tx (inl x) = x
+    mere-dec-to-actual tx (inr nx) = ex-falso (rec-prop-trunc Empty (λ x ()) (λ x → nx x) tx)
+
+    from-count : count A → is-finite B
+    from-count cA = finite-to-retr-finite (s , ((f , K))) Afin
+      where
+        fib-dec : (b : B) → is-decidable (fib f b)
+        fib-dec b = count-to-dec (subtype-decidable-to-count (λ z → f z ≡ b) (λ a → B-set (f a) b) cA λ x → Bdeceq (f x) b)
+
+        sec-s : (b : B) → fib f b
+        sec-s b = mere-dec-to-actual (fsurj b) (fib-dec b)
+
+        s : B → A
+        s b = proj₁ (sec-s b)
+
+        K : (b : B) → f (s b) ≡ b
+        K b = proj₂ (sec-s b)
